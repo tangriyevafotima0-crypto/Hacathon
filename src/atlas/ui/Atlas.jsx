@@ -7,6 +7,7 @@ import {convertNasaTable} from '../nasa-import.js';
 import t25 from '../data/GMT216-T25.csv?raw';
 import './atlas.css';
 import {readNotebooks, NOTEBOOK_KEY} from './notebook.js';
+import Ingestion,{ingestionJSON} from './Ingestion.jsx';
 
 export function download(name, text, type='application/json') {
   const url=URL.createObjectURL(new Blob([text],{type})); const a=document.createElement('a'); a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -26,6 +27,10 @@ async function requestJSON(url, options){
 export default function Atlas(){
   const [store]=useState(()=>{let s;try{s=localStorage;}catch{} return openAtlasStore(s);});
   const [loaded,setLoaded]=useState(()=>store.load());
+  const [importJob,setImportJob]=useState(()=>{
+    try{const id=localStorage.getItem('skyforge.ingestion.lastJob');return id?{id}:null;}catch{return null;}
+  });
+  const lastImport=useRef([]);
   useEffect(()=>{
     const refresh=event=>{if(event.key===STORE_KEY||event.key===null)setLoaded(store.load());};
     window.addEventListener('storage',refresh);
@@ -113,7 +118,11 @@ export default function Atlas(){
   async function applyProposal(){
     const apply=()=>{
       const result=commitReevaluation(store,pending,{confirmed:true,acknowledgeFlags:true});
-      if(result.ok){setLoaded({ok:true,database:result.database});setPending(null);setMessage(tr('Tuzatish saqlandi','Correction saved'));}
+      if(result.ok){
+        setLoaded({ok:true,database:result.database});setPending(null);setMessage(tr('Tuzatish saqlandi','Correction saved'));
+        const active=activeRecords(result.database).find(record=>record.study_id===pending.study_id&&record.trial_id===pending.trial_id);
+        if(active){lastImport.current=[active.raw_input];void enqueueImport();}
+      }
       else{setMessage(result.error.code);clearProposal();}
     };
     if(navigator.locks) await navigator.locks.request('skyforge.atlas.write',apply); else apply();
@@ -121,8 +130,23 @@ export default function Atlas(){
   function clearImportPreview(){importVersion.current++;setPreview(null);setAck(false);}
   function makePreview(value=text,fmt=format){clearImportPreview();clearProposal();setPreview(store.preview(value,fmt));setMessage('');}
   async function save(){
-    const commit=()=>{const result=store.commit(preview,{confirmed:true,acknowledgeFlags:ack}); if(result.ok){setLoaded({ok:true,database:result.database});setPreview(null);setMessage(`${tr('Saqlandi','Saved')}: ${result.changes.length}; unchanged: ${result.unchanged}`);}else setMessage(result.error.code);};
-    if(navigator.locks) await navigator.locks.request('skyforge.atlas.write',commit); else commit();
+    const commit=()=>store.commit(preview,{confirmed:true,acknowledgeFlags:ack});
+    const result=navigator.locks?await navigator.locks.request('skyforge.atlas.write',commit):commit();
+    if(!result.ok){setMessage(result.error.code);return;}
+    setLoaded({ok:true,database:result.database});setPreview(null);
+    setMessage(`${tr('Saqlandi','Saved')}: ${result.changes.length}; unchanged: ${result.unchanged}`);
+    const active=new Map(activeRecords(result.database).map(record=>[key(record),record.raw_input]));
+    lastImport.current=[...new Set(preview.entries.map(entry=>entry.key))].map(id=>active.get(id));
+    void enqueueImport();
+  }
+  async function enqueueImport(){
+    try{
+      const result=await ingestionJSON('import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(lastImport.current)});
+      setImportJob(result);
+      try{localStorage.setItem('skyforge.ingestion.lastJob',result.id);}catch{}
+    }catch(error){
+      if(error.message!=='INGESTION_UNAVAILABLE')setImportJob({error:error.message});
+    }
   }
   function toggle(r){const k=key(r);if(selected.includes(k))setSelected(selected.filter(x=>x!==k));else if(selected.length<3)setSelected([...selected,k]);else setMessage(tr('Eng ko‘pi 3 ta sinov','Select at most 3 trials'));}
   function proof(e,r,field){lastField.current=e.currentTarget;setEvidence({trial:r.trial_id,field,detail:fieldProof(r,field).evidence,...fieldEvidence(loaded.database,r.study_id,r.trial_id,field)});setTimeout(()=>evidenceRef.current?.focus(),0);}
@@ -183,6 +207,7 @@ export default function Atlas(){
       <button onClick={applyProposal}>{tr('Tuzatishni tasdiqlash','Confirm correction')}</button>
       <button onClick={clearProposal}>{tr('Rad etish','Reject correction')}</button>
     </section>}
+    <Ingestion lang={lang} importJob={importJob} retryImport={enqueueImport}/>
     <section><h2>05 · Focus Corner / Notebook</h2><label>{tr('Izoh','Notes')}<textarea value={note} onChange={e=>setNote(e.target.value)} rows="4"/></label>{!notebookState.ok&&<p role="alert">NOTEBOOK_READ_FAILED: {notebookState.error}. {tr('Asl ma’lumot saqlandi; ustidan yozilmadi.','Original data preserved; no overwrite.')}</p>}<button disabled={!notebookState.ok} onClick={saveNotebook}>{tr('Daftarga saqlash','Save notebook')}</button>{notebooks.map(n=><div className="controls" key={n.id}><span>{n.date}</span><button onClick={()=>{setNote(n.note);setSelected(n.selected);changeQuery(n.query);setMaterial(n.material);setGravity(n.gravity);}}>{tr('Qayta ochish','Reopen')}</button><button onClick={()=>download(`notebook-${n.id}.json`,JSON.stringify(n,null,2))}>Download</button></div>)}</section>
     <section><h2>06 · Export</h2><p>{tr('Barcha faol yozuvlar, asl birliklar va manbalar. Archive barcha revisionlarni saqlaydi.','All active records with original units and sources. Archive retains every revision.')}</p><div className="controls"><button disabled={!loaded.ok} onClick={()=>download('atlas-report.json',exportReportJSON(loaded.database,{selection:chosen.map(r=>({study_id:r.study_id,trial_id:r.trial_id}))}))}>JSON</button><button disabled={!loaded.ok} onClick={()=>download('atlas-report.csv',exportReportCSV(loaded.database,{selection:chosen.map(r=>({study_id:r.study_id,trial_id:r.trial_id}))}),'text/csv')}>CSV</button><button disabled={!loaded.ok} onClick={()=>download('atlas-archive.json',exportArchive(loaded.database))}>Archive</button><button disabled={!loaded.ok} onClick={()=>download('atlas-exchange.json',exportJSON(loaded.database))}>Exchange JSON</button></div></section>
     </main></div>;

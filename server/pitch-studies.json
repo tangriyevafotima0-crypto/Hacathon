@@ -1,0 +1,7 @@
+[
+  {"id":"PSI-98","version":4,"doi":"10.60555/0t15-1z43","totalBytes":12250600201,"kind":"FLIGHT_EXPERIMENT"},
+  {"id":"PSI-107","version":4,"doi":"10.60555/9kbh-e962","totalBytes":6946864573,"kind":"FLIGHT_EXPERIMENT"},
+  {"id":"PSI-102","version":4,"doi":"10.60555/gd4k-8h62","totalBytes":657608178,"kind":"FLIGHT_EXPERIMENT"},
+  {"id":"PSI-47","version":5,"doi":"10.60555/ztgj-d202","totalBytes":41765333,"kind":"FLIGHT_EXPERIMENT"},
+  {"id":"PSI-117","version":2,"doi":"10.60555/gz0q-b577","totalBytes":70820870,"kind":"GROUND_CFD"}
+]

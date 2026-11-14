@@ -26,7 +26,7 @@ function extractRecords(databaseOrRecords) {
  * turning "not in connected corpus" into "does not exist in science".
  */
 export function detectEvidenceGap(databaseOrRecords, queryOrScenario, options = {}) {
-  const records = extractRecords(databaseOrRecords);
+  const records = extractRecords(databaseOrRecords).filter(record => !record.test_only && !record.raw_input?.test_only);
   const adapter = options.metadataAdapter ?? null;
 
   const dependencies = [
@@ -92,7 +92,7 @@ export function detectEvidenceGap(databaseOrRecords, queryOrScenario, options = 
   const ranked = rankTrials(records, query, { metadataAdapter: adapter });
   const qEnv = query.filters.find(f => f.field === 'environment')?.value ?? null;
   const qO2 = query.filters.find(f => f.field === 'o2_concentration') ?? null;
-  const qLoc = query.filters.find(f => f.field === 'oxygen_location')?.value ?? 'chamber_atmosphere';
+  const qLoc = query.filters.find(f => f.field === 'oxygen_location')?.value ?? qO2?.location ?? 'chamber_atmosphere';
   const qMaterial = query.filters.find(f => f.field === 'material')?.value ?? null;
   const qFuel = query.filters.find(f => f.field === 'fuel_type')?.value ?? null;
   const qDomain = query.filters.find(f => f.field === 'domain')?.value ?? null;
@@ -142,8 +142,17 @@ export function detectEvidenceGap(databaseOrRecords, queryOrScenario, options = 
   // Check if any Tier 1 direct match exists where all critical conditions (including environment/gravity if queried,
   // or baseline environment if required) are KNOWN and matched.
   const requireKnownEnvironment = Boolean(qEnv || options.requireKnownEnvironment);
+  const hasDirectEvidence = ({ record }) => record.outcome?.status === 'MEASURED' &&
+    record.sources?.some(source => {
+      try {
+        const host = new URL(source.url).hostname;
+        return (host === 'nasa.gov' || host.endsWith('.nasa.gov')) &&
+          source.row_id === record.trial_id && source.excerpt?.trim() &&
+          (source.pdf_page || source.printed_page || source.table);
+      } catch { return false; }
+    });
   const directMatches = subjectCandidates.filter(r => {
-    if (r.tier !== 1) return false;
+    if (r.tier !== 1 || !hasDirectEvidence(r)) return false;
     if (isPartialGTarget && r.metadata.environment.value !== qEnv) return false;
     if (requireKnownEnvironment && r.metadata.environment.status !== 'MEASURED') return false;
     if (qO2 && (r.metadata.oxygen.status !== 'MEASURED' || r.metadata.oxygen.location !== qLoc)) return false;
@@ -169,7 +178,8 @@ export function detectEvidenceGap(databaseOrRecords, queryOrScenario, options = 
   // and fails direct match SOLELY because one or more queried conditions are UNKNOWN (`counts.unknown > 0`),
   // report `Insufficient metadata` rather than claiming conditions are different!
   const blockedOnlyByUnknownMetadata = subjectCandidates.some(
-    r => r.tier === 2 && r.checklist.counts.partial === 0 && r.checklist.counts.unknown > 0 && r.checklist.counts.matched > 0
+    r => (r.tier === 1 && r.checklist.counts.partial === 0 && !hasDirectEvidence(r)) ||
+      (r.tier === 2 && r.checklist.counts.partial === 0 && r.checklist.counts.unknown > 0 && r.checklist.counts.matched > 0)
   );
 
   if (blockedOnlyByUnknownMetadata) {

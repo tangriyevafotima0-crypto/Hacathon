@@ -1,44 +1,34 @@
 # SKYFORGE Fire Atlas
 
-Atlas core for team SKYFORGE. Shared repository: https://github.com/tangriyevafotima0-crypto/Hacathon
+Fire Atlas opens the BASS-II comparison, source evidence, import, and notebook interface. The original team archives and their validation logs record their own versions.
 
-The initial repository was empty. This import contains the supplied React/Vite educational prototype plus Z Codex's isolated Atlas core. The visible prototype is not yet the Bk Fire Atlas interface. Its illustrative risk formula is not used by the Atlas core.
+## Run locally
 
-## Current status
-
-| Component | Status |
-| --- | --- |
-| Z01 data contract, CSV/JSON import, revisions, provenance, raw/SI and storage adapter | Implemented |
-| Tests | 32 passed locally: 3 original model tests, 20 Z01 tests, and 9 Z02 tests |
-| Import/reload/repeated-import core demo | Passed with injected storage and disk reload |
-| Production build | PASS locally and in [Z02 GitHub Actions](https://github.com/tangriyevafotima0-crypto/Hacathon/actions/runs/43577442863) |
-| D authoritative data and scientific review | Pending integration |
-| Bk Atlas UI and real browser acceptance | Pending integration |
-| Z02 query/ranking/gap/conclusion/API | Implemented in the Atlas core. See the [Z02 contract](docs/z02/CONTRACT.md). |
-| Analyzer / PM approval | Pending |
-
-## Verified repository baseline
-
-[CI run 43572572407](https://github.com/tangriyevafotima0-crypto/Hacathon/actions/runs/43572572407) passed `npm ci`, all 23 tests, and `npm run build` at commit [`04df762`](https://github.com/tangriyevafotima0-crypto/Hacathon/commit/04df76287b92d5b78423125753052cbdd31570b3). Vite 7.3.7 built successfully. All 45 delivered source/evidence files matched their local Git blob hashes at that commit; teammates' DOCX files were preserved. Original local build-failure logs remain historical evidence of the restricted local network, not the current CI result. Browser integration and scientific review remain pending.
-
-## Run
-
-Node.js 22.12+ required.
+Use Node.js 22.12 or later.
 
 ```sh
 npm ci
 npm test
+node scripts/d01-d02-integrity.mjs
 npm run build
-npm run dev
+npm run preview
 ```
 
-Core tests and demonstration need no installed frontend dependencies:
+Open the URL printed by Vite, normally http://127.0.0.1:4173. Development uses `npm run dev`.
 
-```sh
-npm test
-npm run demo:z01
-npm run demo:z02
-```
+1. In Import, choose **NASA’dan olish** to fetch the PSI-25 table. Review and confirm the three source-checked BASS-II rows. The same import supports CSV and JSON uploads and the T25 demo.
+2. Open **PSI-25 · BASS-II** and select T20 and T21. Click a value to open its revision and the NASA locator. Report CSV/JSON exports include measurements and provenance. Exchange JSON can be reimported.
+3. Search for `GMT216-T25`, or ask `0g da 1.2 cm enli SIBAL mato yonishi`. Select Moon or Mars to inspect evidence coverage. Save a note in Focus Corner and reopen it after a reload.
+
+The NASA catalogue lists 24 combustion studies. Numeric comparisons use the imported BASS-II trials. The PSI file supplies the original material label, and NASA Table 7.1 supplies the exact sample width and flow protocol.
+
+## NASA and Gemini
+
+The online NASA fetch and optional Gemini re-evaluation use the server middleware registered in Vite dev and preview. A static-only deployment serves the UI and manual import. To expose the API in a deployed environment, host the middleware behind a same-origin Node server.
+
+Copy `.env.example` to `.env.local`, set `GEMINI_API_KEY` in the server environment and restart the server to try live Gemini 3.8 Flash. Check a saved BASS-II trial using **Enni API orqali tekshirish**. The endpoint validates the requested width, the source reference, and the Gemini response. A correction requires explicit confirmation and a current revision. A missing credential is reported as `API_UNAVAILABLE`, and manual import remains available.
+
+[Acceptance and outstanding checks](docs/acceptance.md)
 
 ## Team integration
 

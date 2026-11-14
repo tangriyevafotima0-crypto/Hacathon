@@ -1,0 +1,4 @@
+* text=auto eol=lf
+/src/atlas/data/sources/** -text
+/src/atlas/data/GMT216-T25.csv -text
+/docs/z01/demo-output/exchange.csv -text

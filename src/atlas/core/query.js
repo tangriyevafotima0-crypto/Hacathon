@@ -71,7 +71,7 @@ const SAMPLE_HISTORY_PATTERNS = [
 const STOPWORDS = new Set([
   'in', 'at', 'on', 'for', 'with', 'and', 'or', 'the', 'a', 'an', 'of', 'to', 'from', 'by', 'is', 'are', 'what', 'which',
   'how', 'does', 'do', 'show', 'find', 'search', 'compare', 'under', 'about', 'condition', 'conditions', 'trial', 'trials',
-  'study', 'studies', 'experiment', 'experiments', 'test', 'tests', 'burn', 'burning', 'combustion', 'fire', 'flame',
+  'study', 'studies', 'experiment', 'experiments', 'test', 'tests', 'burn', 'burning', 'flammability', 'combustion', 'fire', 'flame',
   'uchun', 'bilan', 'va', 'yoki', 'da', 'dagi', 'ning', 'ni', 'ga', 'dan', 'bu', 'qanday', 'qaysi', 'nima', 'top',
   'qidir', 'solishtir', 'sinov', 'sinovlar', 'tadqiqot', 'tadqiqotlar', 'tajriba', 'sharoit', 'sharoitda', 'yonish',
   'yongin', 'olov', 'alanga', 'haqida', 'bo‘yicha', 'boyicha', 'ber', 'ko‘rsat', 'korsat', 'mos', 'dalil', 'evidence',
@@ -178,7 +178,7 @@ export function parseQuery(queryText, options = {}) {
   };
 
   // 1. Oxygen concentration + optional location
-  const o2PctRegex = /(?:(?:o2|o₂|oxygen|kislorod)\s*(?:[:=]?\s*)?([+-]?\d+(?:[.,]\d+)?)\s*(?:vol\s*%|%)|([+-]?\d+(?:[.,]\d+)?)\s*(?:vol\s*%|%)\s*(?:o2|o₂|oxygen|kislorod))/gi;
+  const o2PctRegex = /(?:(?:o2|o₂|oxygen|kislorod)\s*(?:[:=]?\s*)?([+-]?\d+(?:[.,]\d+)?)\s*(?:vol\s*%|%)\s*\+?|([+-]?\d+(?:[.,]\d+)?)\s*(?:vol\s*%|%)\s*\+?\s*(?:o2|o₂|oxygen|kislorod))/gi;
   for (const match of raw_query.matchAll(o2PctRegex)) {
     const numStr = match[1] ?? match[2];
     try {
@@ -186,7 +186,7 @@ export function parseQuery(queryText, options = {}) {
       const si = convert([val], 'vol%', 'o2_concentration');
       addParsed({
         field: 'o2_concentration',
-        operator: 'approx',
+        operator: /%\s*\+/.test(match[0]) ? 'gte' : 'approx',
         value: si.values[0],
         si_value: si.values[0],
         unit: 'mol/mol',
@@ -279,7 +279,7 @@ export function parseQuery(queryText, options = {}) {
   }
 
   // 4. Sample width (e.g. 1.2 cm, 2.2 cm, 22 mm)
-  const widthRegex = /(?:(?:sample\s+width|width|namuna\s+eni|eni|kengligi)\s*(?:[:=]?\s*)?([+-]?\d+(?:[.,]\d+)?)\s*(cm|mm|m)\b|([+-]?\d+(?:[.,]\d+)?)\s*(cm|mm|m)\s*(?:sample\s+width|width|namuna\s+eni|eni|kengligi))/gi;
+  const widthRegex = /(?:(?:sample\s+width|width|namuna\s+eni|enli|eni|kengligi)\s*(?:[:=]?\s*)?([+-]?\d+(?:[.,]\d+)?)\s*(cm|mm|m)\b|([+-]?\d+(?:[.,]\d+)?)\s*(cm|mm|m)\s*(?:sample\s+width|width|namuna\s+eni|enli|eni|kengligi))/gi;
   for (const match of raw_query.matchAll(widthRegex)) {
     const numStr = match[1] ?? match[3];
     const unit = (match[2] ?? match[4]).toLowerCase();
@@ -374,6 +374,8 @@ export function parseQuery(queryText, options = {}) {
   for (const envPat of ENVIRONMENT_PATTERNS) {
     const match = envPat.regex.exec(raw_query);
     if (match) {
+      const gravityToken = { PARTIAL_G_MOON: /\b0[.,]16\s*g\b/i, PARTIAL_G_MARS: /\b0[.,]38\s*g\b/i }[envPat.canonical];
+      if (gravityToken) consumeSpan(spans, gravityToken.exec(raw_query));
       addParsed({
         field: 'environment',
         operator: 'eq',
@@ -590,7 +592,7 @@ export function evaluateChecklist(queryState, record, adapter = null) {
   const q = typeof queryState === 'string' ? parseQuery(queryState) : queryState;
   const meta = resolveMetadata(record, adapter);
   const items = [];
-  const requestedLocation = q.filters.find(f => f.field === 'oxygen_location')?.value ?? 'chamber_atmosphere';
+  const requestedLocation = q.filters.find(f => f.field === 'oxygen_location')?.value;
 
   for (const f of q.filters) {
     let status = 'unknown';
@@ -662,7 +664,7 @@ export function evaluateChecklist(queryState, record, adapter = null) {
         reason = `OXYGEN_LOCATION_MISMATCH:${observed}`;
       }
     } else if (f.field === 'o2_concentration') {
-      const targetLoc = f.location || requestedLocation;
+      const targetLoc = requestedLocation ?? f.location ?? 'chamber_atmosphere';
       observed = {
         si_value: meta.oxygen.si_value,
         location: meta.oxygen.location,
@@ -676,7 +678,7 @@ export function evaluateChecklist(queryState, record, adapter = null) {
         reason = `OXYGEN_LOCATION_MISMATCH:${meta.oxygen.location}_VS_${targetLoc}`;
       } else {
         const diff = Math.abs(meta.oxygen.si_value - f.si_value);
-        if (diff <= 0.005) {
+        if (f.operator === 'gte' ? meta.oxygen.si_value >= f.si_value : diff <= 0.005) {
           status = 'matched';
           reason = 'OXYGEN_CONCENTRATION_AND_LOCATION_MATCH';
         } else {

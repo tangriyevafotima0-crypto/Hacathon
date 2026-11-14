@@ -77,7 +77,7 @@ export function classifyEvidenceTier(record, queryState, adapter = null) {
   const qFuel = q.filters.find(f => f.field === 'fuel_type')?.value ?? null;
   const qDomain = q.filters.find(f => f.field === 'domain')?.value ?? null;
   const qEnv = q.filters.find(f => f.field === 'environment')?.value ?? null;
-  const qLoc = q.filters.find(f => f.field === 'oxygen_location')?.value ?? 'chamber_atmosphere';
+  const qLoc = q.filters.find(f => f.field === 'oxygen_location')?.value ?? q.filters.find(f => f.field === 'o2_concentration')?.location ?? 'chamber_atmosphere';
 
   const askingForSolid = qFuel === 'SOLID_FABRIC' || qFuel === 'SOLID_POLYMER' || qDomain === 'PREVENTION_SOLID' ||
     ['SIBAL', 'PMMA', 'NOMEX', 'COTTON', 'SILICONE'].includes(qMaterial);
@@ -262,7 +262,7 @@ export function computeComponentScores(record, queryState, adapter = null) {
       atmosReasons.push('OXYGEN_LOCATION_MATCH');
     } else {
       const diff = Math.abs(meta.oxygen.si_value - qO2.si_value);
-      if (diff <= 0.005) {
+      if (qO2.operator === 'gte' ? meta.oxygen.si_value >= qO2.si_value : diff <= 0.005) {
         atmosSubscores.push(1.0);
         atmosReasons.push('OXYGEN_EXACT_MATCH');
       } else if (diff <= 0.08) {
@@ -350,14 +350,15 @@ export function computeComponentScores(record, queryState, adapter = null) {
   });
 }
 
-export function scoreWithinTier(components, weights = DEFAULT_WEIGHTS) {
-  const w = normalizeWeights(weights);
-  const score =
-    w.domain * components.domain.score +
+function unroundedScore(components, w) {
+  return w.domain * components.domain.score +
     w.fuel * components.fuel.score +
     w.atmosphere * components.atmosphere.score +
     w.unit_family * components.unit_family.score;
-  return Number(score.toFixed(6));
+}
+
+export function scoreWithinTier(components, weights = DEFAULT_WEIGHTS) {
+  return Number(unroundedScore(components, normalizeWeights(weights)).toFixed(6));
 }
 
 function compareRankedItems(a, b) {
@@ -476,7 +477,8 @@ export function rankTrials(databaseOrRecords, queryInput, options = {}) {
     const tierInfo = classifyEvidenceTier(record, query, adapter);
     const components = computeComponentScores(record, query, adapter);
     const checklist = evaluateChecklist(query, record, adapter);
-    const alignment_score = scoreWithinTier(components, weights);
+    const rawScore = unroundedScore(components, weights);
+    const alignment_score = Number(rawScore.toFixed(6));
     const alignment_score_pct = Number((alignment_score * 100).toFixed(2));
     return {
       key,
@@ -489,7 +491,7 @@ export function rankTrials(databaseOrRecords, queryInput, options = {}) {
       tier_reason: tierInfo.reason,
       alignment_score,
       alignment_score_pct,
-      meets_alignment_threshold: alignment_score_pct >= ALIGNMENT_THRESHOLD_PCT,
+      meets_alignment_threshold: rawScore >= ALIGNMENT_THRESHOLD_PCT / 100,
       score_terminology: SCORE_TERMINOLOGY,
       score_disclaimer: 'Alignment score measures filter/metadata match only; it is NOT scientific confidence or safety probability.',
       weights_used: weights,

@@ -40,7 +40,7 @@ export function sourceReview(record) {
   const expected = record?.study_id === 'PSI-25' && canonical.get(record.trial_id);
   if (!expected) return {status:'NOT_IN_D_REVIEWED_DATA', reasons:['No D-reviewed trial identity'], scientific_verification:'NOT_VERIFIED'};
   const reasons = [];
-  if (record.unparsed_columns?.length) reasons.push('unreviewed_columns');
+  if (record.unparsed_columns?.some(column => column.param_key !== 'psi_csv_material_label')) reasons.push('unreviewed_columns');
   if (record.parameters?.length !== 3) reasons.push('unreviewed_parameters');
   for (const key of ['material','claim_type']) if (record[key] !== expected[key]) reasons.push(key);
   if (!equal(record.sample_history,expected.sample_history)) reasons.push('sample_history');
@@ -85,7 +85,9 @@ export function assessEvidenceGap(query, records=CONNECTED_COVERAGE, {allowTestF
       ...(query.oxygen_fraction!==undefined?['oxygen_fraction','oxygen_location']:[])];
     const unknown=keys.filter(k=>r[k]===undefined || r[k]===null || r[k]==='NOT_PROVIDED');
     if (!(allowTestFixtures && r.test_only) && (!r.source_id || !r.source_url)) unknown.push('provenance');
-    const different=keys.filter(k=>!unknown.includes(k) && r[k]!==query[k]);
+    const different=keys.filter(k=>!unknown.includes(k) && (
+      k==='oxygen_fraction' && query.oxygen_operator==='gte' ? r[k]<query[k] : r[k]!==query[k]
+    ));
     if(r.simulated)different.push('simulated_gravity');
     if(r.kind!=='MEASURED_TEST')different.push('evidence_granularity');
     return {r,unknown,different};
@@ -114,7 +116,7 @@ export function checkBoundedClaim(key) {
   const fixed={
     T20_T21_OXYGEN_DIFFERENT:['CONTRADICTED','Both Table7.1 rows report17.2vol%.'],
     T20_T21_OXYGEN_SAME:['SUPPORTED','Only the selected ISS rows: both17.2vol%.'],
-    T20_T21_NEW:['INSUFFICIENT_EVIDENCE','No explicit NEW assertion in reviewed Table7.1/AppendixB.'],
+    T20_T21_NEW:['INSUFFICIENT_EVIDENCE','No explicit NEW assertion in reviewed Table 7.1 or Appendix A, Table A.6.'],
     T25_QUENCHED:['INSUFFICIENT_EVIDENCE','Reused, ignited does not state later quenching.'],
     BASS_ON_MOON:['CONTRADICTED','Section7.1.3 places these tests aboard ISS in MSG.'],
     FM2_COMPLETED:['INSUFFICIENT_EVIDENCE','Connected FM2 source states future requirements, not completed lunar results.'],

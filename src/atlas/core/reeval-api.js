@@ -86,6 +86,10 @@ export async function proposeReevaluation(store, request, options = {}) {
     });
   }
 
+  const activeRevision = getRevision(loaded.database, study_id, trial_id);
+  const stale = () => freeze({ ok: false, status: 'STALE_REVISION', error: { code: 'STALE_REVISION' } });
+  if (targetRevision.revision_id !== activeRevision.revision_id) return stale();
+
   let providerResult;
   try {
     providerResult = await adapter.evaluate(
@@ -93,6 +97,7 @@ export async function proposeReevaluation(store, request, options = {}) {
         study_id,
         trial_id,
         revision_id: targetRevision.revision_id,
+        field: request.field ?? null,
         record: targetRevision.record,
         sources: targetRevision.record.sources,
       }))
@@ -105,13 +110,9 @@ export async function proposeReevaluation(store, request, options = {}) {
     });
   }
 
-  if (!providerResult || typeof providerResult !== 'object' || !providerResult.proposed_raw_patch || typeof providerResult.proposed_raw_patch !== 'object') {
-    return freeze({
-      ok: false,
-      status: 'PROVIDER_ERROR',
-      error: { code: 'INVALID_PROVIDER_PROPOSAL', message: 'Adapter must return a proposed_raw_patch object.' },
-    });
-  }
+  const current = store.load();
+  if (!current.ok) return current;
+  if (getRevision(current.database, study_id, trial_id)?.revision_id !== targetRevision.revision_id) return stale();
 
   if (containsSecretMaterial(providerResult)) {
     return freeze({
@@ -121,12 +122,27 @@ export async function proposeReevaluation(store, request, options = {}) {
     });
   }
 
+  if (providerResult && ['CONFIRMED', 'INSUFFICIENT_EVIDENCE'].includes(providerResult.status)) {
+    return freeze({ ok: true, status: providerResult.status, rationale: String(providerResult.rationale ?? '') });
+  }
+
+  if (!providerResult || typeof providerResult !== 'object' || !providerResult.proposed_raw_patch || typeof providerResult.proposed_raw_patch !== 'object') {
+    return freeze({
+      ok: false,
+      status: 'PROVIDER_ERROR',
+      error: { code: 'INVALID_PROVIDER_PROPOSAL', message: 'Adapter must return a proposed_raw_patch object.' },
+    });
+  }
+
   const originalRaw = clone(targetRevision.record.raw_input);
   const safePatch = clone(providerResult.proposed_raw_patch);
   // Identity fields cannot be overwritten by re-evaluation patch
   delete safePatch.study_id;
   delete safePatch.study;
   delete safePatch.trial_id;
+  if (request.field && (Object.keys(safePatch).length !== 1 || !Object.hasOwn(safePatch, request.field))) {
+    return freeze({ ok: false, status: 'PROVIDER_ERROR', error: { code: 'UNEXPECTED_PATCH_FIELDS' } });
+  }
   const candidateRaw = { ...originalRaw, ...safePatch };
 
   const diffs = [];
@@ -158,7 +174,7 @@ export async function proposeReevaluation(store, request, options = {}) {
     study_id,
     trial_id,
     base_revision_id: targetRevision.revision_id,
-    base_generation: loaded.database.generation,
+    base_generation: current.database.generation,
     rationale: String(providerResult.rationale ?? ''),
     diffs,
     original_raw_input: originalRaw,

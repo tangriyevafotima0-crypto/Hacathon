@@ -1,0 +1,15 @@
+{
+  "desktop": "PASS",
+  "mobile390": "PASS",
+  "seedConfirm": "PASS",
+  "comparison": "PASS",
+  "sourceLink": "PASS",
+  "T25Import": "PASS",
+  "reload": "PASS",
+  "repeatImport": "UNCHANGED",
+  "notebookReopen": "PASS",
+  "jsonDownload": "PASS",
+  "offlineLoadedCore": "PASS",
+  "focusReturn": "PASS",
+  "pageErrors": []
+}

@@ -1,0 +1,6 @@
+Clean extracted archive verification:
+npm ci: PASS (79 packages)
+npm test: PASS (46 tests, zero failures)
+npm run build: PASS (Vite 7.3.7)
+ZIP CRC: PASS
+Per-file SHA256: PASS

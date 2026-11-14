@@ -1,0 +1,58 @@
+
+> skyforge-dashboard@1.0.0 test
+> node --test src/model.test.js tests/atlas/*.test.js
+
+✔ reference inputs contribute zero; baseline is the illustrative material weight (1.767852ms)
+✔ default scenario has deterministic ranking and saturation (0.35433ms)
+✔ all control extremes produce bounded scores and consistent categories (2.57449ms)
+✔ D01: authoritative rows use Z schema with NASA raw/SI cells and exact outcomes (2.880544ms)
+✔ D01: NEW is not inferred; reused T25 remains flagged despite D source check (0.647316ms)
+✔ D01: T25 original CSV physics agrees; enriched locator is explicitly additional provenance (1.08304ms)
+✔ D01: sidecar preserves spatial flow, ambient location source and series-level scope (0.750658ms)
+✔ D01: mutated physics or locator cannot borrow checked D evidence (1.583596ms)
+✔ D01: raw official PSI CSV joins the correct test, preserves nominal width and negative CO (5.863997ms)
+✔ D01: real Z persistence seed/import/reload/repeat/source-chain works (18.584209ms)
+✔ D01: source enrichment creates a revision without losing original imported provenance (3.007477ms)
+✔ D01: D exchange roundtrip retains source text, ordered flow and missing history (1.167635ms)
+✔ D02: six requested PSI records have exact DOI and source-version provenance (0.677308ms)
+✔ D02: CFD, emulator, planned and simulated data are not flight material-test outcomes (0.573869ms)
+✔ D02: exact four gap statuses, four fixtures per planet, all branches execute (1.040695ms)
+✔ D02: synthetic direct fixtures cannot enter connected scientific evidence (0.301173ms)
+✔ D02: actual lunar/Martian surface query gets related evidence, no fabricated prediction (0.500673ms)
+✔ D02: all oxygen fixtures are corpus- and location-specific (0.507502ms)
+✔ D02: oxygen corpus derives from NASA raw concentration columns, never mass flow (3.424091ms)
+✔ D02: unknown/high-risk claims abstain; no live AI or fake probability is reported (0.267917ms)
+✔ D02: invalid oxygen/unknown query dimensions do not create apparent matches (0.474007ms)
+✔ D02: metadata snapshot hashes and registry references resolve (0.607088ms)
+✔ D01: unreviewed imported fields cannot inherit checked evidence (0.436346ms)
+✔ D02: a purported direct record without provenance is insufficient metadata (0.112754ms)
+✔ NASA Table 7.1 regression: width is 1.2 cm, ordered opposite protocols, distinct outcomes and page locators (6.40862ms)
+✔ provided comma-quoted T25 imports exactly, flagged REUSED, raw and SI retained (2.318124ms)
+✔ CSV preserves escaped quotes, embedded CRLF, BOM, quoted commas, empty fields (0.359066ms)
+✔ malformed CSV and ambiguous column counts fail rather than guess (0.365724ms)
+✔ decimal comma is supported in quoted cells and JSON, never as a thousands separator (0.628586ms)
+✔ missing oxygen remains unknown, zero is measured, statuses remain distinct (0.555026ms)
+✔ unit families, physical ranges, IDs and safe source URLs are enforced (1.122199ms)
+✔ unknown columns are retained with NOT_EXTRACTED and flagged; SI assertions are never trusted (0.416309ms)
+✔ burner oxygen never becomes chamber oxygen (0.234978ms)
+✔ preview is read-only; explicit confirmation and flagged review acknowledgement are required (1.316417ms)
+✔ seed + T25 commit, independent reload, repeat import and historical repeat are idempotent (18.561408ms)
+✔ same child ID in different studies is distinct; batch duplicates collapse; conflicting batch fails atomically (4.017122ms)
+✔ stale tab preview is rejected and can be regenerated without overwriting another tab (4.477202ms)
+✔ quota failure keeps durable state unchanged and lets the same plan retry (4.090623ms)
+✔ corruption, future schema, forged normalized values and denied reads never silently reset the store (2.223395ms)
+✔ source evidence resolves per field and revision, JSON exchange reimports source-linked values (9.129881ms)
+✔ JSON nested values, wrong schema and unsupported formats fail with no partial commit (0.411597ms)
+✔ unit-bearing column aliases cannot silently change units or contradict flexible values (0.443637ms)
+✔ unextracted and conflicting raw text survives without inventing normalized numbers (0.525125ms)
+✔ mixed-column source-linked CSV round trip preserves physics, outcomes, missing states and evidence (6.073014ms)
+✔ Notebook: empty storage and a saved workspace reopen with exact selection and notes (1.33634ms)
+✔ Notebook: corrupt, wrong-shaped and denied storage report errors instead of overwriting (0.213998ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 462.010549

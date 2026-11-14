@@ -4,7 +4,7 @@ export async function ingestionJSON(path,options) {
   const response=await fetch('/api/ingestion/'+path,options);
   if(!response.headers.get('content-type')?.includes('application/json')) throw new Error('INGESTION_UNAVAILABLE');
   const data=await response.json();
-  if(!response.ok) throw new Error(data.error);
+  if(!response.ok) throw new Error(typeof data.error==='string'?data.error:data.error?.code||'INGESTION_FAILED');
   return data;
 }
 
@@ -26,8 +26,12 @@ export default function Ingestion({lang,importJob,retryImport}) {
         const {studies}=await ingestionJSON('studies');
         if(active)setStudies(studies);
         if(importJob?.id){
-          const data=await ingestionJSON('jobs/'+importJob.id);
-          if(active)setJob(data);
+          try{
+            const data=await ingestionJSON('jobs/'+importJob.id);
+            if(active)setJob(data);
+          }catch(error){
+            if(active)setJob({id:importJob.id,state:'FAILED',error:error.message});
+          }
         }
       }catch{/* Existing Atlas stays available without the optional service. */}
     }

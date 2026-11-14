@@ -1,0 +1,56 @@
+{
+  "name": "Oy sharoitida SIBAL matosi",
+  "query": "SIBAL fabric related evidence for Moon",
+  "candidates": [
+    {
+      "id": "PSI-98",
+      "evidence_id": "6bd3bbc00e73d911bf1220c98571d202",
+      "kind": "SOURCE_TABLE",
+      "locator": "CSV record 2",
+      "applicability": "RELATED_DIFFERENT_CONDITIONS"
+    },
+    {
+      "id": "PSI-47",
+      "evidence_id": "3cbba39a340163bef895caf25fa8aab1",
+      "kind": "HYPOTHESIS",
+      "locator": "/hypothesis · 1",
+      "applicability": "RELATED_DIFFERENT_CONDITIONS"
+    },
+    {
+      "id": "PSI-98",
+      "evidence_id": "2aa510bb4c0df02148c3fd2205bcbbee",
+      "kind": "METHOD",
+      "locator": "/approach · 1",
+      "applicability": "RELATED_DIFFERENT_CONDITIONS"
+    },
+    {
+      "id": "PSI-98",
+      "evidence_id": "cd23ef1afa026f7f07bc3f14788eb7f7",
+      "kind": "SOURCE_TABLE",
+      "locator": "CSV record 3",
+      "applicability": "RELATED_DIFFERENT_CONDITIONS"
+    },
+    {
+      "id": "PSI-117",
+      "evidence_id": "466de37b7b127550db5cad8f976dee64",
+      "kind": "METHOD",
+      "locator": "/approach · 1",
+      "applicability": "RELATED_DIFFERENT_CONDITIONS"
+    },
+    {
+      "id": "PSI-102",
+      "evidence_id": "30521d36b7beb0cda1a2f891e22f4295",
+      "kind": "HYPOTHESIS",
+      "locator": "/hypothesis · 1",
+      "applicability": "RELATED_DIFFERENT_CONDITIONS"
+    }
+  ],
+  "explanation": "Ushbu to'plam SIBAL matosiga oid ma'lumotlarni o'z ichiga oladi. Shuni ta'kidlash kerakki, turli sharoitlarda olingan dalillar to'g'ridan-to'g'ri maqsadli o'lchov hisoblanmaydi.",
+  "model": "google/gemini-3.1-flash-lite",
+  "usage": {
+    "prompt_tokens": 519,
+    "completion_tokens": 99,
+    "total_tokens": 618,
+    "cost": 0.00027825
+  }
+}

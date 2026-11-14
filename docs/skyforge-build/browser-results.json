@@ -1,0 +1,17 @@
+{
+  "chatHistory": "PASS",
+  "memoryForget": "PASS",
+  "comparison": "PASS",
+  "shelf": "PASS",
+  "ranking": "PASS",
+  "syntheticEstimate": "PASS",
+  "scenario": "PASS",
+  "export": "PASS",
+  "widths": [
+    1440,
+    768,
+    390
+  ],
+  "reload": "PASS",
+  "pageErrors": []
+}

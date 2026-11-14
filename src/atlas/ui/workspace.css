@@ -1,0 +1,23 @@
+.forge-workspace{min-height:100vh;background:#edf2f5;color:#14273a;font:16px/1.55 system-ui,sans-serif}
+.forge-workspace>header{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1rem clamp(1rem,5vw,4rem);background:#11263b;color:#fff;flex-wrap:wrap}
+.forge-workspace>header span{font-weight:400;margin-left:.5rem}
+.forge-workspace nav{display:flex;gap:.5rem;flex-wrap:wrap}
+.forge-workspace header button[aria-pressed=true]{background:#c8efed;color:#132b36}
+.forge-pane{max-width:1280px;margin:1rem auto;padding:clamp(1rem,3vw,2rem);background:white;border:1px solid #bacbd7;border-radius:12px}
+.forge-chat{display:grid;grid-template-columns:minmax(185px,240px) minmax(0,1fr);gap:1.5rem}
+.forge-chat aside{min-width:0;border-right:1px solid #bbcdd8;padding-right:1rem}
+.forge-chat aside button{display:block;max-width:100%;overflow-wrap:anywhere;text-align:left}
+.forge-pane h2{font-size:1.35rem;font-weight:700}
+.forge-pane h3{font-weight:650}
+.forge-pane article{margin:.85rem 0;padding:.8rem;border:1px solid #bccdd8;border-radius:8px}
+.forge-pane button,.forge-workspace>header button{border:1px solid #267171;border-radius:7px;background:#185856;color:white;padding:.4rem .65rem;margin:.15rem}
+.forge-pane button:disabled{opacity:.5}
+.forge-pane input:not([type=checkbox]),.forge-pane textarea,.forge-pane select{display:block;max-width:100%;border:1px solid #687e8f;border-radius:6px;padding:.35rem .55rem;margin:.15rem 0}
+.forge-pane textarea{width:min(100%,56rem);min-height:4rem}
+.forge-pane label{display:block;margin:.4rem 0}
+.forge-pane table{display:block;overflow:auto;text-align:left;margin:.75rem 0;max-width:100%}
+.forge-pane td,.forge-pane th{border:1px solid #cad7df;padding:.4rem .65rem}
+.forge-pane pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.85rem}
+.forge-pane a{color:#005a83;text-decoration:underline}
+.forge-pane :focus-visible,.forge-workspace>header :focus-visible{outline:3px solid #b8640d;outline-offset:3px}
+@media(max-width:700px){.forge-chat{grid-template-columns:minmax(0,1fr)}.forge-chat aside{border-right:0;border-bottom:1px solid #bbcdd8;padding-bottom:1rem}.forge-pane{margin:.65rem}}

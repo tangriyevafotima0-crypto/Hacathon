@@ -168,6 +168,12 @@ export default function Atlas(){
   }
   async function enqueueImport(){
     try{
+      if(!lastImport.current.length){
+        const current=store.load();
+        if(!current.ok)throw Error(current.error.code);
+        lastImport.current=activeRecords(current.database).map(record=>record.raw_input);
+      }
+      if(!lastImport.current.length)throw Error('IMPORT_REQUIRED');
       const result=await ingestionJSON('import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(lastImport.current)});
       setImportJob(result);
       try{localStorage.setItem('skyforge.ingestion.lastJob',result.id);}catch{}

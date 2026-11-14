@@ -20,6 +20,7 @@ async function post(api, input) {
 
 test('server bounds OpenRouter responses to the requested field and NASA evidence', async t => {
   const input = {study_id:'PSI-25',trial_id:'GMT216-T25',field:'sample_width_cm',source_ref_id:'PSI-25:GMT216-T25:source'};
+  const {study_id,...identifiers}=input;
   let expected;
   t.mock.method(globalThis, 'fetch', async (url, options) => {
     assert.equal(url,'https://openrouter.ai/api/v1/chat/completions');
@@ -35,7 +36,7 @@ test('server bounds OpenRouter responses to the requested field and NASA evidenc
     [1.2,false,'PROPOSED_CORRECTION',2.2],
     [1.2,true,'INSUFFICIENT_EVIDENCE',null],
   ]) {
-    expected={...input,status,value_cm,rationale:'Table 7.1'};
+    expected={...identifiers,status,value_cm,rationale:'Table 7.1'};
     const result=await post(api,{...input,value,withhold_width});
     assert.equal(result.status,200);
     assert.equal(result.body.status,status);
@@ -64,4 +65,22 @@ test('Ask AI rejects invented evidence IDs and skips the provider with no eviden
   await assert.rejects(answerAtlas(router,'T25?','uz',evidence),{message:'API_INVALID_RESPONSE'});
   id='real-id';
   assert.deepEqual((await answerAtlas(router,'T25?','uz',evidence)).evidence,evidence);
+  const inventedNumber={async complete(){return {data:{status:'ANSWERED',claims:[{text:'The width is 99 cm.',evidence_ids:['real-id']}]}};}};
+  await assert.rejects(answerAtlas(inventedNumber,'T25?','uz',evidence),{message:'API_UNSUPPORTED_NUMBER'});
+});
+
+test('OpenRouter exposes auth, credit, quota, timeout and malformed output without retries',async t=>{
+  let reply=401;
+  const mocked=t.mock.method(globalThis,'fetch',async()=>{
+    if(reply==='timeout')throw new DOMException('timeout','TimeoutError');
+    if(reply==='malformed')return Response.json({choices:[{message:{content:'not json'}}]});
+    return new Response('',{status:reply});
+  });
+  const router=createOpenRouter({key:'test-key'});
+  for(const [status,code] of [[401,'OPENROUTER_AUTH'],[402,'OPENROUTER_CREDIT'],[429,'API_QUOTA'],[502,'API_PROVIDER_FAILED'],['timeout','UPSTREAM_TIMEOUT'],['malformed','API_INVALID_RESPONSE']]){
+    reply=status;
+    const count=mocked.mock.callCount();
+    await assert.rejects(router.complete({name:'test',schema:{type:'object'},instructions:'test',input:{}}),{message:code});
+    assert.equal(mocked.mock.callCount(),count+1);
+  }
 });

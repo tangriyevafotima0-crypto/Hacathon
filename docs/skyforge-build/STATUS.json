@@ -1,0 +1,12 @@
+{
+  "pack":"1.0",
+  "baseline":"ec60412",
+  "branch":"codex/skyforge-build-pack",
+  "stage":"11_E2E_VALIDATION",
+  "completed":["00_AUDIT"],
+  "implemented_with_limits":["01_CONTRACTS_PERSISTENCE","02_INGESTION","03_RETRIEVAL_EVIDENCE","04_AI_GATEWAY","05_LIBRARY_COMPARISON","06_ASK_AI_CHAT_MEMORY","07_EVIDENCE_RANK","08_ESTIMATE_LAB","09_SCENARIO_LAB","10_UX_INTEGRATION"],
+  "tests":{"unit_pass":68,"live_api":"PASS staging","native_pdf_docx":"PASS staging","restart":"PASS staging","browser":"Fixing HTTP randomUUID compatibility"},
+  "next":"Complete browser regression and release evidence",
+  "deployment":{"staging":"http://100.105.241.126:4193","production":"http://100.105.241.126:4191","promoted":false},
+  "limitations":["OCR and visual video analysis unavailable","No automatic smart shelf update scheduler","Equivalent versioned envelopes need full pack-schema reconciliation","Named identity and cross-device recovery unavailable"]
+}

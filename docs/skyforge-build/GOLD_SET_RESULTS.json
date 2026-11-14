@@ -1,0 +1,84 @@
+{
+  "date": "2026-11-14T19:33:08.610Z",
+  "corpus": "Five selected NASA metadata/table sets plus three BASS-II transcriptions",
+  "queries": [
+    {
+      "query": "\"GMT216-T25\"",
+      "trials": [
+        "GMT216-T25"
+      ],
+      "actual": [
+        "GMT216-T25"
+      ],
+      "status": "PASS",
+      "ms": 1535
+    },
+    {
+      "query": "T20 and T21",
+      "trials": [
+        "GMT190-T20",
+        "GMT190-T21"
+      ],
+      "actual": [
+        "GMT190-T20",
+        "GMT190-T21"
+      ],
+      "status": "PASS",
+      "ms": 784
+    },
+    {
+      "query": "SIBAL 17.2% O2 chamber atmosphere",
+      "trials": [
+        "GMT190-T20",
+        "GMT190-T21"
+      ],
+      "actual": [
+        "GMT190-T20",
+        "GMT190-T21"
+      ],
+      "status": "PASS",
+      "ms": 452
+    },
+    {
+      "query": "SIBAL 17.2% O2 burner flow",
+      "trials": [],
+      "actual": [],
+      "status": "PASS",
+      "ms": 687
+    },
+    {
+      "query": "SIBAL Moon 0.16g 30% O2",
+      "trials": [],
+      "actual": [],
+      "status": "PASS",
+      "ms": 183
+    },
+    {
+      "query": "T25 namuna eni",
+      "trials": [
+        "GMT216-T25"
+      ],
+      "actual": [
+        "GMT216-T25"
+      ],
+      "status": "PASS",
+      "ms": 201
+    },
+    {
+      "query": "T25 sample width",
+      "trials": [
+        "GMT216-T25"
+      ],
+      "actual": [
+        "GMT216-T25"
+      ],
+      "status": "PASS",
+      "ms": 214
+    }
+  ],
+  "exactSetPasses": 7,
+  "total": 7,
+  "p50_ms": 452,
+  "p95_ms": 1535,
+  "scope": "Finite exact-ID and normalized BASS condition set. Does not measure universal retrieval precision."
+}

@@ -1,0 +1,73 @@
+const assert=require('node:assert/strict');
+const {chromium}=require('playwright');
+const fs=require('node:fs');
+const base=process.env.SKYFORGE_TEST_URL||'http://100.105.241.126:4193';
+(async()=>{
+  const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH,headless:true});
+  try{
+    const page=await browser.newPage({viewport:{width:1440,height:1000}});
+    const errors=[];
+    page.on('pageerror',error=>errors.push(error.message));
+    await page.goto(base);
+    const navigation=page.getByRole('navigation',{name:'Workspace',exact:true});
+    await navigation.getByRole('button',{name:'Ask AI',exact:true}).click();
+    const chat=page.locator('.forge-chat');
+    await chat.getByRole('button',{name:'New Chat',exact:true}).click();
+    await chat.locator('textarea').fill('Salom');
+    await chat.locator('textarea').press('Enter');
+    await chat.getByText('Salom. NASA tadqiqotini topish, sinovlarni solishtirish yoki dalillarni tekshirishda yordam beraman.',{exact:true}).waitFor();
+    await chat.getByRole('button',{name:'Xotirani boshqarish',exact:true}).click();
+    await chat.getByRole('textbox',{name:'Memory',exact:true}).fill('Prefer concise source-linked answers');
+    await chat.getByRole('button',{name:'Xotiraga saqlash',exact:true}).click();
+    await chat.getByRole('button',{name:'Unutish',exact:true}).waitFor();
+    await chat.getByRole('button',{name:'Unutish',exact:true}).click();
+    await page.waitForFunction(()=>!Array.from(document.querySelectorAll('.forge-chat button')).some(button=>button.textContent==='Unutish'));
+    await navigation.getByRole('button',{name:'Library',exact:true}).click();
+    const library=page.locator('.forge-pane').filter({has:page.getByRole('heading',{name:'Library · Shelves and comparison',exact:true})});
+    await library.getByLabel('GMT190-T20',{exact:true}).check();
+    await library.getByLabel('GMT190-T21',{exact:true}).check();
+    await library.getByRole('button',{name:'Compare',exact:true}).click();
+    await library.getByText('11 to 47 cm/s',{exact:true}).waitFor();
+    await library.getByLabel('Javon nomi',{exact:true}).fill('Browser demo shelf');
+    await library.getByRole('button',{name:'Javonni saqlash',exact:true}).click();
+    await library.getByText('Browser demo shelf · manual · 2',{exact:true}).waitFor();
+    await navigation.getByRole('button',{name:'Tools',exact:true}).click();
+    const tools=page.locator('.forge-pane').filter({has:page.getByRole('heading',{name:'Tools',exact:true})});
+    await tools.getByLabel('Maqsad',{exact:true}).fill('ISS SIBAL evidence');
+    await tools.getByRole('button',{name:'Hisoblash va saqlash',exact:true}).click();
+    await tools.getByRole('button',{name:'Run again',exact:true}).waitFor();
+    await tools.getByRole('combobox',{name:'Tahlil turi',exact:true}).selectOption('estimation');
+    await tools.getByRole('checkbox',{name:'Use synthetic inputs',exact:true}).check();
+    await tools.getByRole('button',{name:'Hisoblash va saqlash',exact:true}).click();
+    await tools.getByRole('heading',{name:/Synthetic exercise/}).waitFor();
+    await tools.getByRole('combobox',{name:'Tahlil turi',exact:true}).selectOption('scenario');
+    await tools.getByLabel('Farazlar',{exact:true}).fill('Change ventilation under otherwise matched conditions');
+    await tools.getByRole('button',{name:'Hisoblash va saqlash',exact:true}).click();
+    await tools.getByRole('heading',{name:/PARTIAL/}).waitFor();
+    const downloading=page.waitForEvent('download');
+    await tools.getByRole('button',{name:'Export JSON',exact:true}).click();
+    assert.equal((await downloading).suggestedFilename(),'analysis-run.json');
+    for(const width of [1440,768,390]){
+      await page.setViewportSize({width,height:1000});
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'overflow '+width);
+    }
+    await page.setViewportSize({width:1440,height:1000});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.evaluate(()=>{document.body.style.zoom='2';});
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'200% zoom overflow');
+    await page.evaluate(()=>{document.body.style.zoom='1';});
+    await page.keyboard.press('Tab');
+    assert.ok(await page.evaluate(()=>document.activeElement!==document.body));
+    if(process.env.SKYFORGE_TEST_SCREENSHOT)await page.screenshot({path:process.env.SKYFORGE_TEST_SCREENSHOT,fullPage:true});
+    await page.reload();
+    const nav=page.getByRole('navigation',{name:'Workspace',exact:true});
+    await nav.getByRole('button',{name:'Ask AI',exact:true}).click();
+    await page.locator('.forge-chat aside').getByRole('button',{name:'Salom',exact:true}).click();
+    await page.getByText('Salom. NASA tadqiqotini topish, sinovlarni solishtirish yoki dalillarni tekshirishda yordam beraman.',{exact:true}).waitFor();
+    assert.deepEqual(errors,[]);
+    const result={chatHistory:'PASS',memoryForget:'PASS',comparison:'PASS',shelf:'PASS',ranking:'PASS',
+      syntheticEstimate:'PASS',scenario:'PASS',export:'PASS',widths:[1440,768,390],zoom200:'PASS',keyboard:'PASS',reload:'PASS',pageErrors:errors};
+    if(process.env.SKYFORGE_TEST_BROWSER_EVIDENCE)fs.writeFileSync(process.env.SKYFORGE_TEST_BROWSER_EVIDENCE,JSON.stringify(result,null,2));
+    console.log(JSON.stringify(result,null,2));
+  }finally{await browser.close();}
+})().catch(error=>{console.error(error);process.exitCode=1;});

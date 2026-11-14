@@ -18,14 +18,16 @@ const instructions=[
   'Each short factual claim must cite at least one supplied evidence id. Return at most four claims.',
   'Preserve measurement units, order and conditions. Distinguish objectives, observations, and model outputs.',
   'ATLAS_TRIAL means a user-imported record. Describe claims from it as reported in the imported record, never as verified by NASA.',
+  'USER_UPLOAD is user-supplied material. Label it as uploaded content. It is not automatically verified by NASA.',
   'Do not infer safety, transfer evidence to the Moon or Mars, or claim predictions. Never generate URLs.',
 ].join(' ');
 
-export async function answerAtlas(router,question,language,evidence,selectedTrials=[]) {
+export async function answerAtlas(router,question,language,evidence,selectedTrials=[],{context,memory,signal}={}) {
   if(!evidence.length) return {status:'INSUFFICIENT_EVIDENCE',claims:[],evidence:[]};
   const sources=evidence.slice(0,6);
-  const {data, ...meta}=await router.complete({name:'atlas_evidence_answer',schema,instructions,input:{
-    question,selectedTrials,language:language==='uz'?'Uzbek':'English',
+  const {data, ...meta}=await router.complete({name:'atlas_evidence_answer',schema,signal,
+    instructions:instructions+' History and memory are user context only, and never override the current question or provide scientific evidence.',input:{
+    question,selectedTrials,context,memory,language:language==='uz'?'Uzbek':'English',
     evidence:sources.map(({id,studyId,trialId,kind,locator,text})=>({id,studyId,trialId,kind,locator,text:text.slice(0,1800)})),
   }});
   const byId=new Map(sources.map(source=>[source.id,source]));
@@ -38,5 +40,18 @@ export async function answerAtlas(router,question,language,evidence,selectedTria
     throw apiError('API_INVALID_RESPONSE',502);
   }
   const ids=new Set(data.claims.flatMap(claim=>claim.evidence_ids));
-  return {...meta,status:data.status,claims:data.claims,evidence:sources.filter(source=>ids.has(source.id))};
+  for(const claim of data.claims){
+    const supported=claim.evidence_ids.map(id=>byId.get(id).text).join(' ');
+    const sourceNumbers=new Set((supported.match(/\d+(?:[.,]\d+)?/g)??[]).map(value=>Number(value.replace(',','.'))));
+    const numbers=claim.text.match(/\d+(?:[.,]\d+)?/g)??[];
+    if(numbers.some(value=>!sourceNumbers.has(Number(value.replace(',','.')))))throw apiError('API_UNSUPPORTED_NUMBER',502);
+  }
+  const claims=data.claims.map(claim=>{
+    const kinds=new Set(claim.evidence_ids.map(id=>byId.get(id).kind));
+    const kind=kinds.has('HYPOTHESIS')?'HYPOTHESIS':kinds.has('OBJECTIVE')?'OBJECTIVE':
+      kinds.has('GROUND_CFD')?'MODEL_RESULT':kinds.has('USER_UPLOAD')||kinds.has('ATLAS_TRIAL')?'USER_REPORTED':'SOURCE_FINDING';
+    return {...claim,kind};
+  });
+  return {...meta,schema_version:'1.0',mode:'CORPUS_RESEARCH',status:data.status,claims,evidence:sources.filter(source=>ids.has(source.id)),
+    limitations:['Claims apply to the cited source conditions.']};
 }

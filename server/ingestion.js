@@ -1,7 +1,7 @@
 import { createReadStream, mkdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { parseCSV, readImport, extractRow } from '../src/atlas/core/index.js';
+import { parseCSV, readImport, extractRow,parseQuery } from '../src/atlas/core/index.js';
 import { convert, number } from '../src/atlas/core/contract.js';
 import { studyUrl, sha } from './nasa-pitch.js';
 import { BASS_THREE } from '../src/atlas/data/index.js';
@@ -73,7 +73,7 @@ function original(res,path,type,range) {
   return createReadStream(path,{start,end}).pipe(res);
 }
 
-export async function createIngestion({root,runtime,router}) {
+export async function createIngestion({root,runtime,router,publicOnly=false}) {
   const { DatabaseSync } = await import('node:sqlite');
   const { pipeline,env } = await import(pathToFileURL(join(resolve(runtime),'node_modules','@huggingface','transformers','src','transformers.js')).href);
   const corpus=join(root,'pitch-five');
@@ -120,7 +120,7 @@ export async function createIngestion({root,runtime,router}) {
       const manifest=JSON.parse(readFileSync(join(folder,'manifest.json'),'utf8'));
       const metadata=JSON.parse(readFileSync(join(folder,'study.metadata.json'),'utf8'));
       if (metadata.version!==config.version||metadata.doi!==config.doi||!DOI.test(metadata.doi)) continue;
-      const study={...config,title:metadata.title,sourceUrl:studyUrl(config.id)};
+      const study={...config,title:metadata.title,sourceUrl:studyUrl(config.id),description:metadata.objective||metadata.description,approach:metadata.approach};
       const parts=metadataParts(study,metadata);
       const files=[];
       const manifestFiles=[{name:'study.metadata.json',status:'VERIFIED',version:config.version},...manifest.files];
@@ -188,29 +188,46 @@ export async function createIngestion({root,runtime,router}) {
     if(/\b(?:moon|mars|martian|lunar|oy(?:da|dagi|ning)?|0[.,](?:16|38)\s*g)\b/iu.test(query))return [];
     const ids=new Set(trials??[...query.matchAll(/\b(?:GMT\d+-)?T\d+\b/gi)].map(match=>match[0].toUpperCase()));
     const [vector]=await embed([query],'query');
+    const requirements=parseQuery(query).filters;
+    const oxygenFilter=requirements.find(f=>f.field==='o2_concentration'&&f.status!=='UNKNOWN');
+    const location=requirements.find(f=>f.field==='oxygen_location')?.value;
     const results=[];
     for(const row of db.prepare('SELECT id,payload,embedding FROM evidence WHERE version=? AND (? IS NULL OR study_id=?)').iterate(INDEX,study,study)) {
       const item=JSON.parse(row.payload);
       if(trial&&item.trialId!==trial||material&&!item.material?.toLowerCase().includes(material))continue;
       if(oxygen!==undefined&&item.numeric?.o2_concentration?.[0]!==oxygen)continue;
       if(flow!==undefined&&!item.numeric?.flow_velocity?.includes(flow))continue;
+      if(oxygenFilter){
+        const actual=item.numeric?.o2_concentration?.[0];
+        if(actual===undefined||(oxygenFilter.operator==='gte'?actual<oxygenFilter.si_value:Math.abs(actual-oxygenFilter.si_value)>1e-8))continue;
+        if(location&&location!=='chamber_atmosphere')continue;
+      }
       const trialId=item.trialId?.toUpperCase();
       const trialMatch=ids.has(trialId)||ids.has(trialId?.split('-').at(-1));
-      if(ask&&ids.size&&!trialMatch)continue;
+      if(ids.size&&!trialMatch)continue;
       const bytes=Buffer.from(row.embedding);
       let score=0;
       for(let i=0;i<SIZE;i++)score+=vector[i]*bytes.readFloatLE(i*4);
       results.push({...item,id:row.id,score});
     }
+    const terms=query.toLowerCase().match(/[\p{L}\p{N}_.:-]{3,}/gu)??[];
+    const semantic=[...results].sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
+    const lexical=[...results].map(item=>({...item,lexical:terms.filter(term=>(item.studyId+' '+item.trialId+' '+item.text).toLowerCase().includes(term)).length}))
+      .filter(item=>item.lexical).sort((a,b)=>b.lexical-a.lexical||a.id.localeCompare(b.id));
+    const semanticRanks=new Map(semantic.map((item,index)=>[item.id,index+1]));
+    const lexicalRanks=new Map(lexical.map((item,index)=>[item.id,index+1]));
+    for(const item of results)item.retrieval_score=1/(60+semanticRanks.get(item.id))+(lexicalRanks.has(item.id)?1/(60+lexicalRanks.get(item.id)):0);
+    const compare=(a,b)=>b.retrieval_score-a.retrieval_score||a.id.localeCompare(b.id);
+    if(publicOnly)return results.filter(item=>item.kind!=='ATLAS_TRIAL').sort(compare).slice(0,8);
     if(ask){
       const officialTrials=new Set(results.filter(item=>item.kind==='NASA_TABLE_TRANSCRIPTION').map(item=>item.trialId));
       return results.filter(item=>item.kind!=='ATLAS_TRIAL'||!officialTrials.has(item.trialId))
-        .sort((a,b)=>b.score-a.score).slice(0,8);
+        .sort(compare).slice(0,8);
     }
-    return results.sort((a,b)=>b.score-a.score).slice(0,8);
+    return results.sort(compare).slice(0,8);
   }
 
-  return async (req,res,next) => {
+  const middleware=async (req,res,next) => {
     const url=new URL(req.url,'http://localhost');
     const parts=url.pathname.split('/');
     if(parts[1]!=='api'||parts[2]!=='ingestion')return next();
@@ -228,6 +245,7 @@ export async function createIngestion({root,runtime,router}) {
         return file?original(res,file.path,file.type,req.headers.range):json(res,404,{error:'FILE_NOT_FOUND'});
       }
       if (req.method==='POST'&&['import','ask'].includes(parts[3])) {
+        if(publicOnly&&parts[3]==='import')return json(res,403,{error:'WORKSPACE_IMPORT_REQUIRED'});
         if(req.headers.origin&&req.headers.origin!==`http://${req.headers.host}`&&req.headers.origin!==`https://${req.headers.host}`) {
           return json(res,403,{error:'INGESTION_ORIGIN'});
         }
@@ -277,4 +295,9 @@ export async function createIngestion({root,runtime,router}) {
       return json(res,error.status??(parts[3]==='import'?400:503),{error:error.status?error.message:parts[3]==='import'?'INGESTION_IMPORT_INVALID':'INGESTION_UNAVAILABLE'});
     }
   };
+  middleware.retrieve=retrieve;
+  middleware.embed=embed;
+  middleware.snapshot=()=>sha(JSON.stringify(db.prepare('SELECT id FROM evidence WHERE version=? ORDER BY id').all(INDEX)));
+  middleware.close=()=>{clearInterval(timer);db.close();};
+  return middleware;
 }

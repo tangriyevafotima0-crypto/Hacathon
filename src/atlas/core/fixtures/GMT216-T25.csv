@@ -1,0 +1,2 @@
+trial_id,study,material,sample_width_cm,flow_raw,oxygen_vol_pct,oxygen_location,sample_history,outcome,source_url,pdf_page,printed_page,table,row_id
+GMT216-T25,BASS-II,SIBAL,2.2,5 to 2.5,20.8,chamber_atmosphere,REUSED,"Reused, ignited",https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104,104,96,7.1,GMT216-T25

@@ -43,14 +43,20 @@ Model `Xenova/multilingual-e5-small`, revision `761b726dd34fb83930e26aab4e9ac389
 4. Qidiruv va dalillar eksportini, keyin BASS-II taqqoslash va hisobot eksportini tekshiring. T20 oqimi **11 → 3 cm/s** holida chiqadi.
 5. Analyzer xizmatni qayta ishga tushirib, tayyor qatorlar sonini va bir xil import natijasidagi job IDni solishtiradi.
 
-Demo ingestori NASA metadata va CSV qatorlarini indekslaydi. PDF/DOCX, OCR, video korpusi va Gemini orqali javob yaratish keyingi ko‘lamda.
+Demo ingestori NASA metadata va CSV qatorlarini indekslaydi. PDF/DOCX, OCR va video korpusi keyingi ko‘lamda.
+
+## OpenRouter va Ask AI
+
+Serverning `G:\SKYFORGE-NASA\fire-atlas-pitch\.env.local` fayliga `OPENROUTER_API_KEY` yozing. `OPENROUTER_MODEL` uchun standart qiymat `google/gemini-3.1-flash-lite`. Kalit OpenRouter hisobiga tegishli va serverda saqlanadi. Task Scheduler’da `SKYFORGE-Fire-Atlas-Pitch` xizmatini qayta ishga tushiring.
+
+Atlas ichida **Ask AI** tugmasini bosib «T20 va T21 da havo oqimi qanday o‘zgargan?» deb so‘rang. Javobdagi raqamli dalil havolasini bosib NASA Table 7.1, PDF 104 va qator identifikatorini oching. So‘ng T25 enini API orqali tekshiring. Ikkala amal ham bitta OpenRouter ulanishini ishlatadi. AI xarajatini cheklash uchun server jarayoni UTC kuni davomida 100 ta va bir vaqtda ikkita so‘rov qabul qiladi. Model kaliti o‘chirilganida yoki provayder xato qaytarganida topilgan dalillar ekranda chiqadi.
 
 ## Yakunlash ketma-ketligi
 
 | Tartib | Mas’ul | Yakunlash sharti |
 | --- | --- | --- |
 | 1 · parallel | D | Beshta tadqiqotdagi demo dalili va NASA lokatorlarini tekshiradi. CFD kartasini model sifatida ko‘rsatadi. |
-| 1 · parallel | Bk | Demo qurilmasidan server URL’ini ochadi. Import holati, rasm va eksportni tekshiradi. Jonli Gemini kaliti bo‘lsa, eski en tekshiruvini alohida sinaydi. |
+| 1 · parallel | Bk | Demo qurilmasidan server URL’ini ochadi. Import holati, rasm va eksportni tekshiradi. OpenRouter orqali Ask AI va en tekshiruvini sinaydi. |
 | 1 · parallel | H va BN | Pitch ssenariysi, H01 asl fayllari va tadbir topshirish talablarini tekshiradi. |
 | 2 · birgalikda | Analyzer va BN | Importdan keyin server navbati, ikkala tildagi qidiruv, asl manba, restart va fizik qiymatlar eksportini mustaqil tekshiradi. |
 | 3 · ketma-ket | BN, H va Bk | Taqdimot qurilmasida to‘liq mashq qiladi va demo manzili hamda commitni qayd etadi. |

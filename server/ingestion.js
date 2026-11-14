@@ -4,6 +4,8 @@ import { pathToFileURL } from 'node:url';
 import { parseCSV, readImport, extractRow } from '../src/atlas/core/index.js';
 import { convert, number } from '../src/atlas/core/contract.js';
 import { studyUrl, sha } from './nasa-pitch.js';
+import { BASS_THREE } from '../src/atlas/data/index.js';
+import { answerAtlas } from './atlas-answer.js';
 import studies from './pitch-studies.json' with { type: 'json' };
 
 const MODEL = 'Xenova/multilingual-e5-small';
@@ -71,7 +73,7 @@ function original(res,path,type,range) {
   return createReadStream(path,{start,end}).pipe(res);
 }
 
-export async function createIngestion({root,runtime}) {
+export async function createIngestion({root,runtime,router}) {
   const { DatabaseSync } = await import('node:sqlite');
   const { pipeline,env } = await import(pathToFileURL(join(resolve(runtime),'node_modules','@huggingface','transformers','src','transformers.js')).href);
   const corpus=join(root,'pitch-five');
@@ -111,6 +113,7 @@ export async function createIngestion({root,runtime}) {
     return id;
   }
   const available=[];
+  queue(BASS_THREE.rows.map(row=>({...trialPart(row),kind:'NASA_TABLE_TRANSCRIPTION',file:'NASA/TM-20210011385'})));
   for (const config of studies) {
     try {
       const folder=join(corpus,config.id);
@@ -181,13 +184,38 @@ export async function createIngestion({root,runtime}) {
   timer.unref();
   const jobState=id=>db.prepare('SELECT id,state,count,error FROM jobs WHERE id=?').get(id);
 
+  async function retrieve(query,{study,trial,material,oxygen,flow,ask}) {
+    if(/\b(?:moon|mars|martian|lunar|oy(?:da|dagi|ning)?|0[.,](?:16|38)\s*g)\b/iu.test(query))return [];
+    const ids=new Set([...query.matchAll(/\b(?:GMT\d+-)?(T\d+)\b/gi)].map(match=>match[1].toUpperCase()));
+    const [vector]=await embed([query],'query');
+    const results=[];
+    for(const row of db.prepare('SELECT id,payload,embedding FROM evidence WHERE version=? AND (? IS NULL OR study_id=?)').iterate(INDEX,study,study)) {
+      const item=JSON.parse(row.payload);
+      if(trial&&item.trialId!==trial||material&&!item.material?.toLowerCase().includes(material))continue;
+      if(oxygen!==undefined&&item.numeric?.o2_concentration?.[0]!==oxygen)continue;
+      if(flow!==undefined&&!item.numeric?.flow_velocity?.includes(flow))continue;
+      const trialMatch=ids.has(item.trialId?.split('-').at(-1));
+      if(ask&&ids.size&&!trialMatch)continue;
+      const bytes=Buffer.from(row.embedding);
+      let score=0;
+      for(let i=0;i<SIZE;i++)score+=vector[i]*bytes.readFloatLE(i*4);
+      results.push({...item,id:row.id,score});
+    }
+    if(ask){
+      const officialTrials=new Set(results.filter(item=>item.kind==='NASA_TABLE_TRANSCRIPTION').map(item=>item.trialId));
+      return results.filter(item=>item.kind!=='ATLAS_TRIAL'||!officialTrials.has(item.trialId))
+        .sort((a,b)=>b.score-a.score).slice(0,8);
+    }
+    return results.sort((a,b)=>b.score-a.score).slice(0,8);
+  }
+
   return async (req,res,next) => {
     const url=new URL(req.url,'http://localhost');
     const parts=url.pathname.split('/');
     if(parts[1]!=='api'||parts[2]!=='ingestion')return next();
     try {
       if (req.method==='GET'&&parts[3]==='studies') {
-        return json(res,200,{model:MODEL,revision:REVISION,dimensions:SIZE,index:INDEX,
+        return json(res,200,{model:MODEL,revision:REVISION,dimensions:SIZE,index:INDEX,askConfigured:!!router?.configured,
           studies:available.map(({job,...study})=>({...study,job:jobState(job)}))});
       }
       if (req.method==='GET'&&parts[3]==='jobs') {
@@ -198,12 +226,24 @@ export async function createIngestion({root,runtime}) {
         const file=assets.get(parts[4]);
         return file?original(res,file.path,file.type,req.headers.range):json(res,404,{error:'FILE_NOT_FOUND'});
       }
-      if (req.method==='POST'&&parts[3]==='import') {
+      if (req.method==='POST'&&['import','ask'].includes(parts[3])) {
         if(req.headers.origin&&req.headers.origin!==`http://${req.headers.host}`&&req.headers.origin!==`https://${req.headers.host}`) {
           return json(res,403,{error:'INGESTION_ORIGIN'});
         }
         if(!req.headers['content-type']?.startsWith('application/json'))return json(res,415,{error:'INGESTION_JSON_REQUIRED'});
         const input=await body(req);
+        if(parts[3]==='ask') {
+          const question=typeof input?.question==='string'?input.question.trim():'';
+          const study=input?.study||null;
+          if(!question||question.length>300||study&&!/^PSI-\d+$/.test(study))return json(res,400,{error:'QUERY_INVALID'});
+          const evidence=await retrieve(question,{study,ask:true});
+          if(!router?.configured&&evidence.length) return json(res,200,{status:'OPENROUTER_NOT_CONFIGURED',claims:[],evidence});
+          try { return json(res,200,await answerAtlas(router,question,input.language,evidence)); }
+          catch(error) {
+            if(!error.status)throw error;
+            return json(res,200,{status:error.message,claims:[],evidence});
+          }
+        }
         const rows=readImport(JSON.stringify(input),'json');
         if(rows.length>200)return json(res,400,{error:'INGESTION_BATCH_LIMIT_200'});
         const entries=rows.map(trialPart);
@@ -215,9 +255,6 @@ export async function createIngestion({root,runtime}) {
       if (req.method==='GET'&&parts[3]==='search') {
         const query=url.searchParams.get('q')?.trim();
         if(!query||query.length>300)return json(res,400,{error:'QUERY_LENGTH'});
-        if(/\b(?:moon|mars|martian|lunar|oy(?:da|dagi|ning)?|0[.,](?:16|38)\s*g)\b/iu.test(query)) {
-          return json(res,200,{results:[]});
-        }
         const study=url.searchParams.get('study');
         const trial=url.searchParams.get('trial');
         const material=url.searchParams.get('material')?.toLowerCase();
@@ -226,24 +263,12 @@ export async function createIngestion({root,runtime}) {
           if(url.searchParams.has('oxygen')) oxygen=convert([number(url.searchParams.get('oxygen'))],'vol%','o2_concentration').values[0];
           if(url.searchParams.has('flow')) flow=convert([number(url.searchParams.get('flow'))],'cm/s','flow_velocity').values[0];
         } catch { return json(res,400,{error:'INVALID_NUMERIC_FILTER'}); }
-        const [vector]=await embed([query],'query');
-        const results=[];
-        for(const row of db.prepare('SELECT id,payload,embedding FROM evidence WHERE version=? AND (? IS NULL OR study_id=?)').iterate(INDEX,study,study)) {
-          const item=JSON.parse(row.payload);
-          if(trial&&item.trialId!==trial||material&&!item.material?.toLowerCase().includes(material))continue;
-          if(oxygen!==undefined&&item.numeric?.o2_concentration?.[0]!==oxygen)continue;
-          if(flow!==undefined&&!item.numeric?.flow_velocity?.includes(flow))continue;
-          const bytes=Buffer.from(row.embedding);
-          let score=0;
-          for(let i=0;i<SIZE;i++)score+=vector[i]*bytes.readFloatLE(i*4);
-          results.push({...item,id:row.id,score});
-        }
-        return json(res,200,{results:results.sort((a,b)=>b.score-a.score).slice(0,8)});
+        return json(res,200,{results:await retrieve(query,{study,trial,material,oxygen,flow})});
       }
       return json(res,404,{error:'INGESTION_ROUTE_NOT_FOUND'});
     } catch(error) {
       console.error('Ingestion request failed',error.message);
-      return json(res,parts[3]==='import'?400:503,{error:parts[3]==='import'?'INGESTION_IMPORT_INVALID':'INGESTION_UNAVAILABLE'});
+      return json(res,error.status??(parts[3]==='import'?400:503),{error:error.status?error.message:parts[3]==='import'?'INGESTION_IMPORT_INVALID':'INGESTION_UNAVAILABLE'});
     }
   };
 }

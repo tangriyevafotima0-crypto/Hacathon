@@ -93,7 +93,7 @@ export default function Atlas(){
       const {study_id,trial_id}=record;
       const field=hasValue(record.raw_input.sample_width_raw)?'sample_width_raw':'sample_width_cm';
       const revision_id=getRevision(loaded.database,study_id,trial_id).revision_id;
-      const adapter={name:'Gemini',async evaluate(input){
+      const adapter={name:'OpenRouter',async evaluate(input){
         const width=widthOf(input.record);
         const result=await requestJSON('/api/re-evaluate',{
           method:'POST',headers:{'Content-Type':'application/json'},

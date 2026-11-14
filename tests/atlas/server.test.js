@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Readable } from 'node:stream';
 import { createAtlasApi } from '../../server/atlas-api.js';
+import { createOpenRouter } from '../../server/openrouter.js';
+import { answerAtlas } from '../../server/atlas-answer.js';
 
 async function post(api, input) {
   const request = Readable.from([JSON.stringify(input)]);
@@ -16,19 +18,18 @@ async function post(api, input) {
   });
 }
 
-test('server bounds Gemini responses to the requested field and NASA evidence', async t => {
+test('server bounds OpenRouter responses to the requested field and NASA evidence', async t => {
   const input = {study_id:'PSI-25',trial_id:'GMT216-T25',field:'sample_width_cm',source_ref_id:'PSI-25:GMT216-T25:source'};
   let expected;
   t.mock.method(globalThis, 'fetch', async (url, options) => {
-    assert.match(url,/gemini-3\.8-flash:generateContent$/);
-    assert.equal(options.headers['x-goog-api-key'],'test-credential');
-    const {generationConfig,contents}=JSON.parse(options.body);
-    assert.deepEqual(generationConfig.responseJsonSchema.properties.value_cm.type,['number','null']);
-    assert.equal(generationConfig.responseSchema,undefined);
-    if(expected?.status==='INSUFFICIENT_EVIDENCE')assert.match(contents[0].parts[0].text,/"nasa_width_cm":null/);
-    return Response.json({candidates:[{content:{parts:[{text:JSON.stringify(expected)}]}}],usageMetadata:{totalTokenCount:20}});
+    assert.equal(url,'https://openrouter.ai/api/v1/chat/completions');
+    assert.equal(options.headers.Authorization,'Bearer test-credential');
+    const {response_format,messages}=JSON.parse(options.body);
+    assert.deepEqual(response_format.json_schema.schema.properties.value_cm.type,['number','null']);
+    if(expected?.status==='INSUFFICIENT_EVIDENCE')assert.equal(JSON.parse(messages[1].content).nasa_width_cm,null);
+    return Response.json({choices:[{message:{content:JSON.stringify(expected)}}],usage:{total_tokens:20}});
   });
-  const api=createAtlasApi('test-credential');
+  const api=createAtlasApi(createOpenRouter({key:'test-credential'}));
   for (const [value,withhold_width,status,value_cm] of [
     ['2,2',false,'CONFIRMED',2.2],
     [1.2,false,'PROPOSED_CORRECTION',2.2],
@@ -38,7 +39,7 @@ test('server bounds Gemini responses to the requested field and NASA evidence', 
     const result=await post(api,{...input,value,withhold_width});
     assert.equal(result.status,200);
     assert.equal(result.body.status,status);
-    assert.deepEqual(result.body.usage,{totalTokenCount:20});
+    assert.deepEqual(result.body.usage,{total_tokens:20});
     assert.ok(result.body.duration_ms>=0);
     assert.deepEqual(result.body.proposed_raw_patch,status==='PROPOSED_CORRECTION'?{sample_width_cm:'2.2'}:undefined);
   }
@@ -51,4 +52,16 @@ test('server bounds Gemini responses to the requested field and NASA evidence', 
   assert.equal((await post(api,{...input,trial_id:'OTHER',value:2.2})).status,400);
   assert.equal(globalThis.fetch.mock.callCount(),fetchCount);
   assert.equal((await post(createAtlasApi(),input)).body.error,'API_UNAVAILABLE');
+});
+
+test('Ask AI rejects invented evidence IDs and skips the provider with no evidence', async () => {
+  const evidence=[{id:'real-id',studyId:'PSI-25',kind:'NASA_TABLE_TRANSCRIPTION',locator:'Table 7.1',text:'T25: 2.2 cm'}];
+  let calls=0;
+  let id='invented';
+  const router={async complete(){calls++;return {data:{status:'ANSWERED',claims:[{text:'2.2 cm',evidence_ids:[id]}]}};}};
+  assert.equal((await answerAtlas(router,'T25?','uz',[])).status,'INSUFFICIENT_EVIDENCE');
+  assert.equal(calls,0);
+  await assert.rejects(answerAtlas(router,'T25?','uz',evidence),{message:'API_INVALID_RESPONSE'});
+  id='real-id';
+  assert.deepEqual((await answerAtlas(router,'T25?','uz',evidence)).evidence,evidence);
 });

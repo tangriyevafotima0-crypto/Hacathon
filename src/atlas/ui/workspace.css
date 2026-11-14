@@ -9,6 +9,8 @@
 .forge-chat aside button{display:block;max-width:100%;overflow-wrap:anywhere;text-align:left}
 .forge-pane h2{font-size:1.35rem;font-weight:700}
 .forge-pane h3{font-weight:650}
+.forge-pane summary{color:#14273a;font:inherit;cursor:pointer;padding:.65rem 0;overflow-wrap:anywhere;list-style:disclosure-closed}
+.forge-pane details[open]>summary{list-style:disclosure-open;font-weight:600}
 .forge-pane article{margin:.85rem 0;padding:.8rem;border:1px solid #bccdd8;border-radius:8px}
 .forge-pane button,.forge-workspace>header button{border:1px solid #267171;border-radius:7px;background:#185856;color:white;padding:.4rem .65rem;margin:.15rem}
 .forge-pane button:disabled{opacity:.5}

@@ -1,0 +1,5 @@
+$ git diff --exit-code -- src/atlas/core tests/atlas/import.test.js src/App.jsx src/main.jsx src/styles.css src/model.js src/model.test.js package.json package-lock.json
+exit=0
+stdout:
+
+stderr:

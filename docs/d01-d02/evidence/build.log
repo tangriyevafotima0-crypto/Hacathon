@@ -1,0 +1,18 @@
+$ npm run build
+exit=0
+stdout:
+
+> skyforge-dashboard@1.0.0 build
+> vite build
+
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 1580 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.59 kB │ gzip:  0.38 kB
+dist/assets/index-BbRfXWnW.css   23.63 kB │ gzip:  6.24 kB
+dist/assets/index-BzraWS2X.js   246.34 kB │ gzip: 77.73 kB
+✓ built in 3.03s
+
+stderr:

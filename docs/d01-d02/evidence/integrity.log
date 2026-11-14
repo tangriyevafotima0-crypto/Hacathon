@@ -1,0 +1,3 @@
+$ node scripts/d01-d02-integrity.mjs
+exit=0
+{"status":"PASS","files":61,"baseline_commit":"04df76287b92d5b78423125753052cbdd31570b3","protected_core_ui_lockfile":"UNCHANGED","artifact_version":"SKYFORGE-D01-D02-v0.2.0"}

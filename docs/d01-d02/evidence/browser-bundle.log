@@ -1,0 +1,9 @@
+$ node node_modules/esbuild/bin/esbuild src/atlas/data/index.js --bundle --platform=browser --format=esm --outfile=/tmp/skyforge-d-data.js
+exit=0
+stdout:
+
+stderr:
+
+  ../../../../../../../../tmp/skyforge-d-data.js  157.0kb
+
+⚡ Done in 13ms

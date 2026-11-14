@@ -1,0 +1,30 @@
+[
+  {
+    "corpus": "BASS_THREE",
+    "location": "chamber_atmosphere",
+    "minimum": 0.3,
+    "count": 0,
+    "status": "No matching evidence in connected corpus"
+  },
+  {
+    "corpus": "CFIG_NORMAL",
+    "location": "chamber_atmosphere",
+    "minimum": 0.3,
+    "count": 115,
+    "status": "Direct matching evidence"
+  },
+  {
+    "corpus": "CFIG_INVERSE",
+    "location": "burner_flow",
+    "minimum": 0.3,
+    "count": 115,
+    "status": "Direct matching evidence"
+  },
+  {
+    "corpus": "CFIG_INVERSE",
+    "location": "chamber_atmosphere",
+    "minimum": 0.3,
+    "count": null,
+    "status": "Insufficient metadata"
+  }
+]

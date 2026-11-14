@@ -1,0 +1,869 @@
+{
+  "GMT190-T20": {
+    "id": "GMT190-T20",
+    "experiment": "BASS-II",
+    "psi_id": "PSI-25",
+    "claim_type": "observed_test_row",
+    "gravity_regime": "ISS_MICROGRAVITY",
+    "material": {
+      "name": "SIBAL",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102"
+      },
+      "cotton_percent": 75,
+      "fiberglass_percent": 25,
+      "percent_basis": "NOT_STATED_IN_SECTION_7_1_3"
+    },
+    "sample_width": {
+      "raw": "1.2",
+      "raw_unit": "cm",
+      "si": 0.012,
+      "si_unit": "m",
+      "scope": "TEST_ROW",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT190-T20",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "location": "sample_surface",
+      "location_interpretation": "Measurement on the solid specimen, not a gas volume"
+    },
+    "flow": {
+      "raw": "11 to 3",
+      "raw_unit": "cm/s",
+      "start_si": 0.11,
+      "end_si": 0.03,
+      "si_unit": "m/s",
+      "temporal_change": "DECREASING",
+      "configuration": "concurrent",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT190-T20",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "semantics_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 103,
+        "printed_page": 95,
+        "section": "7.1.4",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=103",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "configuration_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "location": "chamber_atmosphere",
+      "location_interpretation": "Bulk imposed flow in small duct; not local flame-zone velocity"
+    },
+    "oxygen": {
+      "raw": "17.2",
+      "raw_unit": "vol%",
+      "si_fraction": 0.172,
+      "location": "chamber_atmosphere",
+      "scope": "TEST_ROW",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT190-T20",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "location_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "measurement_note": "Fixed nominal test condition in this section; not local flame-zone concentration; CSV has separately calibrated pre/post values."
+    },
+    "outcome": {
+      "raw": "Quenched",
+      "code": "QUENCHED",
+      "mapping": "Project normalization, not a NASA outcome code",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT190-T20",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "sample_history": {
+      "code": "NOT_PROVIDED",
+      "raw": null,
+      "evidence_type": "NO_EXPLICIT_NEW_ASSERTION_FOUND",
+      "new_verified": false,
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT190-T20",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+      },
+      "context_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 103,
+        "printed_page": 95,
+        "section": "7.1.4",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=103"
+      },
+      "note": "Table marks reused samples, but absence of that marker does not directly assert NEW. Distinct sample IDs do not prove freshness."
+    },
+    "pressure": {
+      "raw": "1",
+      "raw_unit": "atm",
+      "si": 101325,
+      "si_unit": "Pa",
+      "scope": "SERIES_CONTEXT",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "thickness": {
+      "raw": "about 0.32",
+      "raw_unit": "mm",
+      "si": 0.00032,
+      "si_unit": "m",
+      "approximate": true,
+      "scope": "SERIES_CONTEXT",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "exposed_length": {
+      "raw": "10",
+      "raw_unit": "cm",
+      "si": 0.1,
+      "si_unit": "m",
+      "scope": "SERIES_CONTEXT",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "csv_provenance": {
+      "file": "sources/PSI-25-table-0.csv",
+      "line": 120,
+      "psi_version": 4,
+      "file_version": 1,
+      "raw_row": {
+        "PI": "T'ien",
+        "Test #": "T20",
+        "Date": "7/9/2014",
+        "GMT": "190",
+        "Sample #": "144m",
+        "Fuel Sample Material": "1 cm SIBAL",
+        "Flow restrictor": "2",
+        "Fan display": "3.6   0.9",
+        "Air display": "11   3",
+        "Radiometer gain   (1000   250   50   10)": "250",
+        "Total Frames Shot": "117",
+        "Calibrated  initial O2 % by vol ": "17.2",
+        "Calibrated final O2 % by vol": "17.2",
+        "Initial CO2 % by vol": "0.31",
+        "Final CO2 % by vol": "0.31",
+        "Initial CO (ppm)": "20",
+        "Final CO (ppm)": "34"
+      },
+      "join_key": [
+        "GMT",
+        "Test #"
+      ],
+      "appendix_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 120,
+        "printed_page": 112,
+        "section": "Appendix B",
+        "row": "T20",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=120"
+      }
+    },
+    "gas_readings": {
+      "Calibrated  initial O2 % by vol ": {
+        "raw": "17.2",
+        "raw_unit": "vol%",
+        "fraction": 0.172,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 120,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Calibrated final O2 % by vol": {
+        "raw": "17.2",
+        "raw_unit": "vol%",
+        "fraction": 0.172,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 120,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Initial CO2 % by vol": {
+        "raw": "0.31",
+        "raw_unit": "vol%",
+        "fraction": 0.0031,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 120,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Final CO2 % by vol": {
+        "raw": "0.31",
+        "raw_unit": "vol%",
+        "fraction": 0.0031,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 120,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Initial CO (ppm)": {
+        "raw": "20",
+        "raw_unit": "ppm",
+        "fraction": 0.000019999999999999998,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 120,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Final CO (ppm)": {
+        "raw": "34",
+        "raw_unit": "ppm",
+        "fraction": 0.000034,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 120,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      }
+    },
+    "review_status": "D_SOURCE_CHECKED"
+  },
+  "GMT190-T21": {
+    "id": "GMT190-T21",
+    "experiment": "BASS-II",
+    "psi_id": "PSI-25",
+    "claim_type": "observed_test_row",
+    "gravity_regime": "ISS_MICROGRAVITY",
+    "material": {
+      "name": "SIBAL",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102"
+      },
+      "cotton_percent": 75,
+      "fiberglass_percent": 25,
+      "percent_basis": "NOT_STATED_IN_SECTION_7_1_3"
+    },
+    "sample_width": {
+      "raw": "1.2",
+      "raw_unit": "cm",
+      "si": 0.012,
+      "si_unit": "m",
+      "scope": "TEST_ROW",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT190-T21",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "location": "sample_surface",
+      "location_interpretation": "Measurement on the solid specimen, not a gas volume"
+    },
+    "flow": {
+      "raw": "11 to 47",
+      "raw_unit": "cm/s",
+      "start_si": 0.11,
+      "end_si": 0.47,
+      "si_unit": "m/s",
+      "temporal_change": "INCREASING",
+      "configuration": "concurrent",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT190-T21",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "semantics_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 103,
+        "printed_page": 95,
+        "section": "7.1.4",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=103",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "configuration_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "location": "chamber_atmosphere",
+      "location_interpretation": "Bulk imposed flow in small duct; not local flame-zone velocity"
+    },
+    "oxygen": {
+      "raw": "17.2",
+      "raw_unit": "vol%",
+      "si_fraction": 0.172,
+      "location": "chamber_atmosphere",
+      "scope": "TEST_ROW",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT190-T21",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "location_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "measurement_note": "Fixed nominal test condition in this section; not local flame-zone concentration; CSV has separately calibrated pre/post values."
+    },
+    "outcome": {
+      "raw": "Blow-off",
+      "code": "BLOW_OFF",
+      "mapping": "Project normalization, not a NASA outcome code",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT190-T21",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "sample_history": {
+      "code": "NOT_PROVIDED",
+      "raw": null,
+      "evidence_type": "NO_EXPLICIT_NEW_ASSERTION_FOUND",
+      "new_verified": false,
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT190-T21",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+      },
+      "context_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 103,
+        "printed_page": 95,
+        "section": "7.1.4",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=103"
+      },
+      "note": "Table marks reused samples, but absence of that marker does not directly assert NEW. Distinct sample IDs do not prove freshness."
+    },
+    "pressure": {
+      "raw": "1",
+      "raw_unit": "atm",
+      "si": 101325,
+      "si_unit": "Pa",
+      "scope": "SERIES_CONTEXT",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "thickness": {
+      "raw": "about 0.32",
+      "raw_unit": "mm",
+      "si": 0.00032,
+      "si_unit": "m",
+      "approximate": true,
+      "scope": "SERIES_CONTEXT",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "exposed_length": {
+      "raw": "10",
+      "raw_unit": "cm",
+      "si": 0.1,
+      "si_unit": "m",
+      "scope": "SERIES_CONTEXT",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "csv_provenance": {
+      "file": "sources/PSI-25-table-0.csv",
+      "line": 121,
+      "psi_version": 4,
+      "file_version": 1,
+      "raw_row": {
+        "PI": "T'ien",
+        "Test #": "T21",
+        "Date": "7/9/2014",
+        "GMT": "190",
+        "Sample #": "145m",
+        "Fuel Sample Material": "1 cm SIBAL",
+        "Flow restrictor": "0",
+        "Fan display": "1.6 pot   52",
+        "Air display": "11   max(47)",
+        "Radiometer gain   (1000   250   50   10)": "250",
+        "Total Frames Shot": "151",
+        "Calibrated  initial O2 % by vol ": "17.2",
+        "Calibrated final O2 % by vol": "17.2",
+        "Initial CO2 % by vol": "0.31",
+        "Final CO2 % by vol": "0.32",
+        "Initial CO (ppm)": "34",
+        "Final CO (ppm)": "45"
+      },
+      "join_key": [
+        "GMT",
+        "Test #"
+      ],
+      "appendix_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 120,
+        "printed_page": 112,
+        "section": "Appendix B",
+        "row": "T21",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=120"
+      }
+    },
+    "gas_readings": {
+      "Calibrated  initial O2 % by vol ": {
+        "raw": "17.2",
+        "raw_unit": "vol%",
+        "fraction": 0.172,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 121,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Calibrated final O2 % by vol": {
+        "raw": "17.2",
+        "raw_unit": "vol%",
+        "fraction": 0.172,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 121,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Initial CO2 % by vol": {
+        "raw": "0.31",
+        "raw_unit": "vol%",
+        "fraction": 0.0031,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 121,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Final CO2 % by vol": {
+        "raw": "0.32",
+        "raw_unit": "vol%",
+        "fraction": 0.0032,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 121,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Initial CO (ppm)": {
+        "raw": "34",
+        "raw_unit": "ppm",
+        "fraction": 0.000034,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 121,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Final CO (ppm)": {
+        "raw": "45",
+        "raw_unit": "ppm",
+        "fraction": 0.000044999999999999996,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 121,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      }
+    },
+    "review_status": "D_SOURCE_CHECKED"
+  },
+  "GMT216-T25": {
+    "id": "GMT216-T25",
+    "experiment": "BASS-II",
+    "psi_id": "PSI-25",
+    "claim_type": "observed_test_row",
+    "gravity_regime": "ISS_MICROGRAVITY",
+    "material": {
+      "name": "SIBAL",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102"
+      },
+      "cotton_percent": 75,
+      "fiberglass_percent": 25,
+      "percent_basis": "NOT_STATED_IN_SECTION_7_1_3"
+    },
+    "sample_width": {
+      "raw": "2.2",
+      "raw_unit": "cm",
+      "si": 0.022,
+      "si_unit": "m",
+      "scope": "TEST_ROW",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT216-T25",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "location": "sample_surface",
+      "location_interpretation": "Measurement on the solid specimen, not a gas volume"
+    },
+    "flow": {
+      "raw": "5 to 2.5",
+      "raw_unit": "cm/s",
+      "start_si": 0.05,
+      "end_si": 0.025,
+      "si_unit": "m/s",
+      "temporal_change": "DECREASING",
+      "configuration": "concurrent",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT216-T25",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "semantics_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 103,
+        "printed_page": 95,
+        "section": "7.1.4",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=103",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "configuration_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "location": "chamber_atmosphere",
+      "location_interpretation": "Bulk imposed flow in small duct; not local flame-zone velocity"
+    },
+    "oxygen": {
+      "raw": "20.8",
+      "raw_unit": "vol%",
+      "si_fraction": 0.208,
+      "location": "chamber_atmosphere",
+      "scope": "TEST_ROW",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT216-T25",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "location_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      },
+      "measurement_note": "Fixed nominal test condition in this section; not local flame-zone concentration; CSV has separately calibrated pre/post values."
+    },
+    "outcome": {
+      "raw": "Reused, ignited",
+      "code": "IGNITED",
+      "mapping": "Project normalization, not a NASA outcome code",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT216-T25",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "sample_history": {
+      "code": "REUSED",
+      "raw": "Reused",
+      "evidence_type": "EXPLICIT_TABLE_COMMENT",
+      "new_verified": false,
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 104,
+        "printed_page": 96,
+        "section": "Table 7.1",
+        "row": "GMT216-T25",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+      },
+      "context_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 103,
+        "printed_page": 95,
+        "section": "7.1.4",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=103"
+      },
+      "note": "Explicitly reused; ignited does not state a later quench or complete burnout."
+    },
+    "pressure": {
+      "raw": "1",
+      "raw_unit": "atm",
+      "si": 101325,
+      "si_unit": "Pa",
+      "scope": "SERIES_CONTEXT",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "thickness": {
+      "raw": "about 0.32",
+      "raw_unit": "mm",
+      "si": 0.00032,
+      "si_unit": "m",
+      "approximate": true,
+      "scope": "SERIES_CONTEXT",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "exposed_length": {
+      "raw": "10",
+      "raw_unit": "cm",
+      "si": 0.1,
+      "si_unit": "m",
+      "scope": "SERIES_CONTEXT",
+      "locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 102,
+        "printed_page": 94,
+        "section": "7.1.3",
+        "row": null,
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102",
+        "document_id": "NASA/TM-20210011385"
+      }
+    },
+    "csv_provenance": {
+      "file": "sources/PSI-25-table-0.csv",
+      "line": 125,
+      "psi_version": 4,
+      "file_version": 1,
+      "raw_row": {
+        "PI": "T'ien",
+        "Test #": "T25",
+        "Date": "8/4/2014",
+        "GMT": "216",
+        "Sample #": "138m",
+        "Fuel Sample Material": "2 cm SIBAL",
+        "Flow restrictor": "1",
+        "Fan display": "53   45",
+        "Air display": "5   2.5",
+        "Radiometer gain   (1000   250   50   10)": "250",
+        "Total Frames Shot": "75",
+        "Calibrated  initial O2 % by vol ": "20.8",
+        "Calibrated final O2 % by vol": "20.7",
+        "Initial CO2 % by vol": "0.36",
+        "Final CO2 % by vol": "0.39",
+        "Initial CO (ppm)": "-1",
+        "Final CO (ppm)": "17"
+      },
+      "join_key": [
+        "GMT",
+        "Test #"
+      ],
+      "appendix_locator": {
+        "source_id": "NASA-TM-20210011385",
+        "pdf_page": 121,
+        "printed_page": 113,
+        "section": "Appendix B",
+        "row": "T25",
+        "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=121"
+      }
+    },
+    "gas_readings": {
+      "Calibrated  initial O2 % by vol ": {
+        "raw": "20.8",
+        "raw_unit": "vol%",
+        "fraction": 0.20800000000000002,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 125,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Calibrated final O2 % by vol": {
+        "raw": "20.7",
+        "raw_unit": "vol%",
+        "fraction": 0.207,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 125,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Initial CO2 % by vol": {
+        "raw": "0.36",
+        "raw_unit": "vol%",
+        "fraction": 0.0036,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 125,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Final CO2 % by vol": {
+        "raw": "0.39",
+        "raw_unit": "vol%",
+        "fraction": 0.0039000000000000003,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 125,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Initial CO (ppm)": {
+        "raw": "-1",
+        "raw_unit": "ppm",
+        "fraction": -0.000001,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 125,
+        "quality": "NEGATIVE_REPORTED_VALUE_RETAINED",
+        "note": "No local concentration or safety threshold inferred."
+      },
+      "Final CO (ppm)": {
+        "raw": "17",
+        "raw_unit": "ppm",
+        "fraction": 0.000017,
+        "scope": "PRE_POST_MSG_READINGS",
+        "source_file": "sources/PSI-25-table-0.csv",
+        "line": 125,
+        "quality": "AS_REPORTED",
+        "note": "No local concentration or safety threshold inferred."
+      }
+    },
+    "review_status": "D_SOURCE_CHECKED"
+  }
+}

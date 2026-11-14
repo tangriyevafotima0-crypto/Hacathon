@@ -1,0 +1,51 @@
+[
+  {
+    "check": "baseline-tests",
+    "command": [
+      "node",
+      "--test",
+      "src/model.test.js"
+    ],
+    "exit_code": 0
+  },
+  {
+    "check": "npm-test",
+    "command": [
+      "npm",
+      "test"
+    ],
+    "exit_code": 0
+  },
+  {
+    "check": "demo",
+    "command": [
+      "npm",
+      "run",
+      "demo:z01"
+    ],
+    "exit_code": 0
+  },
+  {
+    "check": "npm-ci-offline",
+    "command": [
+      "npm",
+      "ci",
+      "--offline",
+      "--cache",
+      "/Users/selfish/.npm",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund"
+    ],
+    "exit_code": 1
+  },
+  {
+    "check": "build",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "exit_code": 127
+  }
+]

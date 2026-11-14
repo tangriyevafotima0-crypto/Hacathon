@@ -1,0 +1,14 @@
+$ node --test src/model.test.js
+✔ reference inputs contribute zero; baseline is the illustrative material weight (0.588083ms)
+✔ default scenario has deterministic ranking and saturation (0.092917ms)
+✔ all control extremes produce bounded scores and consistent categories (0.109583ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 35.932459
+
+EXIT_CODE=0

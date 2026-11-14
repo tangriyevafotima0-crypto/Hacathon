@@ -1,0 +1,86 @@
+[
+  {
+    "path": ".gitignore",
+    "sha256_original": "e8bc935ce727f1809c792f4c5d26c5fc75ba2b7df7fc9390c56c8892f6a6007f",
+    "sha256_current": "e8bc935ce727f1809c792f4c5d26c5fc75ba2b7df7fc9390c56c8892f6a6007f",
+    "changed": false
+  },
+  {
+    "path": "index.html",
+    "sha256_original": "a069b31b41e0d4e70244c41576aa79b98e85d5d600a5a06520883f13e17a7b3d",
+    "sha256_current": "a069b31b41e0d4e70244c41576aa79b98e85d5d600a5a06520883f13e17a7b3d",
+    "changed": false
+  },
+  {
+    "path": "package-lock.json",
+    "sha256_original": "b4acf28b3558a9d6bb8e655cae76812df0424a51206c47894fe0d49a92576300",
+    "sha256_current": "b4acf28b3558a9d6bb8e655cae76812df0424a51206c47894fe0d49a92576300",
+    "changed": false
+  },
+  {
+    "path": "package.json",
+    "sha256_original": "adf44d151e07789aa13038f9a3fe312b16421a339397b56a6b0282f2518b1319",
+    "sha256_current": "6d8c0b4f168a0b3dcbeb044dea24c8466631a1665aa22dc777202f8e57eff592",
+    "changed": true
+  },
+  {
+    "path": "README.md",
+    "sha256_original": "ab03a08bd901c20eb4728f1179cbae3d1b76364f1e366622ed01014271a06236",
+    "sha256_current": "ab03a08bd901c20eb4728f1179cbae3d1b76364f1e366622ed01014271a06236",
+    "changed": false
+  },
+  {
+    "path": "REVIEW.md",
+    "sha256_original": "48572b777ef24d6fd18e6fc179b94ba4141cd7982179eae6920bd612e7ad6eda",
+    "sha256_current": "48572b777ef24d6fd18e6fc179b94ba4141cd7982179eae6920bd612e7ad6eda",
+    "changed": false
+  },
+  {
+    "path": "VALIDATION.md",
+    "sha256_original": "4318a8360b3cb53c1405a7d70e9389bb83b58fefb74de2ecea5b7179961661f0",
+    "sha256_current": "4318a8360b3cb53c1405a7d70e9389bb83b58fefb74de2ecea5b7179961661f0",
+    "changed": false
+  },
+  {
+    "path": "vite.config.js",
+    "sha256_original": "f0c3b48f1dfed677f66cfda6f533c970d9b34a4d0b93faaf1309efd2c4e305c7",
+    "sha256_current": "f0c3b48f1dfed677f66cfda6f533c970d9b34a4d0b93faaf1309efd2c4e305c7",
+    "changed": false
+  },
+  {
+    "path": "public/favicon.svg",
+    "sha256_original": "9be7060dbf48b5606138b7a411ea779fb3bd4e7978d94f44a331f55362a272f2",
+    "sha256_current": "9be7060dbf48b5606138b7a411ea779fb3bd4e7978d94f44a331f55362a272f2",
+    "changed": false
+  },
+  {
+    "path": "src/App.jsx",
+    "sha256_original": "4bb86dc9f78da6c04df8c8f5c1043e4d1332d44c86a8f6dd52d9b8bbcc348ca2",
+    "sha256_current": "4bb86dc9f78da6c04df8c8f5c1043e4d1332d44c86a8f6dd52d9b8bbcc348ca2",
+    "changed": false
+  },
+  {
+    "path": "src/main.jsx",
+    "sha256_original": "38cc9e15aca811fae9cd8880dc51be1752f8b708e1a4f29b8ffa4ef1de7c5761",
+    "sha256_current": "38cc9e15aca811fae9cd8880dc51be1752f8b708e1a4f29b8ffa4ef1de7c5761",
+    "changed": false
+  },
+  {
+    "path": "src/model.js",
+    "sha256_original": "230f096c07a56a763d926b4943891eea1d6a3ac1b4a7470cecc00d1e1a2887d3",
+    "sha256_current": "230f096c07a56a763d926b4943891eea1d6a3ac1b4a7470cecc00d1e1a2887d3",
+    "changed": false
+  },
+  {
+    "path": "src/model.test.js",
+    "sha256_original": "b8d0338de6844797d6edef8954587b38a60cf008b38f74368e5c5714a6cd48e9",
+    "sha256_current": "b8d0338de6844797d6edef8954587b38a60cf008b38f74368e5c5714a6cd48e9",
+    "changed": false
+  },
+  {
+    "path": "src/styles.css",
+    "sha256_original": "9901da5e1019d86d6d10ee231b99a7d0004d60453ac2b2cbeecc7ee4edccd98c",
+    "sha256_current": "9901da5e1019d86d6d10ee231b99a7d0004d60453ac2b2cbeecc7ee4edccd98c",
+    "changed": false
+  }
+]

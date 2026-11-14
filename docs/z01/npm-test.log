@@ -1,0 +1,38 @@
+$ npm test
+
+> skyforge-dashboard@1.0.0 test
+> node --test src/model.test.js tests/atlas/*.test.js
+
+✔ reference inputs contribute zero; baseline is the illustrative material weight (0.652916ms)
+✔ default scenario has deterministic ranking and saturation (0.098041ms)
+✔ all control extremes produce bounded scores and consistent categories (0.117292ms)
+✔ NASA Table 7.1 regression: width is 1.2 cm, ordered opposite protocols, distinct outcomes and page locators (1.741083ms)
+✔ provided comma-quoted T25 imports exactly, flagged REUSED, raw and SI retained (0.657125ms)
+✔ CSV preserves escaped quotes, embedded CRLF, BOM, quoted commas, empty fields (0.119791ms)
+✔ malformed CSV and ambiguous column counts fail rather than guess (0.125292ms)
+✔ decimal comma is supported in quoted cells and JSON, never as a thousands separator (0.207416ms)
+✔ missing oxygen remains unknown, zero is measured, statuses remain distinct (0.187666ms)
+✔ unit families, physical ranges, IDs and safe source URLs are enforced (0.421292ms)
+✔ unknown columns are retained with NOT_EXTRACTED and flagged; SI assertions are never trusted (0.138209ms)
+✔ burner oxygen never becomes chamber oxygen (0.071833ms)
+✔ preview is read-only; explicit confirmation and flagged review acknowledgement are required (0.367208ms)
+✔ seed + T25 commit, independent reload, repeat import and historical repeat are idempotent (4.527709ms)
+✔ same child ID in different studies is distinct; batch duplicates collapse; conflicting batch fails atomically (1.172083ms)
+✔ stale tab preview is rejected and can be regenerated without overwriting another tab (1.018ms)
+✔ quota failure keeps durable state unchanged and lets the same plan retry (1.586208ms)
+✔ corruption, future schema, forged normalized values and denied reads never silently reset the store (0.79075ms)
+✔ source evidence resolves per field and revision, JSON exchange reimports source-linked values (2.813375ms)
+✔ JSON nested values, wrong schema and unsupported formats fail with no partial commit (0.083833ms)
+✔ unit-bearing column aliases cannot silently change units or contradict flexible values (0.127375ms)
+✔ unextracted and conflicting raw text survives without inventing normalized numbers (0.104875ms)
+✔ mixed-column source-linked CSV round trip preserves physics, outcomes, missing states and evidence (2.456542ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.598834
+
+EXIT_CODE=0

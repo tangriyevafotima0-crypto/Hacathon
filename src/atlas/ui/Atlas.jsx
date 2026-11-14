@@ -8,6 +8,7 @@ import t25 from '../data/GMT216-T25.csv?raw';
 import './atlas.css';
 import {readNotebooks, NOTEBOOK_KEY} from './notebook.js';
 import Ingestion,{ingestionJSON} from './Ingestion.jsx';
+import {localTrialAnswer} from './local-answer.js';
 
 export function download(name, text, type='application/json') {
   const url=URL.createObjectURL(new Blob([text],{type})); const a=document.createElement('a'); a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
@@ -81,6 +82,8 @@ export default function Atlas(){
       const question=query.replace(trialPattern,id=>trialFilters.includes(id.toUpperCase())?id:'').replace(/\s+/g,' ').trim();
       const trials=trialFilters.length?trialFilters:chosen.map(record=>record.trial_id);
       if(!question&&!trials.length){setQuickAnswer({status:'INSUFFICIENT_EVIDENCE'});return;}
+      const local=localTrialAnswer(question||'outcome',trials,lang);
+      if(local){setQuickAnswer(local);return;}
       setQuickAnswer(await ingestionJSON('ask',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({question:question||tr('Sinov natijasi qanday?','What was the trial outcome?'),trials,language:lang})}));
     }catch(error){setQuickAnswer({status:error.message});}
@@ -200,6 +203,7 @@ export default function Atlas(){
     <p role="status" aria-live="polite">{message}</p>{!loaded.ok&&<p role="alert">{loaded.error.code}: {loaded.error.message}</p>}
     <section aria-labelledby="question"><h2 id="question">01 · {tr('Savol va talablar','Question and requirements')}</h2><form onSubmit={askQuestion}><label>{tr('Tajriba savoli yoki sinov IDsi','Experiment question or trial ID')}<input value={query} onChange={e=>changeQuery(e.target.value)} disabled={asking} maxLength={300} placeholder="BASS-II / T20 / Quenched"/></label><button disabled={asking||!query.trim()}>{asking?tr('Javob tayyorlanmoqda…','Preparing answer…'):tr('AI javobini olish','Get AI answer')}</button></form>
     {quickAnswer&&<div aria-live="polite" aria-label={tr('AI javobi','AI answer')}>
+      {quickAnswer.local&&<p><strong>{tr('Saqlangan NASA dalilidan · oflayn','From stored NASA evidence · offline')}</strong></p>}
       {quickAnswer.status==='INSUFFICIENT_EVIDENCE'&&<p>{tr('Ulangan korpusda yetarli dalil topilmadi.','The connected corpus has insufficient evidence.')}</p>}
       {!['ANSWERED','INSUFFICIENT_EVIDENCE'].includes(quickAnswer.status)&&<p role="alert">{tr('AI javobini olish imkoni bo‘lmadi.','Unable to get an AI answer.')} · {quickAnswer.status}</p>}
       {quickAnswer.claims?.map((claim,index)=><p key={index}>{claim.text} {claim.evidence_ids.map(id=>{

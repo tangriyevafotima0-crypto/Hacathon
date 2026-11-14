@@ -1,0 +1,323 @@
+[
+  {
+    "source_id": "PSI-25",
+    "retrieval_url": "https://psi.nasa.gov/geode-py/ws/repo/investigations/PSI-25",
+    "full_response_sha256": "b9234754db5da651ad27d888af082b889d07210b018e543369662f065b4ec2da",
+    "metadata": {
+      "accession": "PSI-25",
+      "title": "Burning and Suppression of Solids - II",
+      "investigationAcronym": "BASS-II",
+      "doi": "10.60555/4qc4-de67",
+      "version": 4,
+      "projectType": "Microgravity Investigation",
+      "releaseDate": "31-Dec-2022",
+      "modifiedDate": "24-Nov-2025",
+      "objective": "BASS-II results contribute to the combustion computational models used in the design of fire detection and suppression systems in microgravity and on Earth.\nObjectives Include:\n  1) Study the ignition, flame growth, flame spread, and extinction limits for solid fuels burning in low-velocity forced flows in microgravity.\n  2) Begin to bridge the gap between the normal gravity NASA-STD-6001 Test #1 method, ground-based microgravity tests, and actual material flammability in microgravity.\n  3) Provide SoFIE PIs with preliminary data to refine Science Requirements.\n  4)  Practical, realistic (thicker) fuels in typical geometries will be examined, including slabs, cylinders, and spherical sections.\n\nThe primary variables include:\n     • Forced flow velocity (speed and direction)\n     • Ambient oxygen concentration (via working volume nitrogen vitiation)\n     • Sample geometry (rods, spherical section, slabs, films, and fabric sheets",
+      "approach": "To summarize, BASS-II's approach, microgravity combustion tests were performed aboard the International Space Station. Active crew support for real-time “lab partner” operations. The wind tunnel was installed in the Microgravity Science Glovebox which supplied power, imaging, and a level of containment. Fuel samples were mounted inside a small wind tunnel which could impose airflow speeds up to 40 cm/s. Main variables are airflow speed and oxygen concentration (oxygen varied below 21% by adding nitrogen). Flame appearance, flame growth, and spread rates were determined in both the opposed and concurrent flow.",
+      "experimentalTable": [
+        {
+          "_id": {
+            "$oid": "67a3a17b09ed061032c19775"
+          },
+          "date_created": {
+            "$date": 1738776955343
+          },
+          "date_modified": {
+            "$date": 1738776955343
+          },
+          "file_name": "PSI-25_Experimental table_BASS-II.csv",
+          "file_size": 16590,
+          "remote_path": "/Home/psi-data/PSI-25/Experimental table/PSI-25_Experimental table_BASS-II.csv",
+          "remote_url": "/datamanager/file/Home/psi-data/PSI-25/Experimental table/PSI-25_Experimental table_BASS-II.csv",
+          "resource_id": {
+            "$oid": "66cf53d46f1142c964b2e0a8"
+          },
+          "restricted": false,
+          "s3_path": "psi-data/PSI-25/Experimental table/PSI-25_Experimental table_BASS-II.csv",
+          "s3_version_id": "..Z_cQ7ymWFmdISmAvT7c5Gcs7ZHo4N_",
+          "study_id": {
+            "$oid": "6924805f7f6aa6a8302106fe"
+          },
+          "subcategory": "",
+          "version": 1,
+          "visible": true
+        }
+      ]
+    }
+  },
+  {
+    "source_id": "PSI-98",
+    "retrieval_url": "https://psi.nasa.gov/geode-py/ws/repo/investigations/PSI-98",
+    "full_response_sha256": "501b5f625733e29c0c6ff0c12b3de1a3e960a159a8c8f8a21ba5c5803afe0570",
+    "metadata": {
+      "accession": "PSI-98",
+      "title": "Spacecraft Fire Safety Experiment-I",
+      "investigationAcronym": "SAFFIRE-I",
+      "doi": "10.60555/0t15-1z43",
+      "version": 4,
+      "projectType": "Microgravity Investigation",
+      "releaseDate": "18-Sep-2024",
+      "modifiedDate": "03-Jun-2025",
+      "objective": "The objectives of this investigation were to:\n(1) determine how rapidly a large scale fire grows in low-gravity and (2) investigate the low-g flammability limits compared to those obtained in NASA’s normal\ngravity material flammability screening test.",
+      "approach": "The Saffire-1 experiments was performed on the Orbital Science’s Cygnus resupply vehicle after it deberthed from the ISS. The sample material for Saffire-I is a composite fabric called Sibal consisting of cotton on a fiberglass substrate (75% cotton, 25% fiberglass by weight). It has been used in many space experiments because it burns like cotton but maintains structural integrity after the cotton is consumed. The sample was approximately 0.94 meters long and 0.4 meters wide, simulating a large piece of flammable fabric. The Saffire-1 flight unit had a sample card installed in the middle of a large flow duct. Air is drawn through the flow duct by fans located at the top of the duct with flow straighteners at the bottom of the experiment module. Saffire-I was conducted at an air flow velocity of 20 cm/s. Once the sample was ignited flame images were captured using two cameras. In addition, thermocouples provided flow, flame, and plume temperatures, two radiometers recorded flame radiation, solid state sensors were used to measure pressure, CO2 and O2 mole faction, and two anemometer tracked flow velocity. All data was compressed, and subsequently downlinked.",
+      "experimentalTable": [
+        {
+          "_id": {
+            "$oid": "6792c46eb7b6ff8e65037f3e"
+          },
+          "date_created": {
+            "$date": 1737671790269
+          },
+          "date_modified": {
+            "$date": 1737671790269
+          },
+          "file_name": "PSI-98_Experimental table_SAFFIRE-1.csv",
+          "file_size": 469,
+          "remote_path": "/Home/psi-data/PSI-98/Experimental table/PSI-98_Experimental table_SAFFIRE-1.csv",
+          "remote_url": "/datamanager/file/Home/psi-data/PSI-98/Experimental table/PSI-98_Experimental table_SAFFIRE-1.csv",
+          "resource_id": {
+            "$oid": "66cf53d46f1142c964b2e0a8"
+          },
+          "restricted": false,
+          "s3_path": "psi-data/PSI-98/Experimental table/PSI-98_Experimental table_SAFFIRE-1.csv",
+          "s3_version_id": "_eNG2ATl_BkM8A7pV_lFCVUo5ptKZk3G",
+          "study_id": {
+            "$oid": "683f4a58746db1c87dcebf3d"
+          },
+          "subcategory": "",
+          "version": 1,
+          "visible": true
+        }
+      ]
+    }
+  },
+  {
+    "source_id": "PSI-99",
+    "retrieval_url": "https://psi.nasa.gov/geode-py/ws/repo/investigations/PSI-99",
+    "full_response_sha256": "2c042a6bd82fa6b437cae61490d54ea91f890a52282bc5949b4a0119bcbf6633",
+    "metadata": {
+      "accession": "PSI-99",
+      "title": "Spacecraft Fire Experiment-II",
+      "investigationAcronym": "SAFFIRE-II",
+      "doi": "10.60555/2chp-m469",
+      "version": 5,
+      "projectType": "Microgravity Investigation",
+      "releaseDate": "18-Sep-2024",
+      "modifiedDate": "04-Jun-2025",
+      "objective": "The objectives of SAFFIRE-II are to determine how rapidly a large scale fire grows in low-gravity and to investigate the low-g flammability limits compared to those obtained in NASA’s normal gravity material flammability screening test.",
+      "approach": "The Saffire-II experiment was performed on the Orbital Science’s Cygnus resupply vehicle after it deberthed from the ISS. As a follow on to the Saffire-I investigation, the Saffire-II investigation added more samples including SIBAL, silicone, structure PMMA, flat PMMA, and PMMA with Nomex. The Saffire-1I flight unit had a sample card installed in the middle of a large flow duct. Air is drawn through the flow duct by fans located at the top of the duct with flow straighteners at the bottom of the experiment module. Saffire-II has a sample card that contains 9 samples, each 5 cm x 29 cm. Depending on the sample material, the Saffire-II was conducted at an air flow velocity of either 20 or 30 cm/s, the flow being either concurrent or opposed.  Once the sample was ignited flame images were captured using two cameras. In addition, thermocouples provided flow, flame, and plume temperatures, two radiometers recorded flame radiation, solid state sensors were used to measure pressure, CO2 and O2 mole faction, and two anemometer tracked flow velocity. All data was compressed, and subsequently downlinked. Details related to samples and experimental parameters are provided in the Experimental Details file in the Science document folder.",
+      "experimentalTable": [
+        {
+          "_id": {
+            "$oid": "6792d000b7b6ff8e650380fc"
+          },
+          "date_created": {
+            "$date": 1737674752026
+          },
+          "date_modified": {
+            "$date": 1737674752026
+          },
+          "file_name": "PSI-99_Experimental table_SAFFIRE-2.csv",
+          "file_size": 1973,
+          "remote_path": "/Home/psi-data/PSI-99/Experimental table/PSI-99_Experimental table_SAFFIRE-2.csv",
+          "remote_url": "/datamanager/file/Home/psi-data/PSI-99/Experimental table/PSI-99_Experimental table_SAFFIRE-2.csv",
+          "resource_id": {
+            "$oid": "66cf53d46f1142c964b2e0a8"
+          },
+          "restricted": false,
+          "s3_path": "psi-data/PSI-99/Experimental table/PSI-99_Experimental table_SAFFIRE-2.csv",
+          "s3_version_id": "Kudy6.is5OaNybLt0PRcLA6qMj57Pcxl",
+          "study_id": {
+            "$oid": "6840d3366daf91e274cebc7f"
+          },
+          "subcategory": "",
+          "version": 1,
+          "visible": true
+        }
+      ]
+    }
+  },
+  {
+    "source_id": "PSI-69",
+    "retrieval_url": "https://psi.nasa.gov/geode-py/ws/repo/investigations/PSI-69",
+    "full_response_sha256": "a2d8ec5d0e9ad1060f6ecc7a850598634cc5519c373ae70462bf76c31fc8731c",
+    "metadata": {
+      "accession": "PSI-69",
+      "title": "Flame Extinguishment Experiment",
+      "investigationAcronym": "FLEX",
+      "doi": "10.60555/mbq8-0451",
+      "version": 5,
+      "projectType": "Microgravity Investigation",
+      "releaseDate": "31-Jul-2016",
+      "modifiedDate": "06-Jun-2025",
+      "objective": "The FLEX (Flame Extinguishment Experiment) investigation aims to map the flammability limits of liquid fuels in microgravity environments, measure the effectiveness of various gaseous fire suppressants such as CO2, He, and SF6, and develop reliable predictive models for combustion limits under reduced gravity conditions. The mission seeks to validate and improve simplified models by incorporating detailed chemical reactions, heat transfer, and material movement, using both space-based data and extensive ground-based tests. Key flight experiment goals include obtaining high-resolution measurements of droplet burning rates, flame extinction behavior, heat radiation, soot levels, and temperature profiles, while systematically analyzing the effects of different ambient conditions and suppressant concentrations. These investigations are essential for advancing the fundamental understanding of combustion processes in microgravity and enhancing fire safety protocols for future space missions.",
+      "approach": "The FLEX experiments involve igniting and observing the burning behavior of relatively large droplets. A primary objective of the experiments is to determine the Limiting Oxygen Index (LOI) as a function of ambient pressure and determine how the presence of a suppressant influences the LOI .\nThe basic outline of the procedure to construct this diagram is as follows:\n  1. Select the test pressure (0.5 − 1.5 atm) for the LOI tests.\n  2. Select a smaller droplet size (≈ 3 mm)\n  3. Select an ambient oxygen mole fraction that, based on ground-based testing, will support droplets burning to completion (as opposed to extinguishing at a finite droplet size).\n  4. Perform a droplet combustion test.\n  5. Increase the droplet size or repeat the test (if finite extinction diameter at flame extinction observed).\n  6. Continue steps 4 and 5 until flame exists for only a short time after ignition (radiative extinction).\n  7. Continue steps 4 thru 6 at a decreased ambient oxygen mole fraction.\n  8. Continue step 7 to an ambient oxygen mole fraction where the droplet does not ignite.\n\nThere were ambient conditions where the extinction droplet sizes at all ambient oxygen mole fractions were too small to either be observed or measured with the available diagnostics. In this case, the determination of the LOI is similar, but more iterative. Instead of observing flame extinction, however, the procedure  involved an iterative sequence of tests (burn to completion followed by a no ignition test) with progressively smaller increments in ambient oxygen mole fraction to determine the LOI . For the slow flow tests (in the flight experiment), the configuration of the flight hardware did not allow for adequate diagnostics over the entire test for a droplet in a uniform, steady convective flow.  In these tests, the procedure will be to duplicate tests above which yield finite-sized extinction droplet diameters. Near the end of the tests, prior to flame extinction, the droplet will be subjected to a small, sub-buoyant, convective flow (imparted by translating the droplet at a slow, uniform speed).\n\nThe goal of the experiment is then to see how the presence of this flow influences the extinction process. Note, a large number of the tests involve free droplets (as opposed to fiber-supported droplets) and a number of these tests will have droplets with a slow drift velocity. Data gathered from these tests to examine the influences of a small, sub-buoyant flow on both the burning and extinction process.",
+      "experimentalTable": [
+        {
+          "_id": {
+            "$oid": "6792be99b7b6ff8e65037e3a"
+          },
+          "date_created": {
+            "$date": 1737670297147
+          },
+          "date_modified": {
+            "$date": 1737670297147
+          },
+          "file_name": "PSI-69_Experimental table_FLEX.csv",
+          "file_size": 24776,
+          "remote_path": "/Home/psi-data/PSI-69/Experimental table/PSI-69_Experimental table_FLEX.csv",
+          "remote_url": "/datamanager/file/Home/psi-data/PSI-69/Experimental table/PSI-69_Experimental table_FLEX.csv",
+          "resource_id": {
+            "$oid": "66cf53d46f1142c964b2e0a8"
+          },
+          "restricted": false,
+          "s3_path": "psi-data/PSI-69/Experimental table/PSI-69_Experimental table_FLEX.csv",
+          "s3_version_id": "TParjCiGvSeDqRYFafCSaXSv1jLiimyd",
+          "study_id": {
+            "$oid": "68434e6f8749ebab7e0252e7"
+          },
+          "subcategory": "",
+          "version": 1,
+          "visible": true
+        }
+      ]
+    }
+  },
+  {
+    "source_id": "PSI-101",
+    "retrieval_url": "https://psi.nasa.gov/geode-py/ws/repo/investigations/PSI-101",
+    "full_response_sha256": "e0aa75d015705a5943b51dbb4a8ba52751a35e4cafc2307d9201d77ebed711a5",
+    "metadata": {
+      "accession": "PSI-101",
+      "title": "Smoke Aerosol Measurement Experiment-Reflight",
+      "investigationAcronym": "SAME-R",
+      "doi": "10.60555/2np7-jv14",
+      "version": 4,
+      "projectType": "Microgravity Investigation",
+      "releaseDate": "18-Sep-2024",
+      "modifiedDate": "02-Jun-2025",
+      "objective": "Similar to the original SAME investigation, the primary objective of the SAME-R investigation was to quantify the sizes that the liquid smoke particulate achieves in low gravity and to relate the droplet size distribution to the smoke generation and smoke transport conditions in the experiment. One of the problems encountered during the SAME investigation was that after the thermal precipitators were returned to the ground, it was found that all the TEM grids were severely contaminated with some unidentified foreign particles, making these grids unusable although some of them showed shapes of certain types of smoke particles. Based on that experience the SAME-R investigation employed several modification covering new materials, extended operating conditions, and diagnostic equipments.",
+      "approach": "SAME-R utilized the SAME hardware used on-orbit. Based on the experience gained from SAME, SAME-R included the following modifications: 1) a new test material,\nPyrell®, an intumescent fire-retardant foam by Foamex, was introduced to replace DBP samples, 2) test conditions were broadened including higher heating temperatures and no-flow during sample heating time, and 3) a new instrument, M-pass, developed in-house GRC, was used to replace one of the two Commercial Diagnostic Enclosures that includes a DustTrak and an ionization detector used in SAME. SAME-R flight tests were conducted from July 16, to September 9, 2010, successfully completing 66 test points. After SAME-R flight tests, three major post–flight ground tests were performed to improve data reduction process and to validate the lognormal distribution assumption, the key to the moment method employed by SAME and SAME-R.",
+      "experimentalTable": [
+        {
+          "_id": {
+            "$oid": "679a9e2209ed061032c0cd23"
+          },
+          "date_created": {
+            "$date": 1738186274666
+          },
+          "date_modified": {
+            "$date": 1738186274666
+          },
+          "file_name": "PSI-101_Experimental table_SAME-R.csv",
+          "file_size": 5674,
+          "remote_path": "/Home/psi-data/PSI-101/Experimental table/PSI-101_Experimental table_SAME-R.csv",
+          "remote_url": "/datamanager/file/Home/psi-data/PSI-101/Experimental table/PSI-101_Experimental table_SAME-R.csv",
+          "resource_id": {
+            "$oid": "66cf53d46f1142c964b2e0a8"
+          },
+          "restricted": false,
+          "s3_path": "psi-data/PSI-101/Experimental table/PSI-101_Experimental table_SAME-R.csv",
+          "s3_version_id": ".oPay0vhtdm5h57opgMlVjUs90TD6akh",
+          "study_id": {
+            "$oid": "683dc54eb8656d2315bf533c"
+          },
+          "subcategory": "",
+          "version": 1,
+          "visible": true
+        }
+      ]
+    }
+  },
+  {
+    "source_id": "PSI-159",
+    "retrieval_url": "https://psi.nasa.gov/geode-py/ws/repo/investigations/PSI-159",
+    "full_response_sha256": "e01abe2caa309753a9bee1b0c3c79dec194a2a7300d0d13541e0dcf25e3b0ea5",
+    "metadata": {
+      "accession": "PSI-159",
+      "title": "Advanced Combustion via Microgravity Experiments / Cool Flames Investigation with Gases",
+      "investigationAcronym": "ACME CFI-G",
+      "doi": "10.60555/cyt1-kh64",
+      "version": 1,
+      "projectType": "Microgravity Investigation",
+      "releaseDate": "20-Nov-2025",
+      "modifiedDate": "20-Nov-2025",
+      "objective": "1. Plan and support flight testing on the International Space Station (ISS).\n2. Determine the conditions for which cool diffusion flames occur for propane, n-butane, and n-pentane; normal and inverse flames; and a broad range of Zst, Tad, and fluent flow rate.\n3. Support the flight tests with advanced CFD simulations.\n4. Identify or develop a chemical kinetics mechanism that yields good agreement between the CFD predictions and the ISS measurements.\n5. Disseminate the results as widely as possible.",
+      "approach": "Perform spherical diffusion flame tests aboard the International Space Station. Consider multiple fuels, a range of reactant dilutions, flow rates, and pressures for normal and inverse convection directions. Observe the flames with a broad suite of cameras, radiometers, photomultiplier tubes, and thermocouples.",
+      "experimentalTable": [
+        {
+          "_id": {
+            "$oid": "691f7ea117f78b371b26f6fa"
+          },
+          "date_created": {
+            "$date": 1763671713438
+          },
+          "date_modified": {
+            "$date": 1763671713438
+          },
+          "file_name": "PSI-159_Experimental table_CFI-G_Normal Flames.csv",
+          "file_size": 22166,
+          "remote_path": "/Home/psi-data/PSI-159/Experimental table/PSI-159_Experimental table_CFI-G_Normal Flames.csv",
+          "remote_url": "/datamanager/file/Home/psi-data/PSI-159/Experimental table/PSI-159_Experimental table_CFI-G_Normal Flames.csv",
+          "resource_id": {
+            "$oid": "66cf53d46f1142c964b2e0a8"
+          },
+          "restricted": false,
+          "s3_path": "psi-data/PSI-159/Experimental table/PSI-159_Experimental table_CFI-G_Normal Flames.csv",
+          "s3_version_id": "e2yKIZ6mbgJrKJZoJn0VH.iv5SXkad52",
+          "study_id": {
+            "$oid": "691f7ea517f78b371b2705dd"
+          },
+          "subcategory": "",
+          "version": 1,
+          "visible": true
+        },
+        {
+          "_id": {
+            "$oid": "691f7ea117f78b371b26f6fb"
+          },
+          "date_created": {
+            "$date": 1763671713439
+          },
+          "date_modified": {
+            "$date": 1763671713439
+          },
+          "file_name": "PSI-159_Experimental table_CFI-G_Inverse Flames.csv",
+          "file_size": 39422,
+          "remote_path": "/Home/psi-data/PSI-159/Experimental table/PSI-159_Experimental table_CFI-G_Inverse Flames.csv",
+          "remote_url": "/datamanager/file/Home/psi-data/PSI-159/Experimental table/PSI-159_Experimental table_CFI-G_Inverse Flames.csv",
+          "resource_id": {
+            "$oid": "66cf53d46f1142c964b2e0a8"
+          },
+          "restricted": false,
+          "s3_path": "psi-data/PSI-159/Experimental table/PSI-159_Experimental table_CFI-G_Inverse Flames.csv",
+          "s3_version_id": "n3Zpkz..GSnB2jgO4PjIOmXhx_AbOG.5",
+          "study_id": {
+            "$oid": "691f7ea517f78b371b2705dd"
+          },
+          "subcategory": "",
+          "version": 1,
+          "visible": true
+        }
+      ]
+    }
+  },
+  {
+    "source_id": "PSI-117",
+    "retrieval_url": "https://psi.nasa.gov/geode-py/ws/repo/investigations/PSI-117",
+    "full_response_sha256": "13e50b67d851dcf8bfc09103055995a17d89174589080d7103fa54ef1e02a794",
+    "metadata": {
+      "accession": "PSI-117",
+      "title": "Effect of External Thermo-Convective Perturbation on Cool Flame Dynamics: A Multidimensional Multi-Physics CFD Analysis",
+      "investigationAcronym": "",
+      "doi": "10.60555/gz0q-b577",
+      "version": 2,
+      "projectType": "Ground Investigation",
+      "releaseDate": "10-Jun-2026",
+      "modifiedDate": "09-Jun-2026",
+      "objective": "The objective of this ground investigation was to use flight data obtained from PSI through NASA’s Flame Extinguishment Experiment (FLEX) to quantify how externally imposed thermal and convective perturbations regulated the dynamics and ultimate fate of already established droplet cool flames, and to explain run-to-run variability by isolating the roles of deliberate heating and unintentional drift-induced convection. Focusing on both small and large droplets, the work mapped stability windows for ignition, sustained oscillation, transitions to hot ignition and warm-flame behavior, and extinction under microgravity. By leveraging and extending the FLEX data in the PSI, this study produced reusable models and sensitivity analyses that coupled low-temperature chemistry with transport and radiative effects.",
+      "approach": "OpenFOAM was used to develop a 3-D CFD model of n-alkane droplet cool flames in microgravity, coupling variable-density Navier–Stokes flow with low-temperature combustion chemistry, coupled heat and mass transfer, and radiation. Model fidelity was established against ISS FLEX measurements, after which controlled simulations examined three forcing modes (i) convection alone to mimic droplet drift, (ii) imposed heat flux, and (iii) combined convection plus heating applied to both large (1–4 mm) and sub-millimeter (~0.5 mm) droplets.\n\nTo accelerate progress, the study began with simplified chemistry and transitioned to reduced mechanisms for parameter sweeps over forcing amplitude and frequency, ambient composition (including ozone-assisted cases), and pressure. From each case, predictive observables were extracted (ignition delay, oscillation frequency and amplitude, stand-off and extinction diameters), and were used to construct stability maps that delineated conditions for cool-flame onset, persistence, and quenching. These maps were reconciled with FLEX observations and were used to guide next-generation test matrices for both large- and small-droplet experiments.",
+      "experimentalTable": []
+    }
+  }
+]

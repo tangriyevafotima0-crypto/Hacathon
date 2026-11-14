@@ -1,0 +1,106 @@
+PDF page 3
+ACME/CFI-G Final Report (2022)                                                       21 November 2022
+
+
+1. Overview
+The Cool Flames Investigation with Gases (CFI-G) experiment is one of six independent experiments that
+make up the Advanced Combustion via Microgravity Experiments (ACME) project for which the tests were
+conducted within the Combustion Integrated Rack (CIR) on the International Space Station (ISS).
+
+The experiment’s Principal Investigator (PI) is Prof. Peter B. Sunderland of the Department of Fire
+Protection Engineering at the University of Maryland. The two Co-Investigators (Co-Is) are Profs. Richard
+L. Axelbaum and Forman A. Williams who are respectively from the Washington University of St. Louis and
+the University of California, San Diego (UCSD).
+
+Meanwhile, Dennis P. Stocker of the NASA Glenn Research Center is the Project Scientist (PS) for ACME
+including CFI-G and the rest of the ACME investigations. In ACME’s preparatory drop testing, etc., Dr.
+Fumiaki Takahashi of the Case Western Reserve University (CWRU) served as the Deputy Project Scientist.
+For ACME’s spaceflight operations, the NASA science team included Drs. Uday G. Hegde and Vedha
+Nayagam who are also with CWRU.
+
+The ISS operations for CFI-G were conducted from March to Oct. 2021 in two sequential rounds of testing.
+The two rounds occurred during Increments 64-65 and 65-66 and respectively featured normal and
+inverse flames. The inverse flame tests were conducted with the chamber filled with a mixture of nitrogen
+and gaseous fuel while an oxygen/nitrogen mixture flowed from the burner. As a result, the inverse
+flames were effectively inside out, e.g., where the soot formed outside rather than inside of the flames.
+Although it was in the second round, the final day of CFI-G testing was carried out in the normal flame
+configuration, with gaseous fuel (with or without nitrogen) flowing into an oxygen/nitrogen atmosphere.
+This was an added test day carried out under conditions in which low-temperature combustion occurred
+during the first round of testing.
+
+CFI-G was a late addition to ACME, where the experiment was jointly selected for spaceflight by the
+National Science Foundation (NSF) and the Center for the Advancement of Science in Space (CASIS) rather
+than NASA. The selection was notably announced after the core ACME hardware had launched to the ISS
+and just weeks before ACME’s on-orbit operations began. It is effectively an extension of ACME’s Flame
+Design experiment for which the PI and Co-I are respectively Axelbaum and Sunderland. And it is likewise
+a follow-on to the Cool Flames Investigation (CFI), led by Williams, in which liquid droplets were burned
+rather than gaseous fuel.
+
+Although CFI-G wasn’t selected for spaceflight by NASA, its ISS operations and the development of its
+unique hardware, software, and procedure were carried out by the same teams of personnel as the other
+ACME experiments, primarily from ZIN Technologies, Inc.
+
+
+
+
+                                                   3
+
+PDF page 22
+ACME/CFI-G Final Report (2022)                                                   21 November 2022
+
+
+       Table 2. Flames ignited for the CFI-G experiment in the second round of testing, during
+       Increments 65-66, with inverse flames (where oxidizer from the burner flowed into a
+       gaseous fuel/nitrogen mixture) plus an added day of normal-flame testing
+          Test                                                       Fluent
+          Day 1                                                     reactant      Hot flames
+                   Year Month Date             Atmosphere  2         bottle         ignited3
+                                             Increment 65
+                                           ~30% C2H6, 14.7 psia
+         21196                       15                                                13
+                                           ~30% C2H6, 7.35 psia
+                                            ~6% C2H6, 29.4 psia
+                             7
+         21202                       21    ~12% C2H6, 29.4 psia                        11
+                                           ~12% C2H6, 14.7 psia
+         21209                       28    ~24% C2H6, 7.35 psia                        11
+                                           ~10% C2H6, 44.1 psia
+         21216                        4                                                12
+                                           ~10% C2H6, 14.7 psia
+         21222                       10     ~8% C3H8, 44.1 psia                         9
+                                            ~9% C3H8, 29.4 psia
+         21228               8       16                                                17
+                                            ~9% C3H8, 14.7 psia
+                   2021                                          85% O2 with N2
+                                           ~21% C3H8, 14.7 psia
+         21235                       23                                                 9
+                                           ~21% C3H8, 7.35 psia
+         21242                       30    ~43% C3H8, 7.35 psia                         2
+                                             ~9% n-C4H10, 29.4 psia
+         21256                        13                                                    17
+                                             ~7% n-C4H10, 29.4 psia
+         21265                   9    22     ~6% n-C4H10, 44.1 psia                         15
+                                             ~17% n-C4H10, 14.7 psia
+         21270                        27     ~14% n-C4H10, 14.7 psia
+                                                                                            10
+                                             ~36% n-C4H10, 7.35 psia
+                                             ~25% n-C4H10, 7.35 psia
+         21277               10       4      ~18% n-C4H10, 7.35 psia
+                                                                                            11
+                                             ~14% n-C4H10, 7.35 psia
+                                               Increment 66
+                                              ~40% O2, 29.4 psia      30% n-C4H10
+          21291 2021         10      18                                                      22
+                                              ~40% O2, 14.7 psia         with N2
+        1Test Day includes the year as the first two digits followed by the 3-digit day of the year.
+        2Atmosphere, diluted by nitrogen in all cases, is only nominal where the pressure
+
+        increases and O2% drops with vitiation.
+        3Flames ignited is the number of sustained or momentary hot flames ignited (or
+
+        reignited) on that day (neglecting the day change on ISS).
+
+
+
+
+                                                22

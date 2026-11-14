@@ -1,0 +1,16 @@
+{
+  "task_ids": [
+    "D01",
+    "D02"
+  ],
+  "version": "SKYFORGE-D01-D02-v0.2.0",
+  "baseline_repo": "https://github.com/tangriyevafotima0-crypto/Hacathon",
+  "baseline_commit": "04df76287b92d5b78423125753052cbdd31570b3",
+  "supplied_zip_sha256": "43fb7b30c5e0d3f37a643b29123934ed43e7a3b4dca7adbb124d77e92db9541b",
+  "zip_core_and_tests_equal_to_repo": true,
+  "NASA_BASS_pdf_sha256": "5ffa911fd9b6356f204646003fb9342e341810dcdfdf5cb15756e7f01ec5f770",
+  "partial_gravity_pdf_sha256": "89c604a71fe33840a79aaad8fdb9942e11b32d88b20af6fa46f3bb48b1b63113",
+  "archive_contract": "docs/z01/CONTRACT.md",
+  "core_modifications": "NONE",
+  "ownership": "D: src/atlas/data + D regression tests + handoff/demo; Z core and existing UI unchanged"
+}

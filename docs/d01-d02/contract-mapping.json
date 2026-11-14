@@ -1,0 +1,37 @@
+[
+  {
+    "old": "UNKNOWN",
+    "z_v1": "NOT_PROVIDED",
+    "why": "No direct NEW evidence for T20/T21"
+  },
+  {
+    "old": "AMBIENT_MSG_FLOW_DUCT",
+    "z_v1": "chamber_atmosphere",
+    "why": "Section7.1.3 small duct ambient context"
+  },
+  {
+    "old": "sample width location",
+    "z_v1": "sample_surface",
+    "why": "Specimen dimension; not a gaseous volume"
+  },
+  {
+    "old": "CONCURRENT",
+    "z_v1": "field-provenance.flow.configuration=concurrent",
+    "why": "Spatial relation is separate from core parameter.direction temporal ramp"
+  },
+  {
+    "old": "pressure/thickness/exposed length",
+    "z_v1": "field-provenance series-context",
+    "why": "Core normalizes only width, flow, O2; no unsupported core extension"
+  },
+  {
+    "old": "v0.1 claim verdict fixtures",
+    "z_v1": "Exact four evidence-gap labels from master plan paragraph46",
+    "why": "Claim verdicts and evidence-gap statuses are different taxonomies"
+  },
+  {
+    "old": "v0.1 flat T25 CSV",
+    "z_v1": "Z v1 exchange columns in src/atlas/data/GMT216-T25.csv",
+    "why": "Actual runtime derives SI; never trusts supplied SI assertions"
+  }
+]

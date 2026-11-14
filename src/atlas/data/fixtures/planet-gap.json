@@ -1,0 +1,340 @@
+[
+  {
+    "id": "MOON-1",
+    "query": {
+      "phase": "solid",
+      "material": "SIBAL",
+      "gravity": "lunar",
+      "setting": "lunar_surface"
+    },
+    "records": [
+      {
+        "id": "TEST-ONLY-MOON",
+        "source_id": null,
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "lunar",
+        "setting": "lunar_surface",
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "test_only": true
+      }
+    ],
+    "allow_test_fixtures": true,
+    "expected_status": "Direct matching evidence",
+    "fixture_purpose": "Algorithm branch only; not NASA data",
+    "prediction": null
+  },
+  {
+    "id": "MOON-2",
+    "query": {
+      "phase": "solid",
+      "material": "SIBAL",
+      "gravity": "lunar",
+      "setting": "lunar_surface"
+    },
+    "records": [
+      {
+        "id": "GMT190-T20",
+        "source_id": "NASA-TM-20210011385",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "microgravity",
+        "setting": "ISS",
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": 0.172,
+        "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+      },
+      {
+        "id": "GMT190-T21",
+        "source_id": "NASA-TM-20210011385",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "microgravity",
+        "setting": "ISS",
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": 0.172,
+        "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+      },
+      {
+        "id": "GMT216-T25",
+        "source_id": "NASA-TM-20210011385",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "microgravity",
+        "setting": "ISS",
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": 0.208,
+        "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+      },
+      {
+        "id": "LUCI-STUDY",
+        "source_id": "LUCI",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "lunar",
+        "setting": "rotating_suborbital",
+        "kind": "STUDY_DESCRIPTION",
+        "simulated": true,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": null,
+        "source_url": "https://ntrs.nasa.gov/citations/20250010653"
+      },
+      {
+        "id": "LUNAR-AIRCRAFT-D2-P29",
+        "source_id": "NTRS-20260001966-PRECURSOR",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "lunar",
+        "setting": "parabolic_aircraft",
+        "kind": "MEASURED_ANALOG",
+        "simulated": true,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": 0.21,
+        "source_url": "https://ntrs.nasa.gov/citations/20260001966"
+      },
+      {
+        "id": "FM2-PLAN",
+        "source_id": "FM2",
+        "phase": "solid",
+        "material": "Synergy Pro Navy",
+        "gravity": "lunar",
+        "setting": "lunar_surface",
+        "kind": "PLANNED",
+        "simulated": false,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": null,
+        "source_url": "https://ntrs.nasa.gov/citations/20260001966"
+      }
+    ],
+    "allow_test_fixtures": false,
+    "expected_status": "Related evidence with different conditions",
+    "fixture_purpose": "Actual connected evidence; surface transfer remains conditional",
+    "prediction": null
+  },
+  {
+    "id": "MOON-3",
+    "query": {
+      "phase": "solid",
+      "material": "SIBAL",
+      "gravity": "lunar",
+      "setting": "lunar_surface"
+    },
+    "records": [
+      {
+        "id": "TEST-ONLY-GAS",
+        "phase": "gas",
+        "material": "ethane",
+        "gravity": "microgravity",
+        "setting": "ISS",
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "test_only": true
+      }
+    ],
+    "allow_test_fixtures": true,
+    "expected_status": "No matching evidence in connected corpus",
+    "fixture_purpose": "Algorithm branch only; not NASA data",
+    "prediction": null
+  },
+  {
+    "id": "MOON-4",
+    "query": {
+      "phase": "solid",
+      "material": "SIBAL",
+      "gravity": "lunar",
+      "setting": "lunar_surface"
+    },
+    "records": [
+      {
+        "id": "TEST-ONLY-MISSING",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": null,
+        "setting": null,
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "test_only": true
+      }
+    ],
+    "allow_test_fixtures": true,
+    "expected_status": "Insufficient metadata",
+    "fixture_purpose": "Algorithm branch only; not NASA data",
+    "prediction": null
+  },
+  {
+    "id": "MARS-1",
+    "query": {
+      "phase": "solid",
+      "material": "SIBAL",
+      "gravity": "martian",
+      "setting": "martian_surface"
+    },
+    "records": [
+      {
+        "id": "TEST-ONLY-MARS",
+        "source_id": null,
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "martian",
+        "setting": "martian_surface",
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "test_only": true
+      }
+    ],
+    "allow_test_fixtures": true,
+    "expected_status": "Direct matching evidence",
+    "fixture_purpose": "Algorithm branch only; not NASA data",
+    "prediction": null
+  },
+  {
+    "id": "MARS-2",
+    "query": {
+      "phase": "solid",
+      "material": "SIBAL",
+      "gravity": "martian",
+      "setting": "martian_surface"
+    },
+    "records": [
+      {
+        "id": "GMT190-T20",
+        "source_id": "NASA-TM-20210011385",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "microgravity",
+        "setting": "ISS",
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": 0.172,
+        "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+      },
+      {
+        "id": "GMT190-T21",
+        "source_id": "NASA-TM-20210011385",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "microgravity",
+        "setting": "ISS",
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": 0.172,
+        "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+      },
+      {
+        "id": "GMT216-T25",
+        "source_id": "NASA-TM-20210011385",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "microgravity",
+        "setting": "ISS",
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": 0.208,
+        "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+      },
+      {
+        "id": "LUCI-STUDY",
+        "source_id": "LUCI",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "lunar",
+        "setting": "rotating_suborbital",
+        "kind": "STUDY_DESCRIPTION",
+        "simulated": true,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": null,
+        "source_url": "https://ntrs.nasa.gov/citations/20250010653"
+      },
+      {
+        "id": "LUNAR-AIRCRAFT-D2-P29",
+        "source_id": "NTRS-20260001966-PRECURSOR",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": "lunar",
+        "setting": "parabolic_aircraft",
+        "kind": "MEASURED_ANALOG",
+        "simulated": true,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": 0.21,
+        "source_url": "https://ntrs.nasa.gov/citations/20260001966"
+      },
+      {
+        "id": "FM2-PLAN",
+        "source_id": "FM2",
+        "phase": "solid",
+        "material": "Synergy Pro Navy",
+        "gravity": "lunar",
+        "setting": "lunar_surface",
+        "kind": "PLANNED",
+        "simulated": false,
+        "oxygen_location": "chamber_atmosphere",
+        "oxygen_fraction": null,
+        "source_url": "https://ntrs.nasa.gov/citations/20260001966"
+      }
+    ],
+    "allow_test_fixtures": false,
+    "expected_status": "Related evidence with different conditions",
+    "fixture_purpose": "Actual connected evidence; surface transfer remains conditional",
+    "prediction": null
+  },
+  {
+    "id": "MARS-3",
+    "query": {
+      "phase": "solid",
+      "material": "SIBAL",
+      "gravity": "martian",
+      "setting": "martian_surface"
+    },
+    "records": [
+      {
+        "id": "TEST-ONLY-GAS",
+        "phase": "gas",
+        "material": "ethane",
+        "gravity": "microgravity",
+        "setting": "ISS",
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "test_only": true
+      }
+    ],
+    "allow_test_fixtures": true,
+    "expected_status": "No matching evidence in connected corpus",
+    "fixture_purpose": "Algorithm branch only; not NASA data",
+    "prediction": null
+  },
+  {
+    "id": "MARS-4",
+    "query": {
+      "phase": "solid",
+      "material": "SIBAL",
+      "gravity": "martian",
+      "setting": "martian_surface"
+    },
+    "records": [
+      {
+        "id": "TEST-ONLY-MISSING",
+        "phase": "solid",
+        "material": "SIBAL",
+        "gravity": null,
+        "setting": null,
+        "kind": "MEASURED_TEST",
+        "simulated": false,
+        "test_only": true
+      }
+    ],
+    "allow_test_fixtures": true,
+    "expected_status": "Insufficient metadata",
+    "fixture_purpose": "Algorithm branch only; not NASA data",
+    "prediction": null
+  }
+]

@@ -1,0 +1,129 @@
+studied with O2 percentage as an additional variable parameter (Ref. 7). This facilitates the determination
+of the O2-flow-velocity flammability boundary of materials.
+     In this report, BASS and BASS–II results will be discussed in detail. Flame growth, spread, and
+quenching extinction will be presented for a thin composite cotton-fiberglass fabric burning in various O2
+concentrations and concurrent flow speeds.
+
+7.1.3   Experimental
+      All tests were conducted in a small flow duct (shown in Figure 7.1) within the MSG aboard the ISS.
+The sample used is a composite cotton-fiberglass fabric blend (75 percent cotton and 25 percent
+fiberglass). The thickness of the sample is about 0.32 mm with an area density of 18.2 mg/cm2. The fabric
+is custom made for a previous project Solid Inflammability Boundary at Low Speeds (SIBAL) (Ref. 8),
+hence it is referred to here as the SIBAL fabric. One major advantage of this fuel sample is the retention
+of sample structure integrity after the combustible (i.e., cotton cellulose) is consumed because of the
+fiberglass mesh. It does not crack or produce curly ash typically seen in pure cellulose samples such as
+paper or cloth. In addition to Reference 8, experimental studies using SIBAL fabric can be found in
+References 9 and 10.
+      In the experiment, SIBAL fuel samples of two different widths, 1.2 and 2.2 cm, were used. Both have
+an exposed length of 10 cm. The samples were mounted in stainless steel sample holders. The fuel sample
+mounted to the holder was placed in the small flow duct of cross-sectional size 7.6 by 7.6 cm. The flow
+speed could be varied from 1 to 55 cm/s. The tests were conducted in ambient O2 molar fraction of 16 to
+21 percent. Ambient pressure was 1 atm. It should be noted that for a given test the O2 concentration was
+fixed while the flow speed could be varied.
+      A Kanthal® hot wire was used to ignite the fuel sample leading edge so that the flame can spread in a
+concurrent configuration. The flame growth process was recorded by two cameras. The side-view video
+camera provided edge-on images of the flat samples at standard video framing rates (29.97 frames per
+second). The top-view digital camera looked down on the top fuel surface and provided high-resolution
+still images of the flame at a rate of about one image every 1.2 s. When flow speed and O2 concentration
+were low, the flame became very dim blue and was difficult to see in the side video camera. The top-view
+
+
+
+
+         Figure 7.1.—Experimental setup. (a) Small flow duct. (b) Fuel sample, sample holder, and igniter.
+
+
+
+
+NASA/TM-20210011385                                     94
+camera exposure times were long enough (1/8 to 1/4 s) to easily capture high-quality flame images even
+for dim flames right before quenching. These still images provide a time history of flame quenching that
+can be used to compare with transient model results.
+
+7.1.4   Results and Discussion
+     A total of 27 tests were carried out for the fabric samples in BASS–II, including six quenching tests,
+three nonignited tests, and one blowoff test. These are listed in Table 7.1. In addition, four tests from the
+BASS series were selected as listed at the bottom of Table 7.1. These four tests are all 21 percent O2 cases
+at a fixed flow velocity during each test. For those cases with flow velocity variations, the starting and the
+final velocities are indicated in the velocity column. The rate of velocity change varies from case to case
+depending on the communication between the astronauts and the ground crews and the manual adjustment
+time by the crew. Many of these tests were used to determine the low-speed quenching limits as a
+function of O2 percentage. In some tests, the flame quenched quickly or was not ignited. These samples
+were reused in additional tests as indicated in Table 7.1. These partially burned samples were ignited with
+a retractable igniter on one side of the sample at the fuel burnout position. These reused samples in
+general had a short unburned length and provided less quantitative data, thus will not be discussed in this
+report.
+     Figure 7.2 shows flame development stages of a 2.2-cm sample in 10-cm/s flow and 21 percent O2.
+Figure 7.2(a) shows side-view flame tracking of flame tip, flame base, and flame length. Figure 7.2(b)
+shows flame edge-view video still images at different stages. Note in the figure, flow is from right to left.
+After the igniter was turned on, a strong flame was initiated on both sides of the solid fuel. The flame was
+stabilized and started to grow and move downstream. At about 19 s, the flame reached a limiting constant
+length and a steady spread rate relative to the laboratory (Ref. 11). This steady spread state lasted for
+around 9 s. The flame images look almost identical during this stage, as can be seen at 20.17 and 24.83 s
+in Figure 7.2(b). Then the flame tip (or more precisely the flame preheating front) moved close to the end
+of the fuel sample, and the flame decayed in size until complete burnout. The whole combustion process
+took about 40 s.
+     Figure 7.3 shows flame development stages of a 2.2-cm sample in 5-cm/s flow and 21 percent O2.
+Unlike the flame in 10-cm/s flow in Figure 7.2, the flame from the side-view video is very dim in this
+case. Figure 7.3 thus shows the top-view images and tracking from those images. Because the flow
+speed is lower, it took more than 60 s to burn the whole sample. Steady spread time lasts for about 21 s,
+much longer than the 10-cm/s flow case. Virtually identical images at 35.59 and 45.59 s are shown in
+Figure 7.3(b). In the top-view images, we can find bright spots behind the flame base when the flame
+passes. The spots come from the smoldering of a small amount of fuel that is not completely consumed by
+the flaming combustion. Compared with the 10-cm/s case, the 5-cm/s case has a shorter flame and spreads
+more slowly.
+     Steady flame spread rates in different flow speeds and O2 percentages are plotted in Figure 7.4 for
+both 2.2- and 1.2-cm samples. Note in some cases flow speed was varied during the test. Steady flame
+spread here means the flame reached a constant spread rate for more than 20 s. Flames spread more
+slowly across the narrower samples, at lower flow velocities and at lower O2 percentages. The trends are
+consistent with our physical intuition.
+
+
+
+
+NASA/TM-20210011385                                  95
+            TABLE 7.1.—TEST SUMMARY OF FLAT SIBALa FABRICS IN CONCURRENT FLOW IN
+                       BURNING AND SUPPRSSION SOLIDS (BASS AND BASS–II)
+           Test        Sample width,    Flow,            O2,            Comments
+          number           cm           cm/s            vol%
+     GMT45-T1                    2.2                  10           18.5b   -----------------------------
+     GMT45-T2                    2.2                10 to 5        18.5b   -----------------------------
+     GMT45-T4                    2.2               10 to 2.2       18.7    Quenched
+     GMT45-T15                   2.2               10 to 29        18.7    No blowoff
+     GMT100-T5                   2.2               10 to 2.4       18.8    -----------------------------
+     GMT100-T6                   2.2              4.5 to 2.6       18.8    -----------------------------
+     GMT100-T13                  2.2               4 to 2.2        17.5    Quenched
+     GMT100-T16                  2.2                4 to 3         17.6    -----------------------------
+     GMT175-T9                   2.2                  10           16.4    No ignition
+     GMT175-T10                  2.2                  5            16.4    No ignition
+     GMT175-T18                  2.2               5 to 2.6        17.4    Quenched
+     GMT178-T11                  2.2                  4            17.1    -----------------------------
+     GMT178-T12                  2.2                  5            16.8    No ignition
+     GMT178-T14                  2.2               4 to 2.8        16.9    Quenched
+     GMT178-T17                  2.2                6 to 53        16.9    No blowoff
+     GMT190-T19                  1.2                  11           17.2    -----------------------------
+     GMT190-T20                  1.2                11 to 3        17.2    Quenched
+     GMT190-T21                  1.2               11 to 47        17.2    Blow-off
+     GMT190-T22                  1.2               10.5 to 5       17.1    Quenched
+     GMT190-T23                  2.2                  10           17.2    Reused, did not ignite
+     GMT190-T24                  2.2                  10           18.2    Reused, one-sided flame
+     GMT216-T25                  2.2               5 to 2.5        20.8    Reused, ignited
+     GMT216-T26                  2.2               5 to 2.5        20.8    Reused, ignited
+     GMT216-T27                  1.2                5 to 2         20.7    Reused, ignited
+     GMT216-T28a                 1.2                  5            20.7    Reused, did not ignite
+     GMT216-T28b                 1.2                  5            20.7    Reused, did not ignite
+     GMT216-T29                  1.2                5 to 2         20.7    Reused, ignited
+     GMT96-T8                    2.2                  5            21      BASS
+     GMT96-T7                    2.2                  10           21      BASS
+     GMT131-T10                  1.2                  11           21      BASS
+     GMT222-T11                  1.2                  19           21      BASS
+     aSolid Inflammability Boundary at Low Speeds.
+
+     bO reading in these two tests might be inaccurate.
+       2
+
+
+
+
+NASA/TM-20210011385                                           96
+

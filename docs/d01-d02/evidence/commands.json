@@ -1,0 +1,76 @@
+[
+  {
+    "command": [
+      "npm",
+      "ci",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund"
+    ],
+    "exit": 0,
+    "stdout": "\nadded 79 packages in 2s\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "npm",
+      "test"
+    ],
+    "exit": 0,
+    "stdout": "\n> skyforge-dashboard@1.0.0 test\n> node --test src/model.test.js tests/atlas/*.test.js\n\n✔ reference inputs contribute zero; baseline is the illustrative material weight (2.104276ms)\n✔ default scenario has deterministic ranking and saturation (0.344307ms)\n✔ all control extremes produce bounded scores and consistent categories (0.472776ms)\n✔ D01: authoritative rows use Z schema with NASA raw/SI cells and exact outcomes (4.298588ms)\n✔ D01: NEW is not inferred; reused T25 remains flagged despite D source check (0.939643ms)\n✔ D01: T25 original CSV physics agrees; enriched locator is explicitly additional provenance (1.636517ms)\n✔ D01: sidecar preserves spatial flow, ambient location source and series-level scope (1.22537ms)\n✔ D01: mutated physics or locator cannot borrow checked D evidence (2.282174ms)\n✔ D01: raw official PSI CSV joins the correct test, preserves nominal width and negative CO (8.648839ms)\n✔ D01: real Z persistence seed/import/reload/repeat/source-chain works (16.773806ms)\n✔ D01: source enrichment creates a revision without losing original imported provenance (4.528586ms)\n✔ D01: D exchange roundtrip retains source text, ordered flow and missing history (2.864883ms)\n✔ D02: six requested PSI records have exact DOI and source-version provenance (0.846022ms)\n✔ D02: CFD, emulator, planned and simulated data are not flight material-test outcomes (0.990172ms)\n✔ D02: exact four gap statuses, four fixtures per planet, all branches execute (2.025396ms)\n✔ D02: synthetic direct fixtures cannot enter connected scientific evidence (1.07396ms)\n✔ D02: actual lunar/Martian surface query gets related evidence, no fabricated prediction (0.40175ms)\n✔ D02: all oxygen fixtures are corpus- and location-specific (0.856066ms)\n✔ D02: oxygen corpus derives from NASA raw concentration columns, never mass flow (10.56652ms)\n✔ D02: unknown/high-risk claims abstain; no live AI or fake probability is reported (0.85603ms)\n✔ D02: invalid oxygen/unknown query dimensions do not create apparent matches (1.537414ms)\n✔ D02: metadata snapshot hashes and registry references resolve (2.243093ms)\n✔ D01: unreviewed imported fields cannot inherit checked evidence (1.471521ms)\n✔ D02: a purported direct record without provenance is insufficient metadata (0.4498ms)\n✔ NASA Table 7.1 regression: width is 1.2 cm, ordered opposite protocols, distinct outcomes and page locators (9.55721ms)\n✔ provided comma-quoted T25 imports exactly, flagged REUSED, raw and SI retained (4.650673ms)\n✔ CSV preserves escaped quotes, embedded CRLF, BOM, quoted commas, empty fields (0.983647ms)\n✔ malformed CSV and ambiguous column counts fail rather than guess (0.769453ms)\n✔ decimal comma is supported in quoted cells and JSON, never as a thousands separator (1.177206ms)\n✔ missing oxygen remains unknown, zero is measured, statuses remain distinct (1.079333ms)\n✔ unit families, physical ranges, IDs and safe source URLs are enforced (1.72585ms)\n✔ unknown columns are retained with NOT_EXTRACTED and flagged; SI assertions are never trusted (0.820374ms)\n✔ burner oxygen never becomes chamber oxygen (0.443813ms)\n✔ preview is read-only; explicit confirmation and flagged review acknowledgement are required (2.824915ms)\n✔ seed + T25 commit, independent reload, repeat import and historical repeat are idempotent (22.972736ms)\n✔ same child ID in different studies is distinct; batch duplicates collapse; conflicting batch fails atomically (4.5496ms)\n✔ stale tab preview is rejected and can be regenerated without overwriting another tab (6.717174ms)\n✔ quota failure keeps durable state unchanged and lets the same plan retry (7.556255ms)\n✔ corruption, future schema, forged normalized values and denied reads never silently reset the store (3.646573ms)\n✔ source evidence resolves per field and revision, JSON exchange reimports source-linked values (15.749396ms)\n✔ JSON nested values, wrong schema and unsupported formats fail with no partial commit (0.642947ms)\n✔ unit-bearing column aliases cannot silently change units or contradict flexible values (1.115844ms)\n✔ unextracted and conflicting raw text survives without inventing normalized numbers (1.336916ms)\n✔ mixed-column source-linked CSV round trip preserves physics, outcomes, missing states and evidence (14.879057ms)\nℹ tests 44\nℹ suites 0\nℹ pass 44\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 338.97643\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "node",
+      "scripts/d01-d02-demo.mjs"
+    ],
+    "exit": 0,
+    "stdout": "COMMIT {\"changes\":2,\"generation\":1}\nCOMMIT {\"changes\":1,\"generation\":2}\nCOMMIT {\"changes\":0,\"generation\":2}\nRELOADED [{\"id\":\"GMT190-T20\",\"history\":{\"value\":null,\"status\":\"NOT_PROVIDED\",\"source_ref_ids\":[\"PSI-25:GMT190-T20:source\"]},\"outcome\":\"Quenched\",\"review\":{\"status\":\"D_SOURCE_CHECKED\",\"reasons\":[],\"scientific_verification\":\"NOT_VERIFIED\",\"note\":\"D checks this exact fixture/provenance; import approval and independent scientific approval remain separate.\"}},{\"id\":\"GMT190-T21\",\"history\":{\"value\":null,\"status\":\"NOT_PROVIDED\",\"source_ref_ids\":[\"PSI-25:GMT190-T21:source\"]},\"outcome\":\"Blow-off\",\"review\":{\"status\":\"D_SOURCE_CHECKED\",\"reasons\":[],\"scientific_verification\":\"NOT_VERIFIED\",\"note\":\"D checks this exact fixture/provenance; import approval and independent scientific approval remain separate.\"}},{\"id\":\"GMT216-T25\",\"history\":{\"value\":\"REUSED\",\"status\":\"MEASURED\",\"source_ref_ids\":[\"PSI-25:GMT216-T25:source\"]},\"outcome\":\"Reused, ignited\",\"review\":{\"status\":\"D_SOURCE_CHECKED\",\"reasons\":[],\"scientific_verification\":\"NOT_VERIFIED\",\"note\":\"D checks this exact fixture/provenance; import approval and independent scientific approval remain separate.\"}}]\nFIELD_PROOF {\"review\":{\"status\":\"D_SOURCE_CHECKED\",\"reasons\":[],\"scientific_verification\":\"NOT_VERIFIED\",\"note\":\"D checks this exact fixture/provenance; import approval and independent scientific approval remain separate.\"},\"field\":\"o2_concentration\",\"evidence\":{\"raw\":\"17.2\",\"raw_unit\":\"vol%\",\"si_fraction\":0.172,\"location\":\"chamber_atmosphere\",\"scope\":\"TEST_ROW\",\"locator\":{\"source_id\":\"NASA-TM-20210011385\",\"pdf_page\":104,\"printed_page\":96,\"section\":\"Table 7.1\",\"row\":\"GMT190-T20\",\"url\":\"https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104\",\"document_id\":\"NASA/TM-20210011385\"},\"location_locator\":{\"source_id\":\"NASA-TM-20210011385\",\"pdf_page\":102,\"printed_page\":94,\"section\":\"7.1.3\",\"row\":null,\"url\":\"https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=102\",\"document_id\":\"NASA/TM-20210011385\"},\"measurement_note\":\"Fixed nominal test condition in this section; not local flame-zone concentration; CSV has separately calibrated pre/post values.\"},\"scope\":\"TEST_ROW_WITH_CONTEXT\"}\nCORE_FIELD_EVIDENCE {\"revision_id\":\"[\\\"PSI-25\\\",\\\"GMT216-T25\\\"]:r1\",\"scientific_verification\":\"NOT_VERIFIED\",\"sources\":[{\"source_ref_id\":\"PSI-25:GMT216-T25:source\",\"url\":\"https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104\",\"document_id\":\"NASA/TM-20210011385\",\"pdf_page\":104,\"printed_page\":96,\"table\":\"7.1\",\"row_id\":\"GMT216-T25\",\"excerpt\":\"GMT216-T25 | 2.2 | 5 to 2.5 | 20.8 | Reused, ignited\",\"excerpt_kind\":\"TABLE_TRANSCRIPTION\"}]}\nOXYGEN {\"corpus\":\"BASS_THREE\",\"location\":\"chamber_atmosphere\",\"status\":\"No matching evidence in connected corpus\",\"count\":0,\"matches\":[],\"limit\":\"Concentration/location matches only; no lunar/Mars or solid-material safety inference.\"}\nOXYGEN {\"corpus\":\"CFIG_NORMAL\",\"location\":\"chamber_atmosphere\",\"status\":\"Direct matching evidence\",\"count\":115,\"matches\":[{\"id\":\"21088A1\",\"value\":0.3939,\"location\":\"chamber_atmosphere\",\"claim_type\":\"OBSERVATION\",\"source\":\"PSI-159\",\"csv_file\":\"PSI-159-table-0.csv\",\"csv_record\":2,\"raw_column\":\" XO2 before test\",\"raw_value\":\"0.3939\",\"phase\":\"gas\"}],\"limit\":\"Concentration/location matches only; no lunar/Mars or solid-material safety inference.\"}\nOXYGEN {\"corpus\":\"CFIG_INVERSE\",\"location\":\"burner_flow\",\"status\":\"Direct matching evidence\",\"count\":115,\"matches\":[{\"id\":\"21196 M1\",\"value\":0.3,\"location\":\"burner_flow\",\"claim_type\":\"OBSERVATION\",\"source\":\"PSI-159\",\"csv_file\":\"PSI-159-table-1.csv\",\"csv_record\":15,\"raw_column\":\"XO2\",\"raw_value\":\"0.3\",\"phase\":\"gas\"}],\"limit\":\"Concentration/location matches only; no lunar/Mars or solid-material safety inference.\"}\nOXYGEN {\"corpus\":\"CFIG_INVERSE\",\"location\":\"chamber_atmosphere\",\"status\":\"Insufficient metadata\",\"count\":null,\"matches\":[],\"limit\":\"Concentration/location matches only; no lunar/Mars or solid-material safety inference.\",\"reason\":\"Available oxygen belongs to a different measurement location.\"}\nGAP Moon {\"prediction\":null,\"risk_probability\":null,\"corpus_size\":6,\"status\":\"Related evidence with different conditions\",\"reason\":\"Relevant observations exist, with gravity/setting/condition differences; no blended prediction.\",\"evidence_ids\":[\"GMT190-T20\",\"GMT190-T21\",\"GMT216-T25\",\"LUCI-STUDY\",\"LUNAR-AIRCRAFT-D2-P29\"],\"source_ids\":[\"NASA-TM-20210011385\",\"LUCI\",\"NTRS-20260001966-PRECURSOR\"]}\nGAP Mars {\"prediction\":null,\"risk_probability\":null,\"corpus_size\":6,\"status\":\"Related evidence with different conditions\",\"reason\":\"Relevant observations exist, with gravity/setting/condition differences; no blended prediction.\",\"evidence_ids\":[\"GMT190-T20\",\"GMT190-T21\",\"GMT216-T25\",\"LUCI-STUDY\",\"LUNAR-AIRCRAFT-D2-P29\"],\"source_ids\":[\"NASA-TM-20210011385\",\"LUCI\",\"NTRS-20260001966-PRECURSOR\"]}\nCLAIM {\"claim_key\":\"T20_T21_NEW\",\"verdict\":\"INSUFFICIENT_EVIDENCE\",\"reason\":\"No explicit NEW assertion in reviewed Table7.1/AppendixB.\",\"source_ids\":[\"NASA-TM-20210011385\"],\"engine\":\"DETERMINISTIC_SOURCE_GUARDS\",\"live_api\":\"NOT_IMPLEMENTED_NOT_TESTED\",\"arbitrary_claim_understanding\":false,\"risk_probability\":null,\"predictive_model\":null}\nSUMMARY {\"records\":3,\"reimport_changes\":0,\"scientific_verification\":\"NOT_VERIFIED\",\"live_ai\":\"NOT_IMPLEMENTED_NOT_TESTED\"}\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "exit": 0,
+    "stdout": "\n> skyforge-dashboard@1.0.0 build\n> vite build\n\nvite v7.3.7 building client environment for production...\ntransforming...\n✓ 1580 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.59 kB │ gzip:  0.38 kB\ndist/assets/index-BbRfXWnW.css   23.63 kB │ gzip:  6.24 kB\ndist/assets/index-BzraWS2X.js   246.34 kB │ gzip: 77.73 kB\n✓ built in 3.03s\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "node",
+      "node_modules/esbuild/bin/esbuild",
+      "src/atlas/data/index.js",
+      "--bundle",
+      "--platform=browser",
+      "--format=esm",
+      "--outfile=/tmp/skyforge-d-data.js"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "\n  ../../../../../../../../tmp/skyforge-d-data.js  157.0kb\n\n⚡ Done in 13ms\n"
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--exit-code",
+      "--",
+      "src/atlas/core",
+      "tests/atlas/import.test.js",
+      "src/App.jsx",
+      "src/main.jsx",
+      "src/styles.css",
+      "src/model.js",
+      "src/model.test.js",
+      "package.json",
+      "package-lock.json"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

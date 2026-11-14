@@ -1,0 +1,80 @@
+[
+  {
+    "id": "GMT190-T20",
+    "source_id": "NASA-TM-20210011385",
+    "phase": "solid",
+    "material": "SIBAL",
+    "gravity": "microgravity",
+    "setting": "ISS",
+    "kind": "MEASURED_TEST",
+    "simulated": false,
+    "oxygen_location": "chamber_atmosphere",
+    "oxygen_fraction": 0.172,
+    "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+  },
+  {
+    "id": "GMT190-T21",
+    "source_id": "NASA-TM-20210011385",
+    "phase": "solid",
+    "material": "SIBAL",
+    "gravity": "microgravity",
+    "setting": "ISS",
+    "kind": "MEASURED_TEST",
+    "simulated": false,
+    "oxygen_location": "chamber_atmosphere",
+    "oxygen_fraction": 0.172,
+    "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+  },
+  {
+    "id": "GMT216-T25",
+    "source_id": "NASA-TM-20210011385",
+    "phase": "solid",
+    "material": "SIBAL",
+    "gravity": "microgravity",
+    "setting": "ISS",
+    "kind": "MEASURED_TEST",
+    "simulated": false,
+    "oxygen_location": "chamber_atmosphere",
+    "oxygen_fraction": 0.208,
+    "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104"
+  },
+  {
+    "id": "LUCI-STUDY",
+    "source_id": "LUCI",
+    "phase": "solid",
+    "material": "SIBAL",
+    "gravity": "lunar",
+    "setting": "rotating_suborbital",
+    "kind": "STUDY_DESCRIPTION",
+    "simulated": true,
+    "oxygen_location": "chamber_atmosphere",
+    "oxygen_fraction": null,
+    "source_url": "https://ntrs.nasa.gov/citations/20250010653"
+  },
+  {
+    "id": "LUNAR-AIRCRAFT-D2-P29",
+    "source_id": "NTRS-20260001966-PRECURSOR",
+    "phase": "solid",
+    "material": "SIBAL",
+    "gravity": "lunar",
+    "setting": "parabolic_aircraft",
+    "kind": "MEASURED_ANALOG",
+    "simulated": true,
+    "oxygen_location": "chamber_atmosphere",
+    "oxygen_fraction": 0.21,
+    "source_url": "https://ntrs.nasa.gov/citations/20260001966"
+  },
+  {
+    "id": "FM2-PLAN",
+    "source_id": "FM2",
+    "phase": "solid",
+    "material": "Synergy Pro Navy",
+    "gravity": "lunar",
+    "setting": "lunar_surface",
+    "kind": "PLANNED",
+    "simulated": false,
+    "oxygen_location": "chamber_atmosphere",
+    "oxygen_fraction": null,
+    "source_url": "https://ntrs.nasa.gov/citations/20260001966"
+  }
+]

@@ -1,0 +1,4 @@
+$ git -c core.whitespace=cr-at-eol diff --cached --check -- . :(exclude)src/atlas/data/sources/*.csv
+exit=0
+
+Original NASA CSV bytes are excluded from formatting cleanup and verified by SHA-256.

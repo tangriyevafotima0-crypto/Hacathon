@@ -184,9 +184,9 @@ export async function createIngestion({root,runtime,router}) {
   timer.unref();
   const jobState=id=>db.prepare('SELECT id,state,count,error FROM jobs WHERE id=?').get(id);
 
-  async function retrieve(query,{study,trial,material,oxygen,flow,ask}) {
+  async function retrieve(query,{study,trial,material,oxygen,flow,ask,trials}) {
     if(/\b(?:moon|mars|martian|lunar|oy(?:da|dagi|ning)?|0[.,](?:16|38)\s*g)\b/iu.test(query))return [];
-    const ids=new Set([...query.matchAll(/\b(?:GMT\d+-)?(T\d+)\b/gi)].map(match=>match[1].toUpperCase()));
+    const ids=new Set(trials??[...query.matchAll(/\b(?:GMT\d+-)?T\d+\b/gi)].map(match=>match[0].toUpperCase()));
     const [vector]=await embed([query],'query');
     const results=[];
     for(const row of db.prepare('SELECT id,payload,embedding FROM evidence WHERE version=? AND (? IS NULL OR study_id=?)').iterate(INDEX,study,study)) {
@@ -194,7 +194,8 @@ export async function createIngestion({root,runtime,router}) {
       if(trial&&item.trialId!==trial||material&&!item.material?.toLowerCase().includes(material))continue;
       if(oxygen!==undefined&&item.numeric?.o2_concentration?.[0]!==oxygen)continue;
       if(flow!==undefined&&!item.numeric?.flow_velocity?.includes(flow))continue;
-      const trialMatch=ids.has(item.trialId?.split('-').at(-1));
+      const trialId=item.trialId?.toUpperCase();
+      const trialMatch=ids.has(trialId)||ids.has(trialId?.split('-').at(-1));
       if(ask&&ids.size&&!trialMatch)continue;
       const bytes=Buffer.from(row.embedding);
       let score=0;
@@ -236,9 +237,14 @@ export async function createIngestion({root,runtime,router}) {
           const question=typeof input?.question==='string'?input.question.trim():'';
           const study=input?.study||null;
           if(!question||question.length>300||study&&!/^PSI-\d+$/.test(study))return json(res,400,{error:'QUERY_INVALID'});
-          const evidence=await retrieve(question,{study,ask:true});
+          const trials=input.trials;
+          if(trials!==undefined&&(!Array.isArray(trials)||trials.length>20||
+            trials.some(id=>typeof id!=='string'||!/^[\p{L}\p{N}_.:-]{1,100}$/u.test(id)))) {
+            return json(res,400,{error:'QUERY_INVALID'});
+          }
+          const evidence=await retrieve(question,{study,ask:true,trials:trials?.map(id=>id.toUpperCase())});
           if(!router?.configured&&evidence.length) return json(res,200,{status:'OPENROUTER_NOT_CONFIGURED',claims:[],evidence});
-          try { return json(res,200,await answerAtlas(router,question,input.language,evidence)); }
+          try { return json(res,200,await answerAtlas(router,question,input.language,evidence,trials)); }
           catch(error) {
             if(!error.status)throw error;
             return json(res,200,{status:error.message,claims:[],evidence});

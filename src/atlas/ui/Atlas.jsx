@@ -18,6 +18,7 @@ const metadataAdapter = record => sourceReview(record).status === 'D_SOURCE_CHEC
   ? {environment:'FLIGHT_0G', domain:'PREVENTION_SOLID', fuel_type:'SOLID_FABRIC'} : {};
 const widthOf = record => record.parameters.find(parameter => parameter.param_key === 'sample_width');
 const hasValue = value => String(value ?? '').trim() !== '';
+const trialPattern = /\b(?:GMT\d+-)?T\d+\b/gi;
 async function requestJSON(url, options){
   const response=await fetch(url,options);
   const result=await response.json();
@@ -44,10 +45,18 @@ export default function Atlas(){
   useEffect(()=>{document.documentElement.lang=lang;},[lang]);
   const [claim,setClaim]=useState('T20_T21_OXYGEN_SAME'); const evidenceRef=useRef(), lastField=useRef();
   const [queryState,setQueryState]=useState(()=>parseQuery(''));
+  const [trialFilters,setTrialFilters]=useState([]);
+  const [quickAnswer,setQuickAnswer]=useState(null);
+  const [asking,setAsking]=useState(false);
   const [pending,setPending]=useState(null),[busy,setBusy]=useState(false);
   const requestVersion=useRef(0);
   const importVersion=useRef(0);
-  function changeQuery(value){setQuery(value);setQueryState(parseQuery(value));}
+  function changeQuery(value){
+    setQuery(value);
+    setTrialFilters([...new Set((value.match(trialPattern)||[]).map(id=>id.toUpperCase()))]);
+    setQueryState(parseQuery(value.replace(trialPattern,' ')));
+    setQuickAnswer(null);
+  }
   function clearProposal(){
     requestVersion.current++;
     if(pending) cancelReevaluation(pending);
@@ -59,9 +68,24 @@ export default function Atlas(){
   const literal=query.trim().toLowerCase();
   const identityMatches=literal&&ranked.results.filter(({record:r})=>
     [r.trial_id,r.study_id,r.outcome.raw_display,r.raw_input.study||''].some(value=>value.toLowerCase().includes(literal)));
-  const results=identityMatches?.length?identityMatches:literal&&queryState.filters.every(f=>f.status==='UNKNOWN')?[]:ranked.results;
+  const results=trialFilters.length?ranked.results.filter(item=>trialFilters.some(id=>
+    item.trial_id.toUpperCase()===id||item.trial_id.toUpperCase().endsWith('-'+id))):
+    identityMatches?.length?identityMatches:literal&&queryState.filters.length>0&&queryState.filters.every(f=>f.status==='UNKNOWN')?[]:ranked.results;
   const matches=results.filter(({record:r})=>!material||r.material.toLowerCase().includes(material.toLowerCase())).map(item=>item.record);
   const groups=Object.groupBy(matches,r=>r.study_id);
+  async function askQuestion(event){
+    event.preventDefault();
+    if(!query.trim()||asking)return;
+    setAsking(true);setQuickAnswer(null);
+    try{
+      const question=query.replace(trialPattern,id=>trialFilters.includes(id.toUpperCase())?id:'').replace(/\s+/g,' ').trim();
+      const trials=trialFilters.length?trialFilters:chosen.map(record=>record.trial_id);
+      if(!question&&!trials.length){setQuickAnswer({status:'INSUFFICIENT_EVIDENCE'});return;}
+      setQuickAnswer(await ingestionJSON('ask',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({question:question||tr('Sinov natijasi qanday?','What was the trial outcome?'),trials,language:lang})}));
+    }catch(error){setQuickAnswer({status:error.message});}
+    finally{setAsking(false);}
+  }
   const gravityFilter={microgravity:'FLIGHT_0G',lunar:'PARTIAL_G_MOON',martian:'PARTIAL_G_MARS'}[gravity];
   const gapQuery=queryState.filters.some(f=>f.field==='environment')?queryState:
     addFilter(queryState.filters.some(f=>f.field==='material')?queryState:addFilter(queryState,{field:'material',value:material||'SIBAL'}),{field:'environment',value:gravityFilter});
@@ -174,7 +198,18 @@ export default function Atlas(){
   return <div className="atlas-app"><header><a href="#main">SKYFORGE <small>FIRE ATLAS</small></a><span>{records.length} {tr('ulangan sinov','connected trials')} · {tr('NASA ma’lumotlari','NASA data')}</span><button onClick={()=>setLang(lang==='uz'?'en':'uz')}>{lang==='uz'?'English':'O‘zbekcha'}</button></header>
     <main id="main"><div className="intro"><p>NASA · BASS-II · PSI-25</p><h1>{tr('Savoldan dalilgacha.','From question to evidence.')}</h1><p>{tr('Sinovlarni solishtiring. Har bir qiymatning manbasini oching.','Compare trials. Open the source behind each value.')}</p></div>
     <p role="status" aria-live="polite">{message}</p>{!loaded.ok&&<p role="alert">{loaded.error.code}: {loaded.error.message}</p>}
-    <section aria-labelledby="question"><h2 id="question">01 · {tr('Savol va talablar','Question and requirements')}</h2><label>{tr('Tajriba savoli yoki sinov IDsi','Experiment question or trial ID')}<input value={query} onChange={e=>changeQuery(e.target.value)} placeholder="BASS-II / T20 / Quenched"/></label><div className="controls"><label>Material<input value={material} onChange={e=>setMaterial(e.target.value)} placeholder="SIBAL"/></label><label>{tr('Gravitatsiya','Gravity')}<select value={gravity} onChange={e=>setGravity(e.target.value)}><option value="microgravity">ISS · microgravity</option><option value="lunar">Moon · 0.16g</option><option value="martian">Mars · 0.38g</option></select></label><button onClick={()=>{changeQuery('');setMaterial('');setGravity('microgravity');}}>{tr('Tozalash','Clear')}</button></div><div className="controls" aria-label="Query filters">{queryState.filters.map(f=><div key={f.filter_id} className="chip">
+    <section aria-labelledby="question"><h2 id="question">01 · {tr('Savol va talablar','Question and requirements')}</h2><form onSubmit={askQuestion}><label>{tr('Tajriba savoli yoki sinov IDsi','Experiment question or trial ID')}<input value={query} onChange={e=>changeQuery(e.target.value)} disabled={asking} maxLength={300} placeholder="BASS-II / T20 / Quenched"/></label><button disabled={asking||!query.trim()}>{asking?tr('Javob tayyorlanmoqda…','Preparing answer…'):tr('AI javobini olish','Get AI answer')}</button></form>
+    {quickAnswer&&<div aria-live="polite" aria-label={tr('AI javobi','AI answer')}>
+      {quickAnswer.status==='INSUFFICIENT_EVIDENCE'&&<p>{tr('Ulangan korpusda yetarli dalil topilmadi.','The connected corpus has insufficient evidence.')}</p>}
+      {!['ANSWERED','INSUFFICIENT_EVIDENCE'].includes(quickAnswer.status)&&<p role="alert">{tr('AI javobini olish imkoni bo‘lmadi.','Unable to get an AI answer.')} · {quickAnswer.status}</p>}
+      {quickAnswer.claims?.map((claim,index)=><p key={index}>{claim.text} {claim.evidence_ids.map(id=>{
+        const source=quickAnswer.evidence.find(item=>item.id===id);
+        return source&&<a key={id} href={source.sourceUrl} target="_blank" rel="noreferrer">[{source.locator}] </a>;
+      })}</p>)}
+    </div>}
+    <div className="controls"><label>Material<input value={material} onChange={e=>setMaterial(e.target.value)} placeholder="SIBAL"/></label><label>{tr('Gravitatsiya','Gravity')}<select value={gravity} onChange={e=>setGravity(e.target.value)}><option value="microgravity">ISS · microgravity</option><option value="lunar">Moon · 0.16g</option><option value="martian">Mars · 0.38g</option></select></label><button onClick={()=>{changeQuery('');setMaterial('');setGravity('microgravity');}}>{tr('Tozalash','Clear')}</button></div><div className="controls" aria-label="Query filters">{trialFilters.map(id=><div key={id} className="chip">{id} <button disabled={asking}
+      aria-label={tr('Filtrni olib tashlash','Remove filter')+' '+id}
+      onClick={()=>{setTrialFilters(trialFilters.filter(value=>value!==id));setQuickAnswer(null);}}>×</button></div>)}{queryState.filters.map(f=><div key={f.filter_id} className="chip">
       <label>{f.field}{f.status==='UNKNOWN'?<span> · {String(f.value)}</span>:
         <input aria-label={f.field} defaultValue={Array.isArray(f.value)?f.value.join(' → '):f.value}
           key={JSON.stringify(f.value)} onBlur={e=>{
@@ -186,9 +221,9 @@ export default function Atlas(){
       <button aria-label={tr('Filtrni olib tashlash','Remove filter')+' '+f.field} onClick={()=>setQueryState(removeFilter(queryState,f.filter_id))}>×</button>
     </div>)}</div>
     {ranked.clarification.needed&&<p>{tr('Savolni aniqlashtirish uchun filtrlarni tahrirlang.','Edit the filters to narrow your question.')} <button onClick={()=>setQueryState(skipClarification(queryState))}>Skip</button></p>}
-    {query.trim()&&<details><summary>{tr('Moslik va tekshiruvlar','Ranking and requirements')}</summary>
+    {query.trim()&&<details open><summary>{tr('Moslik va tekshiruvlar','Ranking and requirements')}</summary>
       {results.map(item=><div key={item.key}><strong>{item.trial_id} · Tier {item.tier} · {item.alignment_score_pct}%</strong>
-        {item.sensitivity_warning&&<span> · ±10% weight sensitivity</span>}
+         <button onClick={()=>toggle(item.record)}>{selected.includes(item.key)?tr('Tanlovni olib tashlash','Remove selection'):tr('Atlas’da ko‘rish','View in Atlas')}</button>{item.sensitivity_warning&&<span> · ±10% weight sensitivity</span>}
         <ul>{item.checklist.items.map((check,index)=><li key={index}>{check.field} · {check.status}</li>)}</ul></div>)}
     </details>}
     <p><strong>{gap.status}</strong> · {gap.reason}</p>

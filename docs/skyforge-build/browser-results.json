@@ -7,11 +7,14 @@
   "syntheticEstimate": "PASS",
   "scenario": "PASS",
   "export": "PASS",
+  "staleExport": "PASS",
   "widths": [
     1440,
     768,
     390
   ],
+  "zoom200": "PASS",
+  "keyboard": "PASS",
   "reload": "PASS",
   "pageErrors": []
 }

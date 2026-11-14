@@ -1,12 +1,50 @@
 {
-  "pack":"1.0",
-  "baseline":"ec60412",
-  "branch":"codex/skyforge-build-pack",
-  "stage":"11_E2E_VALIDATION",
-  "completed":["00_AUDIT"],
-  "implemented_with_limits":["01_CONTRACTS_PERSISTENCE","02_INGESTION","03_RETRIEVAL_EVIDENCE","04_AI_GATEWAY","05_LIBRARY_COMPARISON","06_ASK_AI_CHAT_MEMORY","07_EVIDENCE_RANK","08_ESTIMATE_LAB","09_SCENARIO_LAB","10_UX_INTEGRATION"],
-  "tests":{"unit_pass":68,"live_api":"PASS staging","native_pdf_docx":"PASS staging","restart":"PASS staging","browser":"Fixing HTTP randomUUID compatibility"},
-  "next":"Complete browser regression and release evidence",
-  "deployment":{"staging":"http://100.105.241.126:4193","production":"http://100.105.241.126:4191","promoted":false},
-  "limitations":["OCR and visual video analysis unavailable","No automatic smart shelf update scheduler","Equivalent versioned envelopes need full pack-schema reconciliation","Named identity and cross-device recovery unavailable"]
+  "pack": "1.0",
+  "baseline": "ec60412",
+  "branch": "codex/skyforge-build-pack",
+  "stage": "12_RELEASE_DEMO_WITH_LIMITS",
+  "completed": [
+    "00_AUDIT"
+  ],
+  "implemented_with_limits": [
+    "01_CONTRACTS_PERSISTENCE",
+    "02_INGESTION",
+    "03_RETRIEVAL_EVIDENCE",
+    "04_AI_GATEWAY",
+    "05_LIBRARY_COMPARISON",
+    "06_ASK_AI_CHAT_MEMORY",
+    "07_EVIDENCE_RANK",
+    "08_ESTIMATE_LAB",
+    "09_SCENARIO_LAB",
+    "10_UX_INTEGRATION",
+    "11_VALIDATION",
+    "12_RELEASE"
+  ],
+  "tests": {
+    "unit_pass": 68,
+    "live_api": "PASS production, 8 checks",
+    "native_pdf_docx": "PASS production restart",
+    "restart": "PASS staging",
+    "browser": "PASS production",
+    "gold": "7/7 finite cases",
+    "integrity": "42 artifacts PASS",
+    "rollback": "PASS original 5-study API then promoted"
+  },
+  "next": "Resolve limited acceptance cases before full product acceptance",
+  "deployment": {
+    "staging": "http://100.105.241.126:4193",
+    "production": "http://100.105.241.126:4191",
+    "promoted": true,
+    "staging_running": false
+  },
+  "limitations": [
+    "OCR and video understanding unavailable",
+    "Named identity and cross-device recovery unavailable",
+    "Full pack-schema conformance incomplete",
+    "Ranking limited to three normalized BASS trials; private imports not promoted to canonical measurements",
+    "Smart shelf membership limited to public catalog",
+    "Full adversarial/accessibility/performance validation incomplete"
+  ],
+  "source_release": "229cb4cacb174d6dbcaed33c42f43c92b35b6897",
+  "full_pack_accepted": false
 }

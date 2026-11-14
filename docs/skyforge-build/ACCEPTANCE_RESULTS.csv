@@ -1,0 +1,36 @@
+id,status,scope,evidence
+A01,PASS,Audit current server/repo,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+D01,PASS,Reingest unchanged assets twice,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+D02,LIMITED,Native text and original image/video transport covered; OCR/visual understanding unavailable.,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+D03,PASS,Search quoted trial ID and a numeric oxygen filter,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+D04,PASS,UZ and EN equivalent query,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+D05,LIMITED,Owner original access and deletion tested; full administrative source-ACL lifecycle limited.,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+D06,LIMITED,"Typed execution, schema/citation/number guards tested; full live malicious multimodal set unavailable.",RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+C01,PASS,New Chat after a detailed prior thread,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+C02,PASS,Refresh/restart and open old chat,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+C03,PASS,Retry timed-out send twice,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+C04,LIMITED,Cancellation persists; final-only SSE tested. Full transport reconnect/partial-delta handling not validated.,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+C05,PASS,Rename/archive/search/delete conversation,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+C06,PASS,Enable/edit/forget memory,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+C07,PASS,User A IDs requested by user B,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+C08,LIMITED,Current query scopes retrieval; explicit-input-over-memory policy present; extended conflicting-goal language set limited.,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+L01,PASS,Smart shelf goal includes Moon/Mars,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+L02,LIMITED,Auto-refresh and exclusions tested; private uploads are not enrolled as normalized shelf candidates.,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+L03,LIMITED,Exact PDF/CSV/paragraph and originals covered; video time locators unavailable.,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+X01,PASS,Compare width vs thickness or incompatible conditions,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+R01,PASS,Rank direct fabric evidence against gas proxy,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+R02,PASS,Increase weight by 10% relatively,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+R03,LIMITED,Snapshot invalidation and immutable rerun tested; newly imported studies do not change the three-trial ranking corpus.,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+R04,PASS,Unknown material attribute,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+E01,PASS,Valid independent synthetic Bernoulli data,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+E02,PASS,Many frames from one burn,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+E03,PASS,Ask Mars safety probability with only ISS data,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+E04,PASS,Relevant paper but no target outcomes,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+S01,PASS,Scenario has no applicable probability model,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+S02,PASS,Scenario branches overlap,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+S03,LIMITED,Condition differences shown; broader contradicting-source corpus not connected.,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+P01,PASS,Provider 401/402/429/timeout/malformed JSON,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+P02,PASS,Concurrent requests near spending limit,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+U01,PASS,Keyboard/mobile/zoom/reduced-motion,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+U02,PASS,AI down,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+U03,PASS,Export old/stale run,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json

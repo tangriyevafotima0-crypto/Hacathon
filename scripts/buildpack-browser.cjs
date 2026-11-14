@@ -44,9 +44,21 @@ const base=process.env.SKYFORGE_TEST_URL||'http://100.105.241.126:4193';
     await tools.getByLabel('Farazlar',{exact:true}).fill('Change ventilation under otherwise matched conditions');
     await tools.getByRole('button',{name:'Hisoblash va saqlash',exact:true}).click();
     await tools.getByRole('heading',{name:/PARTIAL/}).waitFor();
+    const updateAsset=await page.evaluate(async()=>{
+      const response=await fetch('/api/workspace/assets',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name:'synthetic-stale-export.txt',base64:btoa('Synthetic stale-export test fixture.')})});
+      if(!response.ok)throw new Error('Fixture upload failed');
+      return (await response.json()).id;
+    });
     const downloading=page.waitForEvent('download');
     await tools.getByRole('button',{name:'Export JSON',exact:true}).click();
-    assert.equal((await downloading).suggestedFilename(),'analysis-run.json');
+    const exported=await downloading;
+    assert.equal(exported.suggestedFilename(),'analysis-run.json');
+    const exportedRun=JSON.parse(fs.readFileSync(await exported.path(),'utf8'));
+    assert.equal(exportedRun.stale,true);
+    assert.ok(exportedRun.corpus_snapshot_id);
+    assert.equal(exportedRun.definition.tool,'scenario');
+    await page.evaluate(id=>fetch('/api/workspace/assets/'+id,{method:'DELETE'}),updateAsset);
     for(const width of [1440,768,390]){
       await page.setViewportSize({width,height:1000});
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'overflow '+width);
@@ -61,6 +73,7 @@ const base=process.env.SKYFORGE_TEST_URL||'http://100.105.241.126:4193';
     assert.equal(await page.evaluate(()=>document.activeElement.textContent),'Library');
     await page.keyboard.press('Enter');
     await library.getByRole('heading',{name:'Library · Shelves and comparison',exact:true}).waitFor();
+    assert.ok(await library.locator('summary').first().evaluate(element=>parseFloat(getComputedStyle(element).fontSize)>=14));
     if(process.env.SKYFORGE_TEST_SCREENSHOT)await page.screenshot({path:process.env.SKYFORGE_TEST_SCREENSHOT,fullPage:true});
     await page.reload();
     const nav=page.getByRole('navigation',{name:'Workspace',exact:true});
@@ -69,7 +82,7 @@ const base=process.env.SKYFORGE_TEST_URL||'http://100.105.241.126:4193';
     await page.getByText('Salom. NASA tadqiqotini topish, sinovlarni solishtirish yoki dalillarni tekshirishda yordam beraman.',{exact:true}).waitFor();
     assert.deepEqual(errors,[]);
     const result={chatHistory:'PASS',memoryForget:'PASS',comparison:'PASS',shelf:'PASS',ranking:'PASS',
-      syntheticEstimate:'PASS',scenario:'PASS',export:'PASS',widths:[1440,768,390],zoom200:'PASS',keyboard:'PASS',reload:'PASS',pageErrors:errors};
+      syntheticEstimate:'PASS',scenario:'PASS',export:'PASS',staleExport:'PASS',widths:[1440,768,390],zoom200:'PASS',keyboard:'PASS',reload:'PASS',pageErrors:errors};
     if(process.env.SKYFORGE_TEST_BROWSER_EVIDENCE)fs.writeFileSync(process.env.SKYFORGE_TEST_BROWSER_EVIDENCE,JSON.stringify(result,null,2));
     console.log(JSON.stringify(result,null,2));
   }finally{await browser.close();}

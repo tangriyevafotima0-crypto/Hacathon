@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-14T20:02:16.645Z",
+  "base": "http://100.105.241.126:4191",
+  "synthetic": true,
+  "unchangedReingest": "PASS",
+  "backendRestart": "PASS",
+  "restoredChat": "PASS",
+  "originalOpen": "PASS",
+  "unauthorizedOriginal": "DENIED",
+  "assets": [
+    {
+      "id": "254af8455716ec59800bacb2d6d616a1df5f6c4c5b7a3db687998843f7e7544f",
+      "name": "synthetic-native-fixture.pdf",
+      "version": 3,
+      "chunks": 1,
+      "locators": [
+        "PDF page 1"
+      ]
+    },
+    {
+      "id": "dbe43ddafd6f3d903be8441619aed4d3124d23345128d2de5fe0e530a3d8088b",
+      "name": "synthetic-native-fixture.docx",
+      "version": 3,
+      "chunks": 2,
+      "locators": [
+        "Paragraph 1",
+        "Paragraph 2"
+      ]
+    }
+  ]
+}

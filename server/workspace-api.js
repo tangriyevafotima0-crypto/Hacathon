@@ -179,6 +179,18 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
       }
       if(resource==='imports'&&id&&method==='GET')return respond(200,requireRecord('import',id));
       if(resource==='compare'&&method==='POST')return respond(200,compareTrials(input.trials));
+      if(resource==='analysis-preview'&&method==='POST'){
+        if(!validText(input.target,500)||!match(input.tool,['ranking','estimation','scenario']))throw failure(400,'INVALID_ANALYSIS');
+        const weightsSchema={type:'object',additionalProperties:false,required:['domain','fuel','atmosphere','unit_family'],
+          properties:Object.fromEntries(['domain','fuel','atmosphere','unit_family'].map(key=>[key,{type:'number',minimum:0,maximum:100}]))};
+        const schema={type:'object',additionalProperties:false,required:['explanation','weights','assumptions'],
+          properties:{explanation:{type:'string'},weights:weightsSchema,assumptions:{type:'array',maxItems:6,items:{type:'string',maxLength:300}}}};
+        const proposal=await router.complete({name:'analysis_configuration',schema,
+          instructions:'Explain a bounded research-analysis setup in the requested language. The user will edit and approve it before code runs. Preserve the current goal and tool. For ranking propose transparent domain/fuel/atmosphere/unit_family weights, product defaults 25 each if unspecified. Assumptions are explicitly hypothetical. Never produce a physical probability, invent observations, or claim measured-performance data exists.',
+          input:{target:input.target,tool:input.tool,language:input.language,knownScope:'Three source-checked BASS-II trial transcriptions, plus selected NASA study metadata and tables.'}});
+        if(Object.values(proposal.data.weights).every(value=>value===0))throw failure(502,'API_INVALID_RESPONSE');
+        return respond(200,{...proposal.data,target:input.target,tool:input.tool,model:proposal.model,usage:proposal.usage});
+      }
       if(resource==='search'&&method==='POST'){
         if(!validText(input.query,300))throw failure(400,'INVALID_QUERY');
         const result=await search(input.query);

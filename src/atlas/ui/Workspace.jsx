@@ -297,6 +297,7 @@ function Tools({language,trials,setTrials}){
   const [tool,setTool]=useState('ranking'),[target,setTarget]=useState(''),[assumptions,setAssumptions]=useState('');
   const [runs,setRuns]=useState([]),[current,setCurrent]=useState(null),[error,setError]=useState('');
   const [busy,setBusy]=useState(false),[weights,setWeights]=useState({domain:25,fuel:25,atmosphere:25,unit_family:25});
+  const [proposal,setProposal]=useState(null);
   const report=e=>setError(e.message);
   useEffect(()=>{void api('runs').then(setRuns).catch(report);},[]);
   async function run(e){
@@ -317,6 +318,14 @@ function Tools({language,trials,setTrials}){
         <option value="ranking">Evidence Rank</option><option value="estimation">Estimate Lab</option><option value="scenario">Scenario Lab</option>
       </select></label>
       <label>{uz?'Maqsad':'Target'}<input value={target} onChange={e=>setTarget(e.target.value)} maxLength={500} required/></label>
+      <button type="button" disabled={busy||!target.trim()} onClick={async()=>{
+        setBusy(true);
+        try{
+          const plan=await api('analysis-preview','POST',{tool,target,language});
+          setProposal(plan);setWeights(plan.weights);setAssumptions(plan.assumptions.join('\n'));
+        }catch(error){report(error);}finally{setBusy(false);}
+      }}>{uz?'AI bilan sozlamani tayyorlash':'Prepare configuration with AI'}</button>
+      {proposal&&<p>{proposal.explanation}</p>}
       {tool==='ranking'&&<><label>Entity<select name="entity_type"><option>TRIAL</option><option>STUDY</option><option>MATERIAL</option></select></label>
         <label>Rank mode<select name="rank_mode"><option>RESEARCH_USEFULNESS</option><option>MEASURED_PERFORMANCE</option></select></label>
         {Object.entries(weights).map(([key,value])=><label key={key}>{key}<input type="number" min="0" max="100" value={value} onChange={e=>setWeights({...weights,[key]:Number(e.target.value)})}/></label>)}</>}

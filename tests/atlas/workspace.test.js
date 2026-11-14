@@ -101,8 +101,12 @@ test('workspace APIs isolate owners, persist lifecycle, and deduplicate concurre
   assert.equal(uploaded.status,202);
   assert.equal((await request(b,'assets/'+uploaded.value.id+'/original')).status,404);
   assert.equal((await request(b,'assets')).value.length,0);
-  await new Promise(resolve=>setTimeout(resolve,1800));
-  const files=(await request(a,'assets')).value;
+  let files=[];
+  for(let i=0;i<30;i++){
+    files=(await request(a,'assets')).value;
+    if(files[0].state==='READY')break;
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
   assert.equal(files[0].state,'READY');
   assert.equal(files[0].chunk_count,1);
   await request(a,'assets/'+uploaded.value.id,'DELETE');

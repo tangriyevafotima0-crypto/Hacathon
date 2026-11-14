@@ -336,7 +336,10 @@ function Tools({language,trials,setTrials}){
       {tool==='scenario'&&<><TrialPicker selected={trials} onChange={setTrials}/><label>{uz?'Farazlar':'Assumptions'}<textarea value={assumptions} onChange={e=>setAssumptions(e.target.value)}/></label></>}
       <button disabled={busy}>{uz?'Hisoblash va saqlash':'Run and save'}</button>
     </form>
-    <label>{uz?'Saqlangan natijalar':'Saved runs'}<select value={current?.id??''} onChange={e=>setCurrent(runs.find(r=>r.id===e.target.value))}>
+    <label>{uz?'Saqlangan natijalar':'Saved runs'}<select value={current?.id??''} onChange={e=>{
+      if(!e.target.value){setCurrent(null);return;}
+      void api('runs/'+e.target.value).then(setCurrent).catch(report);
+    }}>
       <option value="">—</option>{runs.map(item=><option key={item.id} value={item.id}>{item.definition.tool} · {item.definition.target}</option>)}
     </select></label>
     {current&&<article><h3>{current.result.synthetic?'Synthetic exercise · ':''}{current.result.status} · {current.result.method}</h3><p>{current.definition.target}</p>
@@ -369,7 +372,13 @@ function Tools({language,trials,setTrials}){
         {current.result.next_measurement&&<p><strong>{uz?'Keyingi o‘lchov':'Next measurement'}</strong> · {current.result.next_measurement}</p>}
       </div>}
       <details><summary>{uz?'Usul va hisob yozuvi':'Method and calculation record'}</summary><pre>{JSON.stringify(current.result,null,2)}</pre></details>
-      <button onClick={()=>download('analysis-run.json',JSON.stringify(current,null,2))}>Export JSON</button>
+      <button onClick={async()=>{
+        try{
+          const latest=await api('runs/'+current.id);
+          setCurrent(latest);
+          download('analysis-run.json',JSON.stringify(latest,null,2));
+        }catch(error){report(error);}
+      }}>Export JSON</button>
     </article>}
   </section>;
 }

@@ -11,11 +11,15 @@ The initial repository was empty. This import contains the supplied React/Vite e
 | Z01 data contract, CSV/JSON import, revisions, provenance, raw/SI and storage adapter | Implemented |
 | Tests | 23 passed locally: 3 original model tests + 20 Atlas tests |
 | Import/reload/repeated-import core demo | Passed with injected storage and disk reload |
-| Production build | Local check blocked by unavailable exact Vite dependency/network; GitHub CI must confirm |
+| Production build | PASS in GitHub Actions on `04df762` with the unchanged lockfile |
 | D authoritative data and scientific review | Pending integration |
 | Bk Atlas UI and real browser acceptance | Pending integration |
 | Z02 query/ranking/gap/conclusion/API | Next stage; not implemented |
 | Analyzer / PM approval | Pending |
+
+## Verified repository baseline
+
+[CI run 43572572407](https://github.com/tangriyevafotima0-crypto/Hacathon/actions/runs/43572572407) passed `npm ci`, all 23 tests, and `npm run build` at commit [`04df762`](https://github.com/tangriyevafotima0-crypto/Hacathon/commit/04df76287b92d5b78423125753052cbdd31570b3). Vite 7.3.7 built successfully. All 45 delivered source/evidence files matched their local Git blob hashes at that commit; teammates' DOCX files were preserved. Original local build-failure logs remain historical evidence of the restricted local network, not the current CI result. Browser integration and scientific review remain pending.
 
 ## Run
 

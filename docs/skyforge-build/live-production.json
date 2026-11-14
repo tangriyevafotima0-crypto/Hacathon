@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-14T20:02:14.053Z",
+  "date": "2026-11-14T20:20:07.890Z",
   "base": "http://100.105.241.126:4191",
   "checks": [
     {
@@ -37,7 +37,7 @@
   ],
   "provider": [
     {
-      "turn_id": "50f0ebf2-1c61-4881-921c-7664c6c33aca:gold-turn-1",
+      "turn_id": "5520df00-2ecf-4a8d-8831-917c879c7783:gold-turn-1",
       "model": "google/gemini-3.1-flash-lite",
       "usage": {
         "prompt_tokens": 1125,
@@ -45,13 +45,13 @@
         "total_tokens": 1316,
         "cost": 0.00056775
       },
-      "duration_ms": 1589
+      "duration_ms": 1747
     }
   ],
   "latencies": [
     {
       "name": "chat",
-      "ms": 2691
+      "ms": 1979
     }
   ]
 }

@@ -24,18 +24,21 @@
     "unit_pass": 68,
     "live_api": "PASS production, 8 checks",
     "native_pdf_docx": "PASS production restart",
-    "restart": "PASS staging",
+    "restart": "PASS production after S4U task change",
     "browser": "PASS production",
     "gold": "7/7 finite cases",
     "integrity": "42 artifacts PASS",
-    "rollback": "PASS original 5-study API then promoted"
+    "rollback": "PASS original 5-study API then promoted",
+    "ci": "PASS Ubuntu + Windows, 4c15923"
   },
   "next": "Resolve limited acceptance cases before full product acceptance",
   "deployment": {
     "staging": "http://100.105.241.126:4193",
     "production": "http://100.105.241.126:4191",
     "promoted": true,
-    "staging_running": false
+    "staging_running": false,
+    "task_logon": "S4U",
+    "startup_trigger": true
   },
   "limitations": [
     "OCR and video understanding unavailable",

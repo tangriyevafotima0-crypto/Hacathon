@@ -1,5 +1,48 @@
 # SKYFORGE Fire Atlas
 
-Z01 foundation for team SKYFORGE. This repository will contain the supplied React/Vite prototype and the Atlas import, provenance, revision and persistence core.
+Z01 foundation for team SKYFORGE. Shared repository: https://github.com/tangriyevafotima0-crypto/Hacathon
 
-Local validation: 23 tests passed. Production build awaits an environment with the exact dependencies available. Scientific data review, Atlas UI integration, Z02 and independent Analyzer approval remain pending.
+The initial repository was empty. This import contains the supplied React/Vite educational prototype plus Z Codex's isolated Atlas core. The visible prototype is not yet the Bk Fire Atlas interface. Its illustrative risk formula is not used by the Atlas core.
+
+## Current status
+
+| Component | Status |
+| --- | --- |
+| Z01 data contract, CSV/JSON import, revisions, provenance, raw/SI and storage adapter | Implemented |
+| Tests | 23 passed locally: 3 original model tests + 20 Atlas tests |
+| Import/reload/repeated-import core demo | Passed with injected storage and disk reload |
+| Production build | Local check blocked by unavailable exact Vite dependency/network; GitHub CI must confirm |
+| D authoritative data and scientific review | Pending integration |
+| Bk Atlas UI and real browser acceptance | Pending integration |
+| Z02 query/ranking/gap/conclusion/API | Next stage; not implemented |
+| Analyzer / PM approval | Pending |
+
+## Run
+
+Node.js 22.12+ required.
+
+```sh
+npm ci
+npm test
+npm run build
+npm run dev
+```
+
+Core tests and demonstration need no installed frontend dependencies:
+
+```sh
+npm test
+npm run demo:z01
+```
+
+## Team integration
+
+- Z owns `src/atlas/core`, import/store/search/export and shared types. Public API: `src/atlas/core/index.js`.
+- D supplies authoritative source packages in `src/atlas/data`. Z's starter fixture is intentionally under `core/fixtures`.
+- Bk owns `src/atlas/ui`, translations and styling, and consumes Z's contract.
+- H owns acceptance scenarios and demo evidence. Analyzer independently repeats checks.
+- Make small owner-specific branches and pull requests. Agree shared entrypoint/type changes before merging. Do not overwrite other owners' work.
+
+Start with [Z01 contract](docs/z01/CONTRACT.md), [original artifact handoff](docs/z01/HANDOFF.md), and [GitHub handoff and next steps](docs/z01/GITHUB-HANDOFF.md). The original prototype instructions are retained in [PROTOTYPE-README.md](docs/z01/PROTOTYPE-README.md). Logs describe observed checks of Z01-v1.0.0; GitHub integration metadata is recorded separately.
+
+Import confirmation is separate from scientific verification. T20/T21 history remains unknown, T25 remains reused and flagged; no unsupported NASA verification or predictive safety claim is made.

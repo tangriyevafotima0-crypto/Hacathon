@@ -1,4 +1,5 @@
 import { clone, freeze } from './contract.js';
+import { selectLibraryStudies, selectStudyTrials, validateTrialSelection, updateTrialSelection } from './library.js';
 
 export function getRevision(database, study_id, trial_id, revision_id) {
   const trial = database.trials.find(t => t.study_id === study_id && t.trial_id === trial_id);
@@ -14,3 +15,5 @@ export function fieldEvidence(database, study_id, trial_id, field, revision_id) 
   return freeze(clone({ revision_id:revision.revision_id, scientific_verification:revision.record.review.scientific_verification,
     sources:revision.record.sources.filter(s => ids.includes(s.source_ref_id)) }));
 }
+
+export { selectLibraryStudies, selectStudyTrials, validateTrialSelection, updateTrialSelection };

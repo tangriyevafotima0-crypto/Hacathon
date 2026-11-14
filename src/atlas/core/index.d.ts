@@ -103,7 +103,7 @@ export function exportReportJSON(database:Database, options?:{ selection?:unknow
 export function exportReportCSV(database:Database, options?:{ selection?:unknown[] }):string;
 
 export function getReevaluationApiStatus(adapter?:unknown):{ available:boolean; status:string; message:string };
-export function proposeReevaluation(store:AtlasStore, request:{ study_id:string; trial_id:string; revision_id?:string }, options?:{ adapter?:unknown }):Promise<unknown>;
+export function proposeReevaluation(store:AtlasStore, request:{ study_id:string; trial_id:string; revision_id?:string; field?:string }, options?:{ adapter?:unknown }):Promise<unknown>;
 export function cancelReevaluation(proposal:unknown):{ ok:true; status:'CANCELLED'; mutated:false };
 export function commitReevaluation(store:AtlasStore, proposal:unknown, options?:{ confirmed?:boolean; acknowledgeFlags?:boolean }):unknown;
 

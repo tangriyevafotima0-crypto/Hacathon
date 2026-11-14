@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { BASS_THREE } from '../../src/atlas/data/index.js';
 import { convertNasaTable } from '../../src/atlas/nasa-import.js';
 import { openAtlasStore, getRevision, parseQuery, equalQueryFilters, evaluateChecklist, updateFilter,
-  proposeReevaluation, commitReevaluation, detectEvidenceGap, createMetadataAdapter } from '../../src/atlas/core/index.js';
+  proposeReevaluation, commitReevaluation, detectEvidenceGap, createMetadataAdapter, rankTrials, skipClarification } from '../../src/atlas/core/index.js';
 
 function setup() {
   const storage = new Map();
@@ -69,4 +69,24 @@ test('NASA table maps only three source-checked rows, preserving nominal materia
   assert.equal(rows[0].psi_csv_material_label,'1 cm SIBAL');
   assert.equal(rows[0].sample_width_cm,'1.2');
   assert.throws(()=>convertNasaTable(csv.replace(',T20,',',T999,')),/NASA_SOURCE_ROWS_INCOMPLETE/);
+});
+
+test('clarification counts actual alignment before rounding and Skip keeps order', () => {
+  const {store,row,write}=setup();
+  for (let index=0;index<3;index++) write({...row,trial_id:'BOUNDARY-'+index});
+  const query=parseQuery('20.8% O2');
+  const adapter=createMetadataAdapter({studies:{'PSI-25':{fuel_type:'SOLID_FABRIC'}}});
+  const records=store.load().database.trials.map(trial=>trial.revisions[0].record);
+  const options={metadataAdapter:adapter,weights:{domain:0,fuel:0.75,atmosphere:0.25,unit_family:0}};
+  const atThreshold=rankTrials(records,query,options);
+  assert.equal(atThreshold.clarification.high_alignment_count,4);
+  assert.equal(atThreshold.clarification.needed,true);
+  assert.equal(rankTrials(records.slice(0,3),query,options).clarification.needed,false);
+  const skipped=rankTrials(records,skipClarification(query),options);
+  assert.equal(skipped.clarification.needed,false);
+  assert.deepEqual(skipped.results.map(row=>row.key),atThreshold.results.map(row=>row.key));
+  const below=rankTrials(records,query,{...options,weights:{...options.weights,fuel:0.7500025,atmosphere:0.2499975}});
+  assert.equal(below.results[0].alignment_score,0.699999);
+  assert.equal(below.results[0].alignment_score_pct,70);
+  assert.equal(below.clarification.high_alignment_count,0);
 });

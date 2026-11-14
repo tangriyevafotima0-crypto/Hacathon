@@ -1,4 +1,5 @@
 import { BASS_THREE } from '../src/atlas/data/index.js';
+import { convert, number } from '../src/atlas/core/contract.js';
 
 const NASA = 'https://psi.nasa.gov/geode-py/ws';
 const STATUSES = ['CONFIRMED', 'PROPOSED_CORRECTION', 'INSUFFICIENT_EVIDENCE'];
@@ -55,30 +56,47 @@ const RESULT_SCHEMA = {
   required: ['status', 'trial_id', 'field', 'source_ref_id', 'value_cm', 'rationale'],
 };
 
-async function reevaluate(input, key) {
+function validateReevaluation(input) {
   const row = BASS_THREE.rows.find(r => r.study_id === input.study_id && r.trial_id === input.trial_id);
   const source = row && row.study_id + ':' + row.trial_id + ':source';
   if (!row || input.field !== 'sample_width_cm' || input.source_ref_id !== source ||
-      !['string', 'number'].includes(typeof input.value) || !Number.isFinite(Number(input.value))) return null;
+      !['string', 'number'].includes(typeof input.value)) return null;
+  try {
+    const value = number(input.value);
+    const widthM = convert([value], 'cm', 'sample_width').values[0];
+    if (widthM <= 0) return null;
+    return { row, source, value, widthM };
+  } catch {
+    return null;
+  }
+}
+
+async function reevaluate(input, key, { row, source, value, widthM }) {
   const evidence = input.withhold_width === true ? null : Number(row.sample_width_cm);
   const expected = evidence === null ? 'INSUFFICIENT_EVIDENCE' :
-    Number(input.value) === evidence ? 'CONFIRMED' : 'PROPOSED_CORRECTION';
+    widthM === convert([evidence], 'cm', 'sample_width').values[0] ? 'CONFIRMED' : 'PROPOSED_CORRECTION';
+  const started = performance.now();
   const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + MODEL + ':generateContent', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
     signal: AbortSignal.timeout(15000),
     body: JSON.stringify({
       contents: [{ parts: [{ text: 'Compare the supplied sample width (cm) to the NASA table width (cm). Return CONFIRMED for equal values, PROPOSED_CORRECTION for a mismatch and INSUFFICIENT_EVIDENCE for missing evidence. Repeat identifiers exactly. Explain briefly in the requested language. ' +
-        JSON.stringify({ trial_id: row.trial_id, field: input.field, source_ref_id: source, value_cm: Number(input.value), nasa_width_cm: evidence, language: input.language === 'uz' ? 'Uzbek' : 'English' }) }] }],
-      generationConfig: { responseMimeType: 'application/json', responseSchema: RESULT_SCHEMA, maxOutputTokens: 768, thinkingConfig: { thinkingLevel: 'LOW' } },
+        JSON.stringify({ trial_id: row.trial_id, field: input.field, source_ref_id: source, value_cm: value, nasa_width_cm: evidence, language: input.language === 'uz' ? 'Uzbek' : 'English' }) }] }],
+      generationConfig: { responseMimeType: 'application/json', responseJsonSchema: RESULT_SCHEMA, maxOutputTokens: 768, thinkingConfig: { thinkingLevel: 'LOW' } },
     }),
   });
   if (response.status === 429) return { error: 'API_QUOTA', http: 429 };
   if (!response.ok) return { error: 'API_PROVIDER_FAILED', http: 502 };
-  const payload = await response.json();
-  const parts = payload.candidates?.[0]?.content?.parts ?? [];
-  const result = JSON.parse(parts.filter(part => !part.thought).map(part => part.text ?? '').join(''));
-  if (result.status !== expected || result.trial_id !== row.trial_id ||
+  let payload, result;
+  try {
+    payload = await response.json();
+    const parts = payload.candidates?.[0]?.content?.parts ?? [];
+    result = JSON.parse(parts.filter(part => !part.thought).map(part => part.text ?? '').join(''));
+  } catch {
+    return { error: 'API_INVALID_RESPONSE', http: 502 };
+  }
+  if (result?.status !== expected || result.trial_id !== row.trial_id ||
       result.field !== input.field || result.source_ref_id !== source ||
       result.value_cm !== evidence || typeof result.rationale !== 'string') {
     return { error: 'API_INVALID_RESPONSE', http: 502 };
@@ -86,6 +104,10 @@ async function reevaluate(input, key) {
   return {
     status: result.status, trial_id: row.trial_id, field: input.field, source_ref_id: source,
     rationale: result.rationale.slice(0, 1000), model: MODEL,
+    duration_ms: Math.round(performance.now() - started),
+    usage: Object.fromEntries(['promptTokenCount', 'candidatesTokenCount', 'thoughtsTokenCount', 'totalTokenCount']
+      .filter(name => Number.isSafeInteger(payload.usageMetadata?.[name]))
+      .map(name => [name, payload.usageMetadata[name]])),
     ...(expected === 'PROPOSED_CORRECTION' ? { proposed_raw_patch: { sample_width_cm: String(evidence) } } : {}),
   };
 }
@@ -100,11 +122,12 @@ export function createAtlasApi(key) {
       if (path !== '/api/re-evaluate' || req.method !== 'POST') return send(res, 405, { error: 'METHOD_NOT_ALLOWED' });
       if (!key) return send(res, 503, { error: 'API_UNAVAILABLE' });
       const input = await readBody(req);
-      if (!input) return send(res, 400, { error: 'INVALID_REQUEST' });
+      const validated = input && validateReevaluation(input);
+      if (!validated) return send(res, 400, { error: 'INVALID_REQUEST' });
       if (calls >= 100) return send(res, 429, { error: 'API_DEMO_LIMIT' });
       calls++;
-      const result = await reevaluate(input, key);
-      return result ? send(res, result.http ?? 200, result) : send(res, 400, { error: 'INVALID_REQUEST' });
+      const result = await reevaluate(input, key, validated);
+      return send(res, result.http ?? 200, result);
     } catch (error) {
       const timeout = ['TimeoutError', 'AbortError'].includes(error.name);
       return send(res, timeout ? 504 : 502, { error: timeout ? 'UPSTREAM_TIMEOUT' : 'UPSTREAM_FAILED' });

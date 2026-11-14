@@ -14,7 +14,7 @@ This matrix gives each check equal weight. PASS counts toward the estimate. PART
 | 08 | Bk | Fetch PSI-25 online and preview three eligible trials | PASS, docs/bk/browser-nasa.cjs |
 | 09 | Bk | CSV/JSON preview, flagged review, confirmation and reload | PASS, docs/bk/browser-check.cjs and import.test.js |
 | 10 | Z | Repeated import preserves a single trial and existing revisions | PASS, import.test.js and Chromium |
-| 11 | Z | Race during API request, historical target, stale confirmation | PASS, integration.test.js |
+| 11 | Z | Race during API request, historical target, stale confirmation and restoration as a new revision | PASS, integration.test.js |
 | 12 | Z | API unavailable, cancel, provider error and retry preserve the store | PASS, z02.test.js, import.test.js and Chromium |
 | 13 | Z | Exact H02 UZ/EN questions resolve to equivalent width and other chips | PASS, integration.test.js |
 | 14 | Z | 70% banner boundaries and unchanged ranking on Skip | PASS, integration.test.js |
@@ -25,7 +25,7 @@ This matrix gives each check equal weight. PASS counts toward the estimate. PART
 | 19 | Bk | CSV/JSON report with raw/SI and provenance, exchange JSON reimports | PASS, z02.test.js, import.test.js and Chromium JSON download |
 | 20 | D | Four gap states, partial gravity analogs and no interpolated prediction | PASS, data.test.js, z02.test.js and integration.test.js |
 | 21 | Bk | Desktop and 390 px, reload, Notebook reopen | PASS, docs/bk/browser-check.cjs |
-| 22 | Bk | Gemini response contract and invalid response rejection | PASS with simulated provider, server.test.js |
+| 22 | Bk | Gemini JSON Schema and invalid response rejection, paired units in correction diff | PASS with simulated provider, server.test.js and docs/bk/browser-reevaluation.cjs |
 | 23 | Bk | Real Gemini 3.8 Flash responses in UZ/EN with usage and timing | NOT RUN, server needs a team GEMINI_API_KEY |
 | 24 | H | Original H01 artifact and historical 31-file manifest | NOT RUN, ZIP includes the H01 report text |
 | 25 | H/BN | Confirm team local event, local deadline and required format | NOT RUN, team registration evidence required |
@@ -33,6 +33,8 @@ This matrix gives each check equal weight. PASS counts toward the estimate. PART
 | 27 | Analyzer/PM | Independent review, release decision and deployment SHA check | NOT RUN, this matrix records implementation-side verification |
 
 Verified coverage is 23 of 27 checks, about 85%. This is a readiness estimate for this integration scope. Gemini can be enabled with the server credential. The hosted build and formal team handoff require separate verification.
+
+The November 14 re-audit also checks that a late NASA response preserves a newer manual preview. Run `docs/bk/browser-reevaluation.cjs` with Playwright and the local preview URL for this regression and the mocked correction flow.
 
 ## Demo and claim notes
 

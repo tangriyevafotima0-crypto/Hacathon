@@ -32,6 +32,36 @@ test('API cannot overwrite an edit made during a request or after the preview', 
   assert.equal(store.load().database.trials[0].revisions.length,3);
 });
 
+test('confirmed correction appends a revision even when the value matches a historical row', async () => {
+  const {store,row,write}=setup();
+  const request={study_id:row.study_id,trial_id:row.trial_id,field:'sample_width_cm'};
+  write({...row,sample_width_cm:'3.3'});
+  assert.equal(write(row).changes.length,0);
+  const proposal=await proposeReevaluation(store,request,{
+    adapter:{evaluate:()=>({proposed_raw_patch:{sample_width_cm:row.sample_width_cm}})},
+  });
+  assert.equal(proposal.preview_entry.action,'NEW_REVISION');
+  assert.equal(commitReevaluation(store,proposal,{confirmed:true,acknowledgeFlags:true}).changes.length,1);
+  const {database}=store.load();
+  assert.deepEqual(database.trials[0].revisions.map(rev=>rev.record.raw_input.sample_width_cm),['2.2','3.3','2.2']);
+  assert.equal(getRevision(database,row.study_id,row.trial_id).record.raw_input.sample_width_cm,'2.2');
+});
+
+test('reevaluation can correct paired width aliases without changing units or other fields', async () => {
+  const {store,row,write}=setup();
+  write({...row,sample_width_cm:'3.3',sample_width_raw:'33',sample_width_unit:'mm'});
+  const request={study_id:row.study_id,trial_id:row.trial_id,field:'sample_width_raw'};
+  const propose=patch=>proposeReevaluation(store,request,{adapter:{evaluate:()=>({proposed_raw_patch:patch})}});
+  assert.equal((await propose({sample_width_raw:'22',outcome:'Edited'})).error.code,'UNEXPECTED_PATCH_FIELDS');
+  assert.equal((await propose({sample_width_raw:'23',sample_width_cm:'2.2'})).status,'INVALID_PROPOSAL_VALUES');
+  const proposal=await propose({sample_width_raw:'22',sample_width_cm:'2.2'});
+  assert.deepEqual(proposal.diffs.map(diff=>diff.field).sort(),['sample_width_cm','sample_width_raw']);
+  const result=commitReevaluation(store,proposal,{confirmed:true,acknowledgeFlags:true});
+  const width=getRevision(result.database,row.study_id,row.trial_id).record.parameters.find(p=>p.param_key==='sample_width');
+  assert.equal(width.raw_display,'22 mm');
+  assert.deepEqual(width.si.values,[0.022]);
+});
+
 test('bilingual width, numeric gravity and minimum oxygen use the same checklist context', () => {
   assert.ok(equalQueryFilters(parseQuery('0g da 1.2 cm enli SIBAL mato yonishi'),parseQuery('SIBAL fabric flammability at 1.2 cm width in 0g')));
   for (const target of ['Moon 0.16g 30%+ O2','Mars 0.38g O2 30%+']) {

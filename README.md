@@ -30,6 +30,8 @@ Copy `.env.example` to `.env.local`, set `GEMINI_API_KEY` in the server environm
 
 [Acceptance and outstanding checks](docs/acceptance.md)
 
+[O‘zbekcha ishga tushirish va taqdimot qo‘llanmasi](docs/fire-atlas-qollanma-uz.md)
+
 ## Team integration
 
 - Z owns `src/atlas/core`, import/store/search/export and shared types. Public API: `src/atlas/core/index.js`.

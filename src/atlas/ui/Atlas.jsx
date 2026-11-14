@@ -1,6 +1,7 @@
 import React, {useState, useRef, useEffect} from 'react';
-import {openAtlasStore, activeRecords, fieldEvidence, exportJSON, exportArchive, exportReportCSV, exportReportJSON, trialKey, parseQuery, addFilter, rankTrials, updateFilter, removeFilter, skipClarification, createMetadataAdapter, detectEvidenceGap, proposeReevaluation, commitReevaluation, cancelReevaluation} from '../core/index.js';
-import {BASS_SEED, assessEvidenceGap, fieldProof, sourceReview, checkBoundedClaim} from '../data/index.js';
+import {STORE_KEY, openAtlasStore, getRevision, activeRecords, fieldEvidence, exportJSON, exportArchive, exportReportCSV, exportReportJSON, trialKey, parseQuery, addFilter, rankTrials, updateFilter, removeFilter, skipClarification, detectEvidenceGap, proposeReevaluation, commitReevaluation, cancelReevaluation} from '../core/index.js';
+import {CONVERSIONS} from '../core/contract.js';
+import {BASS_SEED, BASS_THREE, assessEvidenceGap, fieldProof, sourceReview, checkBoundedClaim} from '../data/index.js';
 import catalog from '../catalog.json';
 import {convertNasaTable} from '../nasa-import.js';
 import t25 from '../data/GMT216-T25.csv?raw';
@@ -11,9 +12,11 @@ export function download(name, text, type='application/json') {
   const url=URL.createObjectURL(new Blob([text],{type})); const a=document.createElement('a'); a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 const key=r=>trialKey(r.study_id,r.trial_id);
-const metadataAdapter = createMetadataAdapter({studies:{'PSI-25':{
-  environment:'FLIGHT_0G', domain:'PREVENTION_SOLID', fuel_type:'SOLID_FABRIC',
-}}});
+const supportedTrials = new Set(BASS_THREE.rows.map(key));
+const metadataAdapter = record => sourceReview(record).status === 'D_SOURCE_CHECKED'
+  ? {environment:'FLIGHT_0G', domain:'PREVENTION_SOLID', fuel_type:'SOLID_FABRIC'} : {};
+const widthOf = record => record.parameters.find(parameter => parameter.param_key === 'sample_width');
+const hasValue = value => String(value ?? '').trim() !== '';
 async function requestJSON(url, options){
   const response=await fetch(url,options);
   const result=await response.json();
@@ -23,6 +26,11 @@ async function requestJSON(url, options){
 export default function Atlas(){
   const [store]=useState(()=>{let s;try{s=localStorage;}catch{} return openAtlasStore(s);});
   const [loaded,setLoaded]=useState(()=>store.load());
+  useEffect(()=>{
+    const refresh=event=>{if(event.key===STORE_KEY||event.key===null)setLoaded(store.load());};
+    window.addEventListener('storage',refresh);
+    return ()=>window.removeEventListener('storage',refresh);
+  },[store]);
   const [lang,setLang]=useState('uz'); const tr=(uz,en)=>lang==='uz'?uz:en;
   const [selected,setSelected]=useState([]),[query,setQuery]=useState(''),[material,setMaterial]=useState(''),[gravity,setGravity]=useState('microgravity');
   const [evidence,setEvidence]=useState(null),[text,setText]=useState(''),[format,setFormat]=useState('csv'),[preview,setPreview]=useState(null),[ack,setAck]=useState(false),[message,setMessage]=useState('');
@@ -33,6 +41,7 @@ export default function Atlas(){
   const [queryState,setQueryState]=useState(()=>parseQuery(''));
   const [pending,setPending]=useState(null),[busy,setBusy]=useState(false);
   const requestVersion=useRef(0);
+  const importVersion=useRef(0);
   function changeQuery(value){setQuery(value);setQueryState(parseQuery(value));}
   function clearProposal(){
     requestVersion.current++;
@@ -61,12 +70,14 @@ export default function Atlas(){
       oxygen_location:gapQuery.filters.find(f=>f.field==='oxygen_location')?.value??'chamber_atmosphere',
     }:{})});
   async function fromNasa(){
+    const version=++importVersion.current;
     setBusy(true);
     try {
       const result=await requestJSON('/api/nasa/bass-ii');
+      if(version!==importVersion.current)return;
       const next=convertNasaTable(result.csv);
       setText(next);setFormat('json');makePreview(next,'json');
-    }catch(error){setMessage(error.message);}
+    }catch(error){if(version===importVersion.current)setMessage(error.message);}
     finally{setBusy(false);}
   }
   async function recheck(record){
@@ -74,12 +85,25 @@ export default function Atlas(){
     const version=requestVersion.current;
     setBusy(true);
     try{
-      const adapter={name:'Gemini',evaluate:input=>requestJSON('/api/re-evaluate',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({study_id:input.study_id,trial_id:input.trial_id,field:input.field,
-          source_ref_id:input.sources[0]?.source_ref_id,value:input.record.raw_input.sample_width_cm,language:lang}),
-      })};
-      const result=await proposeReevaluation(store,{study_id:record.study_id,trial_id:record.trial_id,field:'sample_width_cm'},{adapter});
+      const {study_id,trial_id}=record;
+      const field=hasValue(record.raw_input.sample_width_raw)?'sample_width_raw':'sample_width_cm';
+      const revision_id=getRevision(loaded.database,study_id,trial_id).revision_id;
+      const adapter={name:'Gemini',async evaluate(input){
+        const width=widthOf(input.record);
+        const result=await requestJSON('/api/re-evaluate',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({study_id,trial_id,field:'sample_width_cm',source_ref_id:input.sources[0]?.source_ref_id,
+            value:Number((width.si.values[0]*100).toPrecision(14)),language:lang}),
+        });
+        if(field==='sample_width_raw'&&result.proposed_raw_patch){
+          const cm=result.proposed_raw_patch.sample_width_cm;
+          const raw=Number((Number(cm)*.01/CONVERSIONS[width.raw.unit][1]).toPrecision(14));
+          result.proposed_raw_patch={sample_width_raw:String(raw)};
+          if(hasValue(input.record.raw_input.sample_width_cm))result.proposed_raw_patch.sample_width_cm=cm;
+        }
+        return result;
+      }};
+      const result=await proposeReevaluation(store,{study_id,trial_id,revision_id,field},{adapter});
       if(version!==requestVersion.current) return;
       if(result.status==='PROPOSAL_READY_FOR_CONFIRMATION')setPending(result);
       setMessage([result.error?.message||result.error?.code||result.status,result.rationale].filter(Boolean).join(' · '));
@@ -94,7 +118,8 @@ export default function Atlas(){
     };
     if(navigator.locks) await navigator.locks.request('skyforge.atlas.write',apply); else apply();
   }
-  function makePreview(value=text,fmt=format){clearProposal();setPreview(store.preview(value,fmt));setAck(false);setMessage('');}
+  function clearImportPreview(){importVersion.current++;setPreview(null);setAck(false);}
+  function makePreview(value=text,fmt=format){clearImportPreview();clearProposal();setPreview(store.preview(value,fmt));setMessage('');}
   async function save(){
     const commit=()=>{const result=store.commit(preview,{confirmed:true,acknowledgeFlags:ack}); if(result.ok){setLoaded({ok:true,database:result.database});setPreview(null);setMessage(`${tr('Saqlandi','Saved')}: ${result.changes.length}; unchanged: ${result.unchanged}`);}else setMessage(result.error.code);};
     if(navigator.locks) await navigator.locks.request('skyforge.atlas.write',commit); else commit();
@@ -112,11 +137,15 @@ export default function Atlas(){
     }catch(e){setMessage(e.message);}
   }
   async function readFile(file){
-    setPreview(null);
     if(!file)return;
+    clearImportPreview();
+    const version=importVersion.current;
     if(file.size>5_000_000){setMessage('IMPORT_FILE_TOO_LARGE');return;}
-    try{setText(await file.text());setFormat(file.name.toLowerCase().endsWith('.json')?'json':'csv');setMessage('');}
-    catch(e){setMessage(`IMPORT_FILE_READ_FAILED: ${e.message}`);}
+    try{
+      const value=await file.text();
+      if(version!==importVersion.current)return;
+      setText(value);setFormat(file.name.toLowerCase().endsWith('.json')?'json':'csv');setMessage('');
+    }catch(e){if(version===importVersion.current)setMessage(`IMPORT_FILE_READ_FAILED: ${e.message}`);}
   }
   return <div className="atlas-app"><header><a href="#main">SKYFORGE <small>FIRE ATLAS</small></a><span>{records.length} {tr('ulangan sinov','connected trials')} · {tr('NASA ma’lumotlari','NASA data')}</span><button onClick={()=>setLang(lang==='uz'?'en':'uz')}>{lang==='uz'?'English':'O‘zbekcha'}</button></header>
     <main id="main"><div className="intro"><p>NASA · BASS-II · PSI-25</p><h1>{tr('Savoldan dalilgacha.','From question to evidence.')}</h1><p>{tr('Sinovlarni solishtiring. Har bir qiymatning manbasini oching.','Compare trials. Open the source behind each value.')}</p></div>
@@ -144,9 +173,9 @@ export default function Atlas(){
       <ul>{catalog.filter(item=>!literal||[item.id,item.title,item.name].some(value=>String(value??'').toLowerCase().includes(literal))).map(item=>
         <li key={item.id}><a href={'https://psi.nasa.gov/physci/repo/data/investigations/'+item.id} target="_blank" rel="noreferrer">{item.id} · {item.title}</a></li>)}</ul>
     </details></section>
-    <section><h2>03 · Atlas <small>{chosen.length}/3</small></h2>{!chosen.length&&<p>{tr('Study oching va 1–3 sinov tanlang.','Open a study and select 1–3 trials.')}</p>}<div className="comparison">{chosen.map(r=><article key={key(r)}><h3>{r.trial_id}</h3><h4>{tr('Pasport va cheklovlar','Passport and limitations')}</h4><p>{r.material} · {r.claim_type}</p><p>{r.sample_history.value||r.sample_history.status}</p><p className="chip">{sourceReview(r).status} · {r.review.scientific_verification}</p><h4>{tr('O‘lchovlar','Measurements')}</h4>{r.parameters.map(p=><div className="measurement" key={p.param_key}><span>{p.param_key}</span><button onClick={e=>proof(e,r,p.param_key)}>{p.raw_display}</button><small>SI: {p.si_display} · {p.direction} · {p.location} · {p.status}</small></div>)}<h4>{tr('Natija va gap','Outcome and gap')}</h4><button onClick={e=>proof(e,r,'outcome')}>{r.outcome.raw_display}</button><p>{gap.status}</p><h4>{tr('Dalil va workspace','Evidence and workspace')}</h4><p>{r.review.reasons.join(' · ')||'UNREVIEWED'}</p>{r.study_id==='PSI-25'&&<button disabled={busy} onClick={()=>recheck(r)}>{tr('Enni API orqali tekshirish','Check width with API')}</button>}<button onClick={e=>proof(e,r,'sample_history')}>{tr('Namuna tarixi dalili','Sample history evidence')}</button></article>)}</div><label>{tr('Chegaralangan xulosa tekshiruvi','Bounded conclusion check')}<select value={claim} onChange={e=>setClaim(e.target.value)}>{['T20_T21_OXYGEN_SAME','T20_T21_OXYGEN_DIFFERENT','T20_T21_NEW','T25_QUENCHED','BASS_ON_MOON','MOON_MARS_RISK_PERCENT'].map(x=><option key={x}>{x}</option>)}</select></label><p>{checkBoundedClaim(claim).verdict}: {checkBoundedClaim(claim).reason}</p></section>
+    <section><h2>03 · Atlas <small>{chosen.length}/3</small></h2>{!chosen.length&&<p>{tr('Study oching va 1–3 sinov tanlang.','Open a study and select 1–3 trials.')}</p>}<div className="comparison">{chosen.map(r=><article key={key(r)}><h3>{r.trial_id}</h3><h4>{tr('Pasport va cheklovlar','Passport and limitations')}</h4><p>{r.material} · {r.claim_type}</p><p>{r.sample_history.value||r.sample_history.status}</p><p className="chip">{sourceReview(r).status} · {r.review.scientific_verification}</p><h4>{tr('O‘lchovlar','Measurements')}</h4>{r.parameters.map(p=><div className="measurement" key={p.param_key}><span>{p.param_key}</span><button onClick={e=>proof(e,r,p.param_key)}>{p.raw_display}</button><small>SI: {p.si_display} · {p.direction} · {p.location} · {p.status}</small></div>)}<h4>{tr('Natija va gap','Outcome and gap')}</h4><button onClick={e=>proof(e,r,'outcome')}>{r.outcome.raw_display}</button><p>{gap.status}</p><h4>{tr('Dalil va workspace','Evidence and workspace')}</h4><p>{r.review.reasons.join(' · ')||'UNREVIEWED'}</p>{supportedTrials.has(key(r))&&widthOf(r)?.status==='MEASURED'&&<button disabled={busy} onClick={()=>recheck(r)}>{tr('Enni API orqali tekshirish','Check width with API')}</button>}<button onClick={e=>proof(e,r,'sample_history')}>{tr('Namuna tarixi dalili','Sample history evidence')}</button></article>)}</div><label>{tr('Chegaralangan xulosa tekshiruvi','Bounded conclusion check')}<select value={claim} onChange={e=>setClaim(e.target.value)}>{['T20_T21_OXYGEN_SAME','T20_T21_OXYGEN_DIFFERENT','T20_T21_NEW','T25_QUENCHED','BASS_ON_MOON','MOON_MARS_RISK_PERCENT'].map(x=><option key={x}>{x}</option>)}</select></label><p>{checkBoundedClaim(claim).verdict}: {checkBoundedClaim(claim).reason}</p></section>
     {evidence&&<aside className="proof" tabIndex="-1" ref={evidenceRef} aria-label="Evidence panel" onKeyDown={event=>{if(event.key==='Escape')closeProof();}}><button onClick={closeProof}>{tr('Yopish','Close')}</button><h2>Click-to-Prove · {evidence.trial}</h2><h3>{evidence.field}</h3><p>{evidence.revision_id}</p><p>{evidence.scientific_verification}</p>{evidence.detail&&<details><summary>Field provenance</summary><pre>{JSON.stringify(evidence.detail,null,2)}</pre></details>}{evidence.sources?.map(s=><div key={s.source_ref_id}><a href={s.url||s.source_url} target="_blank" rel="noreferrer">{s.document_id} · PDF {s.pdf_page} / {tr('bosma','printed')} {s.printed_page} · Table {s.table} · {s.row_id}</a><blockquote>{s.excerpt||s.source_excerpt}</blockquote><pre>{JSON.stringify(s,null,2)}</pre></div>)}</aside>}
-    <section><h2>04 · Import / diff / confirm</h2><p>{tr('NASA jadvalini oling yoki CSV/JSON yuklang. Qiymatlarni saqlashdan oldin ko‘rib chiqing.','Fetch the NASA table or upload CSV/JSON. Review the values before saving.')}</p><button disabled={busy} onClick={fromNasa}>{tr('NASA’dan olish','Fetch from NASA')}</button>{busy&&<p role="status">{tr('So‘rov bajarilmoqda…','Request in progress…')}</p>}<input type="file" accept=".csv,.json" aria-label="Import file" onChange={e=>readFile(e.target.files[0])}/><label>Format<select value={format} onChange={e=>{setFormat(e.target.value);setPreview(null);}}><option>csv</option><option>json</option></select></label><label>{tr('Import matni','Import text')}<textarea value={text} onChange={e=>{setText(e.target.value);setPreview(null);}} rows="5"/></label><div className="controls"><button onClick={()=>{setText(t25);setFormat('csv');makePreview(t25,'csv');}}>T25 demo preview</button><button disabled={!loaded.ok} onClick={()=>makePreview()}>Preview</button></div>{preview&&<div><h3>Preview · {preview.ok?'READY':'ERROR'}</h3>{preview.error&&<p role="alert">{preview.error.code}</p>}{preview.errors?.map((e,i)=><p role="alert" key={i}>Row {e.row}: {e.message}</p>)}{preview.entries?.map((e,i)=><details key={i}><summary>{e.record.trial_id}: {e.action}</summary><p>{e.record.review.reasons.join(' · ')}</p><pre>{JSON.stringify({previous:records.find(r=>key(r)===key(e.record))?.raw_input||null,incoming:e.record.raw_input},null,2)}</pre></details>)}<label><input type="checkbox" checked={ack} onChange={e=>setAck(e.target.checked)}/>{tr('Bayroqlarni ko‘rdim, importni tasdiqlayman','I reviewed the flags and confirm this import')}</label><button disabled={!preview.ok||!ack} onClick={save}>{tr('Tasdiqlash va saqlash','Confirm and save')}</button><button onClick={()=>setPreview(null)}>{tr('Bekor qilish','Cancel')}</button></div>}</section>
+    <section><h2>04 · Import / diff / confirm</h2><p>{tr('NASA jadvalini oling yoki CSV/JSON yuklang. Qiymatlarni saqlashdan oldin ko‘rib chiqing.','Fetch the NASA table or upload CSV/JSON. Review the values before saving.')}</p><button disabled={busy} onClick={fromNasa}>{tr('NASA’dan olish','Fetch from NASA')}</button>{busy&&<p role="status">{tr('So‘rov bajarilmoqda…','Request in progress…')}</p>}<input type="file" accept=".csv,.json" aria-label="Import file" onChange={e=>readFile(e.target.files[0])}/><label>Format<select value={format} onChange={e=>{setFormat(e.target.value);clearImportPreview();}}><option>csv</option><option>json</option></select></label><label>{tr('Import matni','Import text')}<textarea value={text} onChange={e=>{setText(e.target.value);clearImportPreview();}} rows="5"/></label><div className="controls"><button onClick={()=>{setText(t25);setFormat('csv');makePreview(t25,'csv');}}>T25 demo preview</button><button disabled={!loaded.ok} onClick={()=>makePreview()}>Preview</button></div>{preview&&<div><h3>Preview · {preview.ok?'READY':'ERROR'}</h3>{preview.error&&<p role="alert">{preview.error.code}</p>}{preview.errors?.map((e,i)=><p role="alert" key={i}>Row {e.row}: {e.message}</p>)}{preview.entries?.map((e,i)=><details key={i}><summary>{e.record.trial_id}: {e.action}</summary><p>{e.record.review.reasons.join(' · ')}</p><pre>{JSON.stringify({previous:records.find(r=>key(r)===key(e.record))?.raw_input||null,incoming:e.record.raw_input},null,2)}</pre></details>)}<label><input type="checkbox" checked={ack} onChange={e=>setAck(e.target.checked)}/>{tr('Bayroqlarni ko‘rdim, importni tasdiqlayman','I reviewed the flags and confirm this import')}</label><button disabled={!preview.ok||!ack} onClick={save}>{tr('Tasdiqlash va saqlash','Confirm and save')}</button><button onClick={clearImportPreview}>{tr('Bekor qilish','Cancel')}</button></div>}</section>
     {pending&&<section aria-label="API correction"><h2>{tr('API tuzatish taklifi','API correction proposal')}</h2>
       <p>{pending.trial_id} · {pending.base_revision_id}</p>
       {pending.preview_entry?.record.sources.map(source=><a key={source.source_ref_id} href={source.url} target="_blank" rel="noreferrer">{source.document_id} · Table {source.table} · {source.row_id}</a>)}

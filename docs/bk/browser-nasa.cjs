@@ -11,6 +11,7 @@ try{
  await page.getByText('GMT216-T25: INSERT',{exact:true}).waitFor();
  await page.getByRole('checkbox',{name:/Bayroqlarni/}).check();
  await page.getByRole('button',{name:'Tasdiqlash va saqlash'}).click();
+ await page.getByText('Saqlandi: 3; unchanged: 0',{exact:true}).waitFor();
  await page.reload();
  await page.getByRole('textbox',{name:/Tajriba savoli/}).fill('GMT216-T25');
  await page.getByText('PSI-25 · BASS-II (1)',{exact:true}).click();

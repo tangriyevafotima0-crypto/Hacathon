@@ -140,7 +140,12 @@ export async function proposeReevaluation(store, request, options = {}) {
   delete safePatch.study_id;
   delete safePatch.study;
   delete safePatch.trial_id;
-  if (request.field && (Object.keys(safePatch).length !== 1 || !Object.hasOwn(safePatch, request.field))) {
+  const fields = Object.keys(safePatch);
+  // A width represented in both forms must be updated atomically. Import validation checks their equality.
+  const pairedWidth = request.field === 'sample_width_raw' && fields.length === 2 &&
+    ['sample_width_raw', 'sample_width_cm'].every(field =>
+      Object.hasOwn(safePatch, field) && String(originalRaw[field] ?? '').trim() !== '');
+  if (request.field && !pairedWidth && (fields.length !== 1 || !Object.hasOwn(safePatch, request.field))) {
     return freeze({ ok: false, status: 'PROVIDER_ERROR', error: { code: 'UNEXPECTED_PATCH_FIELDS' } });
   }
   const candidateRaw = { ...originalRaw, ...safePatch };
@@ -159,7 +164,7 @@ export async function proposeReevaluation(store, request, options = {}) {
   }
 
   // Validate candidate row via store.preview (read-only)
-  const previewPlan = store.preview(JSON.stringify([candidateRaw]), 'json');
+  const previewPlan = store.preview(JSON.stringify([candidateRaw]), 'json', { allowHistoricalRevision: true });
   if (!previewPlan.ok) {
     return freeze({
       ok: false,

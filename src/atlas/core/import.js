@@ -101,7 +101,7 @@ export function readImport(text, format) {
   return rows;
 }
 
-export function previewImport(text, format, database) {
+export function previewImport(text, format, database, { allowHistoricalRevision = false } = {}) {
   const entries = [], errors = [], seen = new Map();
   let rows;
   try { rows = readImport(text, format); } catch (error) { return freeze({ ok:false, entries:[], errors:[{ row:null, message:error.message }] }); }
@@ -116,7 +116,8 @@ export function previewImport(text, format, database) {
       }
       seen.set(key, signature);
       const existing = database.trials.find(t => trialKey(t.study_id, t.trial_id) === key);
-      const previous = existing?.revisions.find(r => stable(r.record) === signature);
+      const previous = existing?.revisions.find(r =>
+        (!allowHistoricalRevision || r.revision_id === existing.active_revision_id) && stable(r.record) === signature);
       entries.push({ row:i + 1, key, action: previous ? 'UNCHANGED' : existing ? 'NEW_REVISION' : 'INSERT',
         matched_revision_id: previous?.revision_id ?? null, record });
     } catch (error) { errors.push({ row:i + 1, message:error.message }); }

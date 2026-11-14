@@ -36,12 +36,12 @@ export function openAtlasStore(storage, { key = STORE_KEY, clock = () => new Dat
       return { ok:true, raw, database:freeze(raw === null ? emptyDatabase() : validateDatabase(JSON.parse(raw))) };
     } catch (error) { return { ok:false, error:{ code:'STORE_READ_FAILED', message:error.message } }; }
   }
-  function preview(text, format) {
+  function preview(text, format, { allowHistoricalRevision = false } = {}) {
     const loaded = read();
     if (!loaded.ok) return loaded;
-    const preview = previewImport(text, format, loaded.database);
+    const preview = previewImport(text, format, loaded.database, { allowHistoricalRevision });
     const plan = freeze({ ...preview, base_generation: loaded.database.generation });
-    if (plan.ok) plans.set(plan, { text, format, base:loaded.raw });
+    if (plan.ok) plans.set(plan, { text, format, base:loaded.raw, allowHistoricalRevision });
     return plan;
   }
   function commit(plan, { confirmed = false, acknowledgeFlags = false } = {}) {
@@ -53,7 +53,7 @@ export function openAtlasStore(storage, { key = STORE_KEY, clock = () => new Dat
     if (!loaded.ok) return loaded;
     if (loaded.raw !== pending.base) return { ok:false, error:{ code:'STALE_PREVIEW', message:'Reload and preview again; another write changed the store.' } };
     // Re-extract instead of trusting a caller-modified preview object.
-    const checked = previewImport(pending.text, pending.format, loaded.database);
+    const checked = previewImport(pending.text, pending.format, loaded.database, pending);
     if (!checked.ok) return { ok:false, error:{ code:'INVALID_PREVIEW' } };
     const next = clone(loaded.database), changes = [];
     try {

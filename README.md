@@ -1,6 +1,6 @@
 # SKYFORGE Fire Atlas
 
-Z01 foundation for team SKYFORGE. Shared repository: https://github.com/tangriyevafotima0-crypto/Hacathon
+Atlas core for team SKYFORGE. Shared repository: https://github.com/tangriyevafotima0-crypto/Hacathon
 
 The initial repository was empty. This import contains the supplied React/Vite educational prototype plus Z Codex's isolated Atlas core. The visible prototype is not yet the Bk Fire Atlas interface. Its illustrative risk formula is not used by the Atlas core.
 
@@ -9,12 +9,12 @@ The initial repository was empty. This import contains the supplied React/Vite e
 | Component | Status |
 | --- | --- |
 | Z01 data contract, CSV/JSON import, revisions, provenance, raw/SI and storage adapter | Implemented |
-| Tests | 23 passed locally: 3 original model tests + 20 Atlas tests |
+| Tests | 32 passed locally: 3 original model tests, 20 Z01 tests, and 9 Z02 tests |
 | Import/reload/repeated-import core demo | Passed with injected storage and disk reload |
-| Production build | PASS in GitHub Actions on `04df762` with the unchanged lockfile |
+| Production build | PASS locally and in [Z02 GitHub Actions](https://github.com/tangriyevafotima0-crypto/Hacathon/actions/runs/43577442863) |
 | D authoritative data and scientific review | Pending integration |
 | Bk Atlas UI and real browser acceptance | Pending integration |
-| Z02 query/ranking/gap/conclusion/API | Next stage; not implemented |
+| Z02 query/ranking/gap/conclusion/API | Implemented in the Atlas core. See the [Z02 contract](docs/z02/CONTRACT.md). |
 | Analyzer / PM approval | Pending |
 
 ## Verified repository baseline
@@ -37,6 +37,7 @@ Core tests and demonstration need no installed frontend dependencies:
 ```sh
 npm test
 npm run demo:z01
+npm run demo:z02
 ```
 
 ## Team integration
@@ -48,5 +49,7 @@ npm run demo:z01
 - Make small owner-specific branches and pull requests. Agree shared entrypoint/type changes before merging. Do not overwrite other owners' work.
 
 Start with [Z01 contract](docs/z01/CONTRACT.md), [original artifact handoff](docs/z01/HANDOFF.md), and [GitHub handoff and next steps](docs/z01/GITHUB-HANDOFF.md). The original prototype instructions are retained in [PROTOTYPE-README.md](docs/z01/PROTOTYPE-README.md). Logs describe observed checks of Z01-v1.0.0; GitHub integration metadata is recorded separately.
+
+For the Z02 API, integration example, and test results, see the [Z02 handoff](Z02-HANDOFF.md). Its historical Argon runs are recorded alongside the local Windows results.
 
 Import confirmation is separate from scientific verification. T20/T21 history remains unknown, T25 remains reused and flagged; no unsupported NASA verification or predictive safety claim is made.

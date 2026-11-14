@@ -1,0 +1,13 @@
+
+> skyforge-dashboard@1.0.0 demo:z02
+> node scripts/z02-demo.mjs
+
+QUERY_EQUIVALENCE {"equal":true,"canonical":[{"field":"domain","operator":"eq","value":"PREVENTION_SOLID","si_value":null,"unit":null,"location":null,"direction":null,"status":"PARSED"},{"field":"environment","operator":"eq","value":"FLIGHT_0G","si_value":null,"unit":null,"location":null,"direction":null,"status":"PARSED"},{"field":"fuel_type","operator":"eq","value":"SOLID_FABRIC","si_value":null,"unit":null,"location":null,"direction":null,"status":"PARSED"},{"field":"material","operator":"eq","value":"SIBAL","si_value":null,"unit":null,"location":null,"direction":null,"status":"PARSED"},{"field":"o2_concentration","operator":"approx","value":0.172,"si_value":0.172,"unit":"mol/mol","location":"chamber_atmosphere","direction":"constant","status":"PARSED"},{"field":"oxygen_location","operator":"eq","value":"chamber_atmosphere","si_value":null,"unit":null,"location":"chamber_atmosphere","direction":null,"status":"PARSED"},{"field":"unit_family","operator":"eq","value":"FAMILY_B_ATMOS_THERMO","si_value":null,"unit":null,"location":null,"direction":null,"status":"PARSED"}]}
+RANKING [{"rank":1,"trial":"GMT190-T20","tier":1,"alignment_score":1,"sensitivity_warning":false},{"rank":2,"trial":"GMT190-T21","tier":1,"alignment_score":1,"sensitivity_warning":false},{"rank":3,"trial":"GMT216-T25","tier":2,"alignment_score":0.955,"sensitivity_warning":false}]
+LIBRARY_STUDIES [{"study_id":"PSI-25","trials":["GMT190-T20","GMT190-T21","GMT216-T25"]}]
+SELECTION_VALID {"ok":true,"count":2}
+LUNAR_GAP {"status":"Related evidence with different conditions","interpolation_blocked":true}
+COMPARISON_OUTCOMES [{"key":"[\"PSI-25\",\"GMT190-T20\"]","study_id":"PSI-25","trial_id":"GMT190-T20","revision_id":"[\"PSI-25\",\"GMT190-T20\"]:r1","outcome_raw_display":"Quenched","outcome_status":"MEASURED"},{"key":"[\"PSI-25\",\"GMT190-T21\"]","study_id":"PSI-25","trial_id":"GMT190-T21","revision_id":"[\"PSI-25\",\"GMT190-T21\"]:r1","outcome_raw_display":"Blow-off","outcome_status":"MEASURED"}]
+CONCLUSION_GUARD {"ok":true,"status":"APPROVED_WITH_PROVENANCE"}
+API_STATUS {"available":false,"status":"API_UNAVAILABLE","message":"API unavailable: no configured re-evaluation adapter exists in this repository."}
+ARTIFACTS docs/z02/demo-output/{report.json,report.csv}

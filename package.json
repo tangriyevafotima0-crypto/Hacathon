@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "scripts": { "dev": "vite --host 127.0.0.1", "build": "vite build", "preview": "vite preview --host 127.0.0.1", "test": "node --test src/model.test.js tests/atlas/*.test.js", "demo:z01": "node scripts/z01-demo.mjs" },
+  "scripts": { "dev": "vite --host 127.0.0.1", "build": "vite build", "preview": "vite preview --host 127.0.0.1", "test": "node --test src/model.test.js tests/atlas/*.test.js", "demo:z01": "node scripts/z01-demo.mjs", "demo:z02": "node scripts/z02-demo.mjs" },
   "dependencies": { "react": "^19.2.0", "react-dom": "^19.2.0", "lucide-react": "^0.468.0" },
   "devDependencies": { "vite": "^7.2.2", "@vitejs/plugin-react": "^5.1.0", "tailwindcss": "^4.1.17", "@tailwindcss/vite": "^4.1.17" },
   "engines": { "node": ">=22.12.0" }

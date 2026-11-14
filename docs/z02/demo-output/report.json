@@ -1,0 +1,633 @@
+{
+  "report_schema": "skyforge.atlas.report/1",
+  "export_mode": "PRESENTATION_REPORT_NOT_IMPORT_EXCHANGE",
+  "importable_exchange": false,
+  "database_generation": 2,
+  "row_count": 3,
+  "rows": [
+    {
+      "report_schema": "skyforge.atlas.report/1",
+      "export_mode": "PRESENTATION_REPORT_NOT_IMPORT_EXCHANGE",
+      "importable_exchange": false,
+      "study_id": "PSI-25",
+      "trial_id": "GMT190-T20",
+      "revision_id": "[\"PSI-25\",\"GMT190-T20\"]:r1",
+      "parent_revision_id": "",
+      "created_at": "2026-11-14T08:30:00.000Z",
+      "import_format": "json",
+      "user_confirmation": "CONFIRMED",
+      "scientific_verification": "NOT_VERIFIED",
+      "review_status": "FLAGGED_FOR_REVIEW",
+      "review_reasons": "SAMPLE_HISTORY_MISSING",
+      "claim_type": "OBSERVATION",
+      "material": "SIBAL",
+      "sample_history_value": "",
+      "sample_history_status": "NOT_PROVIDED",
+      "sample_history_source_ref_ids": "PSI-25:GMT190-T20:source",
+      "outcome_display": "Quenched",
+      "outcome_status": "MEASURED",
+      "outcome_source_ref_ids": "PSI-25:GMT190-T20:source",
+      "sample_width_status": "MEASURED",
+      "sample_width_raw_text": "1.2",
+      "sample_width_raw_unit": "cm",
+      "sample_width_raw_values": "1.2",
+      "sample_width_raw_display": "1.2 cm",
+      "sample_width_si_values": "0.012",
+      "sample_width_si_unit": "m",
+      "sample_width_si_display": "0.012 m",
+      "sample_width_direction": "constant",
+      "sample_width_location": "sample_surface",
+      "sample_width_source_ref_ids": "PSI-25:GMT190-T20:source",
+      "flow_velocity_status": "MEASURED",
+      "flow_velocity_raw_text": "11 to 3",
+      "flow_velocity_raw_unit": "cm/s",
+      "flow_velocity_raw_values": "11 -> 3",
+      "flow_velocity_raw_display": "11 to 3 cm/s",
+      "flow_velocity_si_values": "0.11 -> 0.03",
+      "flow_velocity_si_unit": "m/s",
+      "flow_velocity_si_display": "0.11 → 0.03 m/s",
+      "flow_velocity_direction": "decreasing",
+      "flow_velocity_location": "chamber_atmosphere",
+      "flow_velocity_source_ref_ids": "PSI-25:GMT190-T20:source",
+      "o2_concentration_status": "MEASURED",
+      "o2_concentration_raw_text": "17.2",
+      "o2_concentration_raw_unit": "vol%",
+      "o2_concentration_raw_values": "17.2",
+      "o2_concentration_raw_display": "17.2 vol%",
+      "o2_concentration_si_values": "0.172",
+      "o2_concentration_si_unit": "mol/mol",
+      "o2_concentration_si_display": "0.172 mol/mol",
+      "o2_concentration_direction": "constant",
+      "o2_concentration_location": "chamber_atmosphere",
+      "o2_concentration_source_ref_ids": "PSI-25:GMT190-T20:source",
+      "source_ref_id": "PSI-25:GMT190-T20:source",
+      "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+      "document_id": "NASA/TM-20210011385",
+      "pdf_page": 104,
+      "printed_page": 96,
+      "table": "7.1",
+      "row_id": "GMT190-T20",
+      "source_excerpt": "GMT190-T20 | 1.2 | 11 to 3 | 17.2 | Quenched",
+      "excerpt_kind": "TABLE_TRANSCRIPTION",
+      "field_source_refs_json": "{\"material\":[\"PSI-25:GMT190-T20:source\"],\"outcome\":[\"PSI-25:GMT190-T20:source\"],\"sample_history\":[\"PSI-25:GMT190-T20:source\"],\"sample_width\":[\"PSI-25:GMT190-T20:source\"],\"flow_velocity\":[\"PSI-25:GMT190-T20:source\"],\"o2_concentration\":[\"PSI-25:GMT190-T20:source\"]}"
+    },
+    {
+      "report_schema": "skyforge.atlas.report/1",
+      "export_mode": "PRESENTATION_REPORT_NOT_IMPORT_EXCHANGE",
+      "importable_exchange": false,
+      "study_id": "PSI-25",
+      "trial_id": "GMT190-T21",
+      "revision_id": "[\"PSI-25\",\"GMT190-T21\"]:r1",
+      "parent_revision_id": "",
+      "created_at": "2026-11-14T08:30:00.000Z",
+      "import_format": "json",
+      "user_confirmation": "CONFIRMED",
+      "scientific_verification": "NOT_VERIFIED",
+      "review_status": "FLAGGED_FOR_REVIEW",
+      "review_reasons": "SAMPLE_HISTORY_MISSING",
+      "claim_type": "OBSERVATION",
+      "material": "SIBAL",
+      "sample_history_value": "",
+      "sample_history_status": "NOT_PROVIDED",
+      "sample_history_source_ref_ids": "PSI-25:GMT190-T21:source",
+      "outcome_display": "Blow-off",
+      "outcome_status": "MEASURED",
+      "outcome_source_ref_ids": "PSI-25:GMT190-T21:source",
+      "sample_width_status": "MEASURED",
+      "sample_width_raw_text": "1.2",
+      "sample_width_raw_unit": "cm",
+      "sample_width_raw_values": "1.2",
+      "sample_width_raw_display": "1.2 cm",
+      "sample_width_si_values": "0.012",
+      "sample_width_si_unit": "m",
+      "sample_width_si_display": "0.012 m",
+      "sample_width_direction": "constant",
+      "sample_width_location": "sample_surface",
+      "sample_width_source_ref_ids": "PSI-25:GMT190-T21:source",
+      "flow_velocity_status": "MEASURED",
+      "flow_velocity_raw_text": "11 to 47",
+      "flow_velocity_raw_unit": "cm/s",
+      "flow_velocity_raw_values": "11 -> 47",
+      "flow_velocity_raw_display": "11 to 47 cm/s",
+      "flow_velocity_si_values": "0.11 -> 0.47",
+      "flow_velocity_si_unit": "m/s",
+      "flow_velocity_si_display": "0.11 → 0.47 m/s",
+      "flow_velocity_direction": "increasing",
+      "flow_velocity_location": "chamber_atmosphere",
+      "flow_velocity_source_ref_ids": "PSI-25:GMT190-T21:source",
+      "o2_concentration_status": "MEASURED",
+      "o2_concentration_raw_text": "17.2",
+      "o2_concentration_raw_unit": "vol%",
+      "o2_concentration_raw_values": "17.2",
+      "o2_concentration_raw_display": "17.2 vol%",
+      "o2_concentration_si_values": "0.172",
+      "o2_concentration_si_unit": "mol/mol",
+      "o2_concentration_si_display": "0.172 mol/mol",
+      "o2_concentration_direction": "constant",
+      "o2_concentration_location": "chamber_atmosphere",
+      "o2_concentration_source_ref_ids": "PSI-25:GMT190-T21:source",
+      "source_ref_id": "PSI-25:GMT190-T21:source",
+      "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+      "document_id": "NASA/TM-20210011385",
+      "pdf_page": 104,
+      "printed_page": 96,
+      "table": "7.1",
+      "row_id": "GMT190-T21",
+      "source_excerpt": "GMT190-T21 | 1.2 | 11 to 47 | 17.2 | Blow-off",
+      "excerpt_kind": "TABLE_TRANSCRIPTION",
+      "field_source_refs_json": "{\"material\":[\"PSI-25:GMT190-T21:source\"],\"outcome\":[\"PSI-25:GMT190-T21:source\"],\"sample_history\":[\"PSI-25:GMT190-T21:source\"],\"sample_width\":[\"PSI-25:GMT190-T21:source\"],\"flow_velocity\":[\"PSI-25:GMT190-T21:source\"],\"o2_concentration\":[\"PSI-25:GMT190-T21:source\"]}"
+    },
+    {
+      "report_schema": "skyforge.atlas.report/1",
+      "export_mode": "PRESENTATION_REPORT_NOT_IMPORT_EXCHANGE",
+      "importable_exchange": false,
+      "study_id": "PSI-25",
+      "trial_id": "GMT216-T25",
+      "revision_id": "[\"PSI-25\",\"GMT216-T25\"]:r1",
+      "parent_revision_id": "",
+      "created_at": "2026-11-14T08:30:00.000Z",
+      "import_format": "csv",
+      "user_confirmation": "CONFIRMED",
+      "scientific_verification": "NOT_VERIFIED",
+      "review_status": "FLAGGED_FOR_REVIEW",
+      "review_reasons": "REUSED_SAMPLE;SOURCE_LOCATOR_OR_EXCERPT_INCOMPLETE",
+      "claim_type": "OBSERVATION",
+      "material": "SIBAL",
+      "sample_history_value": "REUSED",
+      "sample_history_status": "MEASURED",
+      "sample_history_source_ref_ids": "PSI-25:GMT216-T25:source",
+      "outcome_display": "Reused, ignited",
+      "outcome_status": "MEASURED",
+      "outcome_source_ref_ids": "PSI-25:GMT216-T25:source",
+      "sample_width_status": "MEASURED",
+      "sample_width_raw_text": "2.2",
+      "sample_width_raw_unit": "cm",
+      "sample_width_raw_values": "2.2",
+      "sample_width_raw_display": "2.2 cm",
+      "sample_width_si_values": "0.022",
+      "sample_width_si_unit": "m",
+      "sample_width_si_display": "0.022 m",
+      "sample_width_direction": "constant",
+      "sample_width_location": "sample_surface",
+      "sample_width_source_ref_ids": "PSI-25:GMT216-T25:source",
+      "flow_velocity_status": "MEASURED",
+      "flow_velocity_raw_text": "5 to 2.5",
+      "flow_velocity_raw_unit": "cm/s",
+      "flow_velocity_raw_values": "5 -> 2.5",
+      "flow_velocity_raw_display": "5 to 2.5 cm/s",
+      "flow_velocity_si_values": "0.05 -> 0.025",
+      "flow_velocity_si_unit": "m/s",
+      "flow_velocity_si_display": "0.05 → 0.025 m/s",
+      "flow_velocity_direction": "decreasing",
+      "flow_velocity_location": "chamber_atmosphere",
+      "flow_velocity_source_ref_ids": "PSI-25:GMT216-T25:source",
+      "o2_concentration_status": "MEASURED",
+      "o2_concentration_raw_text": "20.8",
+      "o2_concentration_raw_unit": "vol%",
+      "o2_concentration_raw_values": "20.8",
+      "o2_concentration_raw_display": "20.8 vol%",
+      "o2_concentration_si_values": "0.208",
+      "o2_concentration_si_unit": "mol/mol",
+      "o2_concentration_si_display": "0.208 mol/mol",
+      "o2_concentration_direction": "constant",
+      "o2_concentration_location": "chamber_atmosphere",
+      "o2_concentration_source_ref_ids": "PSI-25:GMT216-T25:source",
+      "source_ref_id": "PSI-25:GMT216-T25:source",
+      "source_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+      "document_id": "NOT_PROVIDED",
+      "pdf_page": 104,
+      "printed_page": 96,
+      "table": "7.1",
+      "row_id": "GMT216-T25",
+      "source_excerpt": "",
+      "excerpt_kind": "NOT_PROVIDED",
+      "field_source_refs_json": "{\"material\":[\"PSI-25:GMT216-T25:source\"],\"outcome\":[\"PSI-25:GMT216-T25:source\"],\"sample_history\":[\"PSI-25:GMT216-T25:source\"],\"sample_width\":[\"PSI-25:GMT216-T25:source\"],\"flow_velocity\":[\"PSI-25:GMT216-T25:source\"],\"o2_concentration\":[\"PSI-25:GMT216-T25:source\"]}"
+    }
+  ],
+  "records": [
+    {
+      "study_id": "PSI-25",
+      "trial_id": "GMT190-T20",
+      "revision_id": "[\"PSI-25\",\"GMT190-T20\"]:r1",
+      "parent_revision_id": null,
+      "created_at": "2026-11-14T08:30:00.000Z",
+      "user_confirmation": "CONFIRMED",
+      "scientific_verification": "NOT_VERIFIED",
+      "review": {
+        "status": "FLAGGED_FOR_REVIEW",
+        "reasons": [
+          "SAMPLE_HISTORY_MISSING"
+        ],
+        "scientific_verification": "NOT_VERIFIED"
+      },
+      "claim_type": "OBSERVATION",
+      "material": "SIBAL",
+      "sample_history": {
+        "value": null,
+        "status": "NOT_PROVIDED",
+        "source_ref_ids": [
+          "PSI-25:GMT190-T20:source"
+        ]
+      },
+      "outcome": {
+        "raw_display": "Quenched",
+        "status": "MEASURED",
+        "source_ref_ids": [
+          "PSI-25:GMT190-T20:source"
+        ]
+      },
+      "parameters": [
+        {
+          "param_key": "sample_width",
+          "status": "MEASURED",
+          "raw_display": "1.2 cm",
+          "raw": {
+            "text": "1.2",
+            "unit": "cm",
+            "values": [
+              1.2
+            ]
+          },
+          "si": {
+            "unit": "m",
+            "values": [
+              0.012
+            ]
+          },
+          "si_display": "0.012 m",
+          "direction": "constant",
+          "location": "sample_surface",
+          "source_ref_ids": [
+            "PSI-25:GMT190-T20:source"
+          ]
+        },
+        {
+          "param_key": "flow_velocity",
+          "status": "MEASURED",
+          "raw_display": "11 to 3 cm/s",
+          "raw": {
+            "text": "11 to 3",
+            "unit": "cm/s",
+            "values": [
+              11,
+              3
+            ]
+          },
+          "si": {
+            "unit": "m/s",
+            "values": [
+              0.11,
+              0.03
+            ]
+          },
+          "si_display": "0.11 → 0.03 m/s",
+          "direction": "decreasing",
+          "location": "chamber_atmosphere",
+          "source_ref_ids": [
+            "PSI-25:GMT190-T20:source"
+          ]
+        },
+        {
+          "param_key": "o2_concentration",
+          "status": "MEASURED",
+          "raw_display": "17.2 vol%",
+          "raw": {
+            "text": "17.2",
+            "unit": "vol%",
+            "values": [
+              17.2
+            ]
+          },
+          "si": {
+            "unit": "mol/mol",
+            "values": [
+              0.172
+            ]
+          },
+          "si_display": "0.172 mol/mol",
+          "direction": "constant",
+          "location": "chamber_atmosphere",
+          "source_ref_ids": [
+            "PSI-25:GMT190-T20:source"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "source_ref_id": "PSI-25:GMT190-T20:source",
+          "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+          "document_id": "NASA/TM-20210011385",
+          "pdf_page": 104,
+          "printed_page": 96,
+          "table": "7.1",
+          "row_id": "GMT190-T20",
+          "excerpt": "GMT190-T20 | 1.2 | 11 to 3 | 17.2 | Quenched",
+          "excerpt_kind": "TABLE_TRANSCRIPTION"
+        }
+      ],
+      "field_source_refs": {
+        "material": [
+          "PSI-25:GMT190-T20:source"
+        ],
+        "outcome": [
+          "PSI-25:GMT190-T20:source"
+        ],
+        "sample_history": [
+          "PSI-25:GMT190-T20:source"
+        ],
+        "sample_width": [
+          "PSI-25:GMT190-T20:source"
+        ],
+        "flow_velocity": [
+          "PSI-25:GMT190-T20:source"
+        ],
+        "o2_concentration": [
+          "PSI-25:GMT190-T20:source"
+        ]
+      }
+    },
+    {
+      "study_id": "PSI-25",
+      "trial_id": "GMT190-T21",
+      "revision_id": "[\"PSI-25\",\"GMT190-T21\"]:r1",
+      "parent_revision_id": null,
+      "created_at": "2026-11-14T08:30:00.000Z",
+      "user_confirmation": "CONFIRMED",
+      "scientific_verification": "NOT_VERIFIED",
+      "review": {
+        "status": "FLAGGED_FOR_REVIEW",
+        "reasons": [
+          "SAMPLE_HISTORY_MISSING"
+        ],
+        "scientific_verification": "NOT_VERIFIED"
+      },
+      "claim_type": "OBSERVATION",
+      "material": "SIBAL",
+      "sample_history": {
+        "value": null,
+        "status": "NOT_PROVIDED",
+        "source_ref_ids": [
+          "PSI-25:GMT190-T21:source"
+        ]
+      },
+      "outcome": {
+        "raw_display": "Blow-off",
+        "status": "MEASURED",
+        "source_ref_ids": [
+          "PSI-25:GMT190-T21:source"
+        ]
+      },
+      "parameters": [
+        {
+          "param_key": "sample_width",
+          "status": "MEASURED",
+          "raw_display": "1.2 cm",
+          "raw": {
+            "text": "1.2",
+            "unit": "cm",
+            "values": [
+              1.2
+            ]
+          },
+          "si": {
+            "unit": "m",
+            "values": [
+              0.012
+            ]
+          },
+          "si_display": "0.012 m",
+          "direction": "constant",
+          "location": "sample_surface",
+          "source_ref_ids": [
+            "PSI-25:GMT190-T21:source"
+          ]
+        },
+        {
+          "param_key": "flow_velocity",
+          "status": "MEASURED",
+          "raw_display": "11 to 47 cm/s",
+          "raw": {
+            "text": "11 to 47",
+            "unit": "cm/s",
+            "values": [
+              11,
+              47
+            ]
+          },
+          "si": {
+            "unit": "m/s",
+            "values": [
+              0.11,
+              0.47
+            ]
+          },
+          "si_display": "0.11 → 0.47 m/s",
+          "direction": "increasing",
+          "location": "chamber_atmosphere",
+          "source_ref_ids": [
+            "PSI-25:GMT190-T21:source"
+          ]
+        },
+        {
+          "param_key": "o2_concentration",
+          "status": "MEASURED",
+          "raw_display": "17.2 vol%",
+          "raw": {
+            "text": "17.2",
+            "unit": "vol%",
+            "values": [
+              17.2
+            ]
+          },
+          "si": {
+            "unit": "mol/mol",
+            "values": [
+              0.172
+            ]
+          },
+          "si_display": "0.172 mol/mol",
+          "direction": "constant",
+          "location": "chamber_atmosphere",
+          "source_ref_ids": [
+            "PSI-25:GMT190-T21:source"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "source_ref_id": "PSI-25:GMT190-T21:source",
+          "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+          "document_id": "NASA/TM-20210011385",
+          "pdf_page": 104,
+          "printed_page": 96,
+          "table": "7.1",
+          "row_id": "GMT190-T21",
+          "excerpt": "GMT190-T21 | 1.2 | 11 to 47 | 17.2 | Blow-off",
+          "excerpt_kind": "TABLE_TRANSCRIPTION"
+        }
+      ],
+      "field_source_refs": {
+        "material": [
+          "PSI-25:GMT190-T21:source"
+        ],
+        "outcome": [
+          "PSI-25:GMT190-T21:source"
+        ],
+        "sample_history": [
+          "PSI-25:GMT190-T21:source"
+        ],
+        "sample_width": [
+          "PSI-25:GMT190-T21:source"
+        ],
+        "flow_velocity": [
+          "PSI-25:GMT190-T21:source"
+        ],
+        "o2_concentration": [
+          "PSI-25:GMT190-T21:source"
+        ]
+      }
+    },
+    {
+      "study_id": "PSI-25",
+      "trial_id": "GMT216-T25",
+      "revision_id": "[\"PSI-25\",\"GMT216-T25\"]:r1",
+      "parent_revision_id": null,
+      "created_at": "2026-11-14T08:30:00.000Z",
+      "user_confirmation": "CONFIRMED",
+      "scientific_verification": "NOT_VERIFIED",
+      "review": {
+        "status": "FLAGGED_FOR_REVIEW",
+        "reasons": [
+          "REUSED_SAMPLE",
+          "SOURCE_LOCATOR_OR_EXCERPT_INCOMPLETE"
+        ],
+        "scientific_verification": "NOT_VERIFIED"
+      },
+      "claim_type": "OBSERVATION",
+      "material": "SIBAL",
+      "sample_history": {
+        "value": "REUSED",
+        "status": "MEASURED",
+        "source_ref_ids": [
+          "PSI-25:GMT216-T25:source"
+        ]
+      },
+      "outcome": {
+        "raw_display": "Reused, ignited",
+        "status": "MEASURED",
+        "source_ref_ids": [
+          "PSI-25:GMT216-T25:source"
+        ]
+      },
+      "parameters": [
+        {
+          "param_key": "sample_width",
+          "status": "MEASURED",
+          "raw_display": "2.2 cm",
+          "raw": {
+            "text": "2.2",
+            "unit": "cm",
+            "values": [
+              2.2
+            ]
+          },
+          "si": {
+            "unit": "m",
+            "values": [
+              0.022
+            ]
+          },
+          "si_display": "0.022 m",
+          "direction": "constant",
+          "location": "sample_surface",
+          "source_ref_ids": [
+            "PSI-25:GMT216-T25:source"
+          ]
+        },
+        {
+          "param_key": "flow_velocity",
+          "status": "MEASURED",
+          "raw_display": "5 to 2.5 cm/s",
+          "raw": {
+            "text": "5 to 2.5",
+            "unit": "cm/s",
+            "values": [
+              5,
+              2.5
+            ]
+          },
+          "si": {
+            "unit": "m/s",
+            "values": [
+              0.05,
+              0.025
+            ]
+          },
+          "si_display": "0.05 → 0.025 m/s",
+          "direction": "decreasing",
+          "location": "chamber_atmosphere",
+          "source_ref_ids": [
+            "PSI-25:GMT216-T25:source"
+          ]
+        },
+        {
+          "param_key": "o2_concentration",
+          "status": "MEASURED",
+          "raw_display": "20.8 vol%",
+          "raw": {
+            "text": "20.8",
+            "unit": "vol%",
+            "values": [
+              20.8
+            ]
+          },
+          "si": {
+            "unit": "mol/mol",
+            "values": [
+              0.208
+            ]
+          },
+          "si_display": "0.208 mol/mol",
+          "direction": "constant",
+          "location": "chamber_atmosphere",
+          "source_ref_ids": [
+            "PSI-25:GMT216-T25:source"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "source_ref_id": "PSI-25:GMT216-T25:source",
+          "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf#page=104",
+          "document_id": "NOT_PROVIDED",
+          "pdf_page": 104,
+          "printed_page": 96,
+          "table": "7.1",
+          "row_id": "GMT216-T25",
+          "excerpt": "",
+          "excerpt_kind": "NOT_PROVIDED"
+        }
+      ],
+      "field_source_refs": {
+        "material": [
+          "PSI-25:GMT216-T25:source"
+        ],
+        "outcome": [
+          "PSI-25:GMT216-T25:source"
+        ],
+        "sample_history": [
+          "PSI-25:GMT216-T25:source"
+        ],
+        "sample_width": [
+          "PSI-25:GMT216-T25:source"
+        ],
+        "flow_velocity": [
+          "PSI-25:GMT216-T25:source"
+        ],
+        "o2_concentration": [
+          "PSI-25:GMT216-T25:source"
+        ]
+      }
+    }
+  ]
+}

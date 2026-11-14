@@ -1,0 +1,174 @@
+
+> skyforge-dashboard@1.0.0 test
+> node --test src/model.test.js tests/atlas/*.test.js
+
+TAP version 13
+# Subtest: reference inputs contribute zero; baseline is the illustrative material weight
+ok 1 - reference inputs contribute zero; baseline is the illustrative material weight
+  ---
+  duration_ms: 2.100188
+  ...
+# Subtest: default scenario has deterministic ranking and saturation
+ok 2 - default scenario has deterministic ranking and saturation
+  ---
+  duration_ms: 0.239837
+  ...
+# Subtest: all control extremes produce bounded scores and consistent categories
+ok 3 - all control extremes produce bounded scores and consistent categories
+  ---
+  duration_ms: 0.525565
+  ...
+# Subtest: NASA Table 7.1 regression: width is 1.2 cm, ordered opposite protocols, distinct outcomes and page locators
+ok 4 - NASA Table 7.1 regression: width is 1.2 cm, ordered opposite protocols, distinct outcomes and page locators
+  ---
+  duration_ms: 7.242987
+  ...
+# Subtest: provided comma-quoted T25 imports exactly, flagged REUSED, raw and SI retained
+ok 5 - provided comma-quoted T25 imports exactly, flagged REUSED, raw and SI retained
+  ---
+  duration_ms: 1.185185
+  ...
+# Subtest: CSV preserves escaped quotes, embedded CRLF, BOM, quoted commas, empty fields
+ok 6 - CSV preserves escaped quotes, embedded CRLF, BOM, quoted commas, empty fields
+  ---
+  duration_ms: 0.452164
+  ...
+# Subtest: malformed CSV and ambiguous column counts fail rather than guess
+ok 7 - malformed CSV and ambiguous column counts fail rather than guess
+  ---
+  duration_ms: 0.390278
+  ...
+# Subtest: decimal comma is supported in quoted cells and JSON, never as a thousands separator
+ok 8 - decimal comma is supported in quoted cells and JSON, never as a thousands separator
+  ---
+  duration_ms: 1.039059
+  ...
+# Subtest: missing oxygen remains unknown, zero is measured, statuses remain distinct
+ok 9 - missing oxygen remains unknown, zero is measured, statuses remain distinct
+  ---
+  duration_ms: 0.811357
+  ...
+# Subtest: unit families, physical ranges, IDs and safe source URLs are enforced
+ok 10 - unit families, physical ranges, IDs and safe source URLs are enforced
+  ---
+  duration_ms: 1.356501
+  ...
+# Subtest: unknown columns are retained with NOT_EXTRACTED and flagged; SI assertions are never trusted
+ok 11 - unknown columns are retained with NOT_EXTRACTED and flagged; SI assertions are never trusted
+  ---
+  duration_ms: 0.474886
+  ...
+# Subtest: burner oxygen never becomes chamber oxygen
+ok 12 - burner oxygen never becomes chamber oxygen
+  ---
+  duration_ms: 0.404403
+  ...
+# Subtest: preview is read-only; explicit confirmation and flagged review acknowledgement are required
+ok 13 - preview is read-only; explicit confirmation and flagged review acknowledgement are required
+  ---
+  duration_ms: 1.088909
+  ...
+# Subtest: seed + T25 commit, independent reload, repeat import and historical repeat are idempotent
+ok 14 - seed + T25 commit, independent reload, repeat import and historical repeat are idempotent
+  ---
+  duration_ms: 16.622895
+  ...
+# Subtest: same child ID in different studies is distinct; batch duplicates collapse; conflicting batch fails atomically
+ok 15 - same child ID in different studies is distinct; batch duplicates collapse; conflicting batch fails atomically
+  ---
+  duration_ms: 5.000057
+  ...
+# Subtest: stale tab preview is rejected and can be regenerated without overwriting another tab
+ok 16 - stale tab preview is rejected and can be regenerated without overwriting another tab
+  ---
+  duration_ms: 3.700646
+  ...
+# Subtest: quota failure keeps durable state unchanged and lets the same plan retry
+ok 17 - quota failure keeps durable state unchanged and lets the same plan retry
+  ---
+  duration_ms: 5.516291
+  ...
+# Subtest: corruption, future schema, forged normalized values and denied reads never silently reset the store
+ok 18 - corruption, future schema, forged normalized values and denied reads never silently reset the store
+  ---
+  duration_ms: 2.488512
+  ...
+# Subtest: source evidence resolves per field and revision, JSON exchange reimports source-linked values
+ok 19 - source evidence resolves per field and revision, JSON exchange reimports source-linked values
+  ---
+  duration_ms: 10.223528
+  ...
+# Subtest: JSON nested values, wrong schema and unsupported formats fail with no partial commit
+ok 20 - JSON nested values, wrong schema and unsupported formats fail with no partial commit
+  ---
+  duration_ms: 0.505015
+  ...
+# Subtest: unit-bearing column aliases cannot silently change units or contradict flexible values
+ok 21 - unit-bearing column aliases cannot silently change units or contradict flexible values
+  ---
+  duration_ms: 0.603552
+  ...
+# Subtest: unextracted and conflicting raw text survives without inventing normalized numbers
+ok 22 - unextracted and conflicting raw text survives without inventing normalized numbers
+  ---
+  duration_ms: 0.447533
+  ...
+# Subtest: mixed-column source-linked CSV round trip preserves physics, outcomes, missing states and evidence
+ok 23 - mixed-column source-linked CSV round trip preserves physics, outcomes, missing states and evidence
+  ---
+  duration_ms: 8.185108
+  ...
+# Subtest: Z02.1 UZ/EN query equivalence, source_text preservation, filter editing, unparsed retention, and 70% alignment_score terminology
+ok 24 - Z02.1 UZ/EN query equivalence, source_text preservation, filter editing, unparsed retention, and 70% alignment_score terminology
+  ---
+  duration_ms: 34.370044
+  ...
+# Subtest: Z02.2 Tier-first ranking: solid fabric query never lets gas-burner proxy outrank direct solid evidence, and 85% burner_flow O2 is not chamber_atmosphere
+ok 25 - Z02.2 Tier-first ranking: solid fabric query never lets gas-burner proxy outrank direct solid evidence, and 85% burner_flow O2 is not chamber_atmosphere
+  ---
+  duration_ms: 16.260891
+  ...
+# Subtest: Z02.3 Unknown metadata is never counted as a match; contract extension works without silent guessing
+ok 26 - Z02.3 Unknown metadata is never counted as a match; contract extension works without silent guessing
+  ---
+  duration_ms: 6.633544
+  ...
+# Subtest: Z02.4 Sensitivity analysis: +-10% relative weight perturbation detects both stable and order-changing cases
+ok 27 - Z02.4 Sensitivity analysis: +-10% relative weight perturbation detects both stable and order-changing cases
+  ---
+  duration_ms: 7.58829
+  ...
+# Subtest: Z02.5 Library filter: each study appears once, Study -> trial selector isolates identical trial_id across studies, and 1-3 selection limit is enforced
+ok 28 - Z02.5 Library filter: each study appears once, Study -> trial selector isolates identical trial_id across studies, and 1-3 selection limit is enforced
+  ---
+  duration_ms: 8.812347
+  ...
+# Subtest: Z02.6 Four evidence-gap statuses, Moon/Mars non-interpolation, and corpus scope disclaimer
+ok 29 - Z02.6 Four evidence-gap statuses, Moon/Mars non-interpolation, and corpus scope disclaimer
+  ---
+  duration_ms: 7.756517
+  ...
+# Subtest: Z02.7 Conclusion guard and side-by-side comparison guardrails
+ok 30 - Z02.7 Conclusion guard and side-by-side comparison guardrails
+  ---
+  duration_ms: 8.453594
+  ...
+# Subtest: Z02.8 Source-linked presentation report export (CSV/JSON) preserves all metadata and stays separate from import exchange
+ok 31 - Z02.8 Source-linked presentation report export (CSV/JSON) preserves all metadata and stays separate from import exchange
+  ---
+  duration_ms: 9.985093
+  ...
+# Subtest: Z02.9 Optional API adapter: defaults to API_UNAVAILABLE, rejects secrets, and requires diff + confirmation before creating a revision
+ok 32 - Z02.9 Optional API adapter: defaults to API_UNAVAILABLE, rejects secrets, and requires diff + confirmation before creating a revision
+  ---
+  duration_ms: 15.161237
+  ...
+1..32
+# tests 32
+# suites 0
+# pass 32
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 678.519644

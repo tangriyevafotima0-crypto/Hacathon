@@ -6,6 +6,8 @@ import {resolve,sep,extname} from 'node:path';
 const types={'.pdf':'application/pdf','.mp4':'video/mp4','.webm':'video/webm','.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.txt':'text/plain; charset=utf-8','.csv':'text/csv; charset=utf-8','.json':'application/json','.zip':'application/zip'};
 export function createNasaFiles(root){
  const empty={files:[],downloadState:'NOT_CONFIGURED',indexed:false};
+ let cachedInventory=null,expiresAt=0;
+ function currentInventory(){if(!cachedInventory||Date.now()>=expiresAt){expiresAt=Date.now()+2000;cachedInventory=inventory().catch(error=>{cachedInventory=null;throw error;});}return cachedInventory;}
  async function inventory(){
   if(!root)return empty;
   let data;try{data=JSON.parse(await readFile(resolve(root,'manifest.json'),'utf8'));}catch{return {...empty,downloadState:'MANIFEST_UNAVAILABLE'};}
@@ -23,7 +25,7 @@ export function createNasaFiles(root){
   const json=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
   if(!['GET','HEAD'].includes(req.method))return json(405,{error:'METHOD_NOT_ALLOWED'});
   try{
-   const list=await inventory();
+   const list=await currentInventory();
    if(url.pathname==='/api/nasa-files')return json(200,{...list,files:list.files.map(({path,...f})=>f)});
    const id=url.pathname.slice('/api/nasa-files/'.length);const file=list.files.find(f=>f.id===id);if(!file)return json(404,{error:'NOT_FOUND'});
    const headers={'Content-Type':file.media,'Content-Disposition':/^(application\/pdf|image\/|video\/|text\/)/.test(file.media)?'inline':'attachment','Accept-Ranges':'bytes','Cache-Control':'private, max-age=60','X-Content-Type-Options':'nosniff'};

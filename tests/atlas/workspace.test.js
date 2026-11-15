@@ -67,6 +67,17 @@ test('workspace APIs isolate owners, persist lifecycle, and deduplicate concurre
   const turn={question:'How wide is T25?',request_id:'test',language:'en'};
   const [one,two]=await Promise.all([request(a,'chats/'+chat.id+'/turns','POST',turn),request(a,'chats/'+chat.id+'/turns','POST',turn)]);
   assert.equal(calls,1);
+  const share=(await request(a,'chats/'+chat.id+'/share','POST',{})).value;
+  const publicView=await request('','shared/'+share.id);
+  assert.equal(publicView.status,200);
+  assert.equal(publicView.value.turns[0].claims[0].evidence_ids[0],'real');
+  assert.equal(publicView.value.turns[0].evidence[0].interpretation,false);
+  await request(a,'chats/'+chat.id+'/share','DELETE');
+  assert.equal((await request('','shared/'+share.id)).status,404);
+  const note=(await request(a,'notes','POST',{title:'private',text:'My notes'})).value;
+  assert.equal((await request(b,'notes/'+note.id,'DELETE')).status,404);
+  assert.equal((await request(a,'notes','GET')).value[0].text,'My notes');
+
   assert.ok([one.value,two.value].some(item=>item.state==='READY'));
   assert.equal((await request(a,'chats/'+chat.id+'/turns','POST',turn)).value.state,'READY');
   assert.equal(calls,1);

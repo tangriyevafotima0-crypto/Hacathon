@@ -261,7 +261,7 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
           const turns=store.list(owner,'turn').filter(t=>t.chat===id&&t.result).reverse();
           if(!turns.length)throw failure(400,'EMPTY_CHAT');
           const old=chat.share_id?store.get('public','share',chat.share_id):null;if(old)store.remove('public','share',old.id);
-          const share=store.save('public','share',{title:chat.title,turns:turns.map(t=>({question:t.question,claims:t.result.claims,evidence:t.result.evidence.map(e=>({id:e.id,text:e.text,locator:e.locator,studyId:e.studyId,sourceUrl:e.kind==='USER_UPLOAD'?null:e.sourceUrl}))}))});
+          const share=store.save('public','share',{title:chat.title,turns:turns.map(t=>({question:t.question,claims:t.result.claims,evidence:t.result.evidence.map(e=>({id:e.id,kind:e.kind,interpretation:!!e.interpretation,text:e.text,locator:e.locator,studyId:e.studyId,sourceUrl:e.kind==='USER_UPLOAD'?null:e.sourceUrl}))}))});
           store.save(owner,'chat',{...fields(chat),share_id:share.id},{id,version:chat.version});return respond(201,{id:share.id});
         }
         if(operation==='share'&&method==='DELETE'){if(chat.share_id)store.remove('public','share',chat.share_id);store.save(owner,'chat',{...fields(chat),share_id:null},{id,version:chat.version});return respond(200,{deleted:true});}

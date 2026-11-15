@@ -1,0 +1,36 @@
+[
+  {
+    "language": "uz",
+    "question": "T20 va T21 da havo oqimi va natijasi qanday farq qilgan?",
+    "answer": "T20 sinovida havo oqimi 11 dan 3 cm/s gacha bo'lgan va natijada olov o'chgan (Quenched). T21 sinovida havo oqimi 11 dan 47 cm/s gacha bo'lgan va natijada olov uzilib qolgan (Blow-off).",
+    "evidence": [
+      {
+        "id": "5ed494be53b1b5fbd0e2c4aa90111ab7",
+        "locator": "Table 7.1 · PDF 104 · GMT190-T21"
+      },
+      {
+        "id": "a2776f3aa3dc0345dea9c7e7bd510427",
+        "locator": "Table 7.1 · PDF 104 · GMT190-T20"
+      }
+    ],
+    "cost": 0.00060575,
+    "status": "PASS"
+  },
+  {
+    "language": "en",
+    "question": "How did airflow and outcomes differ between T20 and T21?",
+    "answer": "In trial T20, the airflow was 11 to 3 cm/s and the outcome was Quenched. In trial T21, the airflow was 11 to 47 cm/s and the outcome was Blow-off.",
+    "evidence": [
+      {
+        "id": "5ed494be53b1b5fbd0e2c4aa90111ab7",
+        "locator": "Table 7.1 · PDF 104 · GMT190-T21"
+      },
+      {
+        "id": "a2776f3aa3dc0345dea9c7e7bd510427",
+        "locator": "Table 7.1 · PDF 104 · GMT190-T20"
+      }
+    ],
+    "cost": 0.00055975,
+    "status": "PASS"
+  }
+]

@@ -123,7 +123,7 @@ export default function Workspace(){
 function SharedChat({id}){
  const [chat,setChat]=useState(null),[error,setError]=useState('');
  useEffect(()=>{api('shared/'+encodeURIComponent(id)).then(setChat).catch(()=>setError('Havola topilmadi yoki ulashish to‘xtatilgan.'));},[id]);
- return <div className="forge-workspace" data-theme="light"><main className="shared-chat forge-pane"><a href="/">← Fire Atlas</a><h1>{chat?.title||'Shared chat'}</h1><p>Read-only · Ulashilgan suhbat nusxasi</p>{error&&<p role="alert">{error}</p>}{chat?.turns.map((t,i)=><article key={i}><h2>{t.question}</h2>{t.claims.map((c,j)=><p key={j}>{c.text}</p>)}{t.evidence.map(e=><details key={e.id}><summary>{e.studyId} · {e.locator}</summary><pre>{e.text}</pre>{e.sourceUrl&&<a href={e.sourceUrl} target="_blank" rel="noreferrer">Original</a>}</details>)}</article>)}</main></div>;
+ return <div className="forge-workspace" data-theme="light"><main className="shared-chat forge-pane"><a href="/">← Fire Atlas</a><h1>{chat?.title||'Shared chat'}</h1><p>Read-only · Ulashilgan suhbat nusxasi</p>{error&&<p role="alert">{error}</p>}{chat?.turns.map((t,i)=><article key={i}><h2>{t.question}</h2>{t.claims.map((c,j)=><p key={j}>{c.kind&&<small>{c.kind} · </small>}{c.text} {c.evidence_ids?.map(id=><a key={id} href={'#shared-'+i+'-'+id}>[{t.evidence.findIndex(e=>e.id===id)+1}] </a>)}</p>)}{t.evidence.map(e=><details key={e.id} id={'shared-'+i+'-'+e.id}><summary>{e.studyId} · {e.locator}</summary><p>{e.interpretation?'AI interpretation · independently unverified':e.kind==='USER_UPLOAD'?'User-supplied source':'Cited source'}</p><pre>{e.text}</pre>{e.sourceUrl&&<a href={e.sourceUrl} target="_blank" rel="noreferrer">Original</a>}</details>)}</article>)}</main></div>;
 }
 function Notes({language,visible}){
  const [items,setItems]=useState([]),[current,setCurrent]=useState(null),[title,setTitle]=useState(''),[text,setText]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
@@ -149,7 +149,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   const bottom=useRef(null),composer=useRef(null),fileInput=useRef(null);
   const [attachments,setAttachments]=useState([]),[uploading,setUploading]=useState(false);
   useEffect(()=>{if(!attachments.some(a=>['QUEUED','RUNNING'].includes(a.state)))return;const timer=setInterval(()=>api('assets').then(items=>setAttachments(old=>old.map(a=>items.find(b=>b.id===a.id)||a))).catch(report),1500);return()=>clearInterval(timer);},[attachments]);
-  async function attach(files){setUploading(true);setError('');try{for(const file of [...files].slice(0,3-attachments.length)){if(file.size>8000000)throw Error('Fayl 8 MB dan kichik bo‘lishi kerak');const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(Error('FILE_READ_FAILED'));reader.readAsDataURL(file);});const item=await api('assets','POST',{name:file.name,base64});setAttachments(old=>[...old.filter(a=>a.id!==item.id),item]);}}catch(e){report(e);}finally{setUploading(false);if(fileInput.current)fileInput.current.value='';}}
+  async function attach(files){setUploading(true);setError('');try{for(const file of [...files].slice(0,3-attachments.length)){if(file.size>8000000)throw Error(uz?'Fayl 8 MB dan kichik bo‘lishi kerak':'File must be smaller than 8 MB');const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(Error('FILE_READ_FAILED'));reader.readAsDataURL(file);});const item=await api('assets','POST',{name:file.name,base64});setAttachments(old=>[...old.filter(a=>a.id!==item.id),item]);}}catch(e){report(e);}finally{setUploading(false);if(fileInput.current)fileInput.current.value='';}}
   const attachmentBusy=uploading||attachments.some(a=>['QUEUED','RUNNING','FAILED'].includes(a.state)||a.chunk_count===0);
   const [rowMenu,setRowMenu]=useState(null),[renaming,setRenaming]=useState(null),[renameTitle,setRenameTitle]=useState('');
   const [shareLink,setShareLink]=useState(''),[shareCopied,setShareCopied]=useState(false);
@@ -167,7 +167,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
     const selected=await api('chats/'+id);
     setChat(selected);setError('');
     const ids=selected.turns?.at(-1)?.asset_ids??[];
-    if(ids.length){const items=await api('assets');setAttachments(items.filter(a=>ids.includes(a.id)));}
+    if(ids.length){const items=await api('assets');setAttachments(items.filter(a=>ids.includes(a.id)));}else setAttachments([]);
   }
   useEffect(()=>{
     if(!chat?.turns?.some(t=>t.state==='RUNNING'))return;
@@ -194,7 +194,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
       if(action==='share'){const shared=await api('chats/'+item.id+'/share','POST',{});const link=location.origin+location.pathname+'?share='+shared.id;setShareLink(link);try{await copyText(link);setShareCopied(true);}catch{setShareCopied(false);}}
       else if(action==='revoke'){await api('chats/'+item.id+'/share','DELETE');setShareLink('');}
       else if(action==='copy'){await copyText(latest.turns.map(t=>t.question+'\n'+(t.result?.claims||[]).map(c=>c.text).join('\n')).join('\n\n'));}
-      else if(action==='delete'){if(!confirm(uz?'Chat o‘chirilsinmi?':'Delete chat?'))return;await api('chats/'+item.id,'DELETE');if(chat?.id===item.id)setChat(null);}
+      else if(action==='delete'){if(!confirm(uz?'Chat o‘chirilsinmi?':'Delete chat?'))return;await api('chats/'+item.id,'DELETE');if(chat?.id===item.id){setChat(null);setAttachments([]);setDraft('');lastRequest.current=null;}}
       else if(action==='memory'){await select(item.id);setShowMemory(true);await loadMemory();}
       else await api('chats/'+item.id,'PATCH',{version:latest.version,...(action==='pin'?{pinned:!latest.pinned}:{archived:!latest.archived})});
       if(chat?.id===item.id&&action!=='delete')await select(item.id);
@@ -242,7 +242,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
 
       {chat?.summary&&<details><summary>{uz?'Suhbat konteksti':'Thread context'}</summary><pre>{JSON.stringify(chat.summary.entries,null,2)}</pre></details>}
 
-      {showMemory&&<div>
+      {showMemory&&<div><label><input type="checkbox" checked={!!chat?.memory} disabled={!chat||!!pending} onChange={e=>void update({memory:e.target.checked}).catch(report)}/>{uz?'Shu chatda xotirani ishlatish':'Use memory in this chat'}</label>
         <button onClick={()=>void api('memory','DELETE').then(loadMemory).catch(report)}>{uz?'Barcha xotirani unutish':'Forget all memory'}</button>
         <form onSubmit={e=>{e.preventDefault();void api('memory','POST',{kind,text:memo,consent:true}).then(()=>{setMemo('');return loadMemory();}).catch(report);}}>
           <select value={kind} onChange={e=>setKind(e.target.value)} aria-label="Memory type">{['goal','language','format','conditions'].map(k=><option key={k}>{k}</option>)}</select>
@@ -278,7 +278,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
       </div>
       <form className="chat-composer" onSubmit={send}>
         <input ref={fileInput} type="file" hidden multiple accept=".pdf,.docx,.txt,.csv,.json,.png,.jpg,.jpeg" onChange={e=>void attach(e.target.files)}/>
-        {attachments.length>0&&<div className="attachment-list">{attachments.map(a=><div key={a.id}><strong>{a.name}</strong><small>{a.state==='READY'?'Tayyor':a.state==='PARTIAL'?'Qisman tayyor':a.state==='FAILED'?'Xato':'Ingestion…'} {a.error||''}</small><button type="button" disabled={!!pending} aria-label={'Remove '+a.name} onClick={()=>setAttachments(old=>old.filter(b=>b.id!==a.id))}>×</button></div>)}</div>}
+        {attachments.length>0&&<div className="attachment-list">{attachments.map(a=><div key={a.id}><strong>{a.name}</strong><small>{a.state==='READY'?(uz?'Tayyor':'Ready'):a.state==='PARTIAL'?(uz?'Qisman tayyor':'Partially ready'):a.state==='FAILED'?(uz?'Xato':'Failed'):'Ingestion…'} {a.error||''}</small><button type="button" disabled={!!pending} aria-label={'Remove '+a.name} onClick={()=>setAttachments(old=>old.filter(b=>b.id!==a.id))}>×</button></div>)}</div>}
         {uploading&&<p role="status">{uz?'Fayl yuklanmoqda…':'Uploading file…'}</p>}
 
         <label>{uz?'Tadqiqot haqida savol':'Ask about an experiment'}
@@ -327,7 +327,7 @@ function EvidenceReader({focus,language,close}){
   const source=focus?.sources?.[current];
   useEffect(()=>{setPart(null);setError('');if(!source)return;const id=(source.fileUrl||source.sourceUrl||'').match(/assets\/([0-9a-f]+)\//)?.[1];if(!id)return;let live=true;api('assets/'+id+'/excerpt?'+new URLSearchParams({locator:source.locator})).then(p=>{if(live)setPart(p);}).catch(e=>{if(live)setError(e.message);});return()=>{live=false;};},[source]);
   if(!focus)return null;
-  const text=part?.text||source?.text||'';
+  const text=source?.text||'';
   return <section id="evidence-reader" className="evidence-reader" tabIndex={-1}><p className="eyebrow">{language==='uz'?'JAVOB → ASL DALIL':'ANSWER → SOURCE EVIDENCE'}</p><h2>{language==='uz'?'Dalilni tekshiring':'Verify the evidence'}</h2><button onClick={()=>download('evidence.json',JSON.stringify({sources:focus.sources},null,2))}>{language==='uz'?'Dalillarni eksport qilish':'Export evidence'}</button>
     {!source?<p>{language==='uz'?'Bu javobga manba biriktirilmagan.':'No source attached to this answer.'}</p>:<>
     <nav aria-label="Answer sources">{focus.sources.map((s,i)=><button key={s.id} aria-pressed={i===current} onClick={()=>setCurrent(i)}>{s.file||s.studyId} · {s.locator}</button>)}</nav>

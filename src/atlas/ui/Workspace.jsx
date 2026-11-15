@@ -2,7 +2,7 @@ import React,{useEffect,useState,useRef} from 'react';
 import {createPortal} from 'react-dom';
 import Atlas,{download} from './Atlas.jsx';
 import {BASS_THREE} from '../data/index.js';
-import {Menu,Plus,LibraryBig,MessageSquare,Settings,Sun,Moon,ArrowUp,PanelLeftClose,Search,Copy,Pencil,Sparkles,SlidersHorizontal,BookOpen} from 'lucide-react';
+import {Menu,Plus,LibraryBig,MessageSquare,Settings,Sun,Moon,ArrowUp,PanelLeftClose,Search,Copy,Pencil,Sparkles,SlidersHorizontal,BookOpen,MoreHorizontal,Pin,Share2,Archive,Trash2,Link,Brain} from 'lucide-react';
 import './workspace.css';
 
 async function api(path,method='GET',data,onProgress){
@@ -145,12 +145,13 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   const [memory,setMemory]=useState([]),[memo,setMemo]=useState(''),[kind,setKind]=useState('goal');
   const [showMemory,setShowMemory]=useState(false);
   const active=useRef(null);
-  useEffect(()=>{function close(event){const menu=document.querySelector('.chat-actions');if(menu?.open&&(event.key==='Escape'||event.type==='pointerdown'&&!menu.contains(event.target))){menu.open=false;if(event.key==='Escape')menu.querySelector('summary')?.focus();}}document.addEventListener('pointerdown',close);document.addEventListener('keydown',close);return()=>{document.removeEventListener('pointerdown',close);document.removeEventListener('keydown',close);};},[]);
+
   const bottom=useRef(null),composer=useRef(null),fileInput=useRef(null);
   const [attachments,setAttachments]=useState([]),[uploading,setUploading]=useState(false);
   useEffect(()=>{if(!attachments.some(a=>['QUEUED','RUNNING'].includes(a.state)))return;const timer=setInterval(()=>api('assets').then(items=>setAttachments(old=>old.map(a=>items.find(b=>b.id===a.id)||a))).catch(report),1500);return()=>clearInterval(timer);},[attachments]);
   async function attach(files){setUploading(true);setError('');try{for(const file of [...files].slice(0,3-attachments.length)){if(file.size>8000000)throw Error('Fayl 8 MB dan kichik bo‘lishi kerak');const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(Error('FILE_READ_FAILED'));reader.readAsDataURL(file);});const item=await api('assets','POST',{name:file.name,base64});setAttachments(old=>[...old.filter(a=>a.id!==item.id),item]);}}catch(e){report(e);}finally{setUploading(false);if(fileInput.current)fileInput.current.value='';}}
   const attachmentBusy=uploading||attachments.some(a=>['QUEUED','RUNNING','FAILED'].includes(a.state)||a.chunk_count===0);
+  const [rowMenu,setRowMenu]=useState(null),[renaming,setRenaming]=useState(null),[renameTitle,setRenameTitle]=useState('');
   const [shareLink,setShareLink]=useState(''),[shareCopied,setShareCopied]=useState(false);
   useEffect(()=>{setShareLink('');},[chat?.id]);
   useEffect(()=>{if(action&&!active.current){setAttachments([]);setChat(null);setDraft('');setError('');}},[action]);
@@ -184,6 +185,22 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
     await api('chats/'+chat.id,'PATCH',{version:chat.version,...patch});
     await select(chat.id);await refresh();
   }
+  useEffect(()=>{if(!rowMenu)return;function close(e){if(e.key==='Escape'||e.type==='pointerdown'&&!e.target.closest('.history-menu')&&!e.target.closest('.history-more'))setRowMenu(null);}function moved(){setRowMenu(null);}document.addEventListener('pointerdown',close);document.addEventListener('keydown',close);window.addEventListener('resize',moved);return()=>{document.removeEventListener('pointerdown',close);document.removeEventListener('keydown',close);window.removeEventListener('resize',moved);};},[rowMenu]);
+  async function rowAction(item,action){
+    setRowMenu(null);setError('');
+    try{
+      const latest=await api('chats/'+item.id);
+      if(action==='rename'){setRenaming(latest);setRenameTitle(latest.title);return;}
+      if(action==='share'){const shared=await api('chats/'+item.id+'/share','POST',{});const link=location.origin+location.pathname+'?share='+shared.id;setShareLink(link);try{await copyText(link);setShareCopied(true);}catch{setShareCopied(false);}}
+      else if(action==='revoke'){await api('chats/'+item.id+'/share','DELETE');setShareLink('');}
+      else if(action==='copy'){await copyText(latest.turns.map(t=>t.question+'\n'+(t.result?.claims||[]).map(c=>c.text).join('\n')).join('\n\n'));}
+      else if(action==='delete'){if(!confirm(uz?'Chat o‘chirilsinmi?':'Delete chat?'))return;await api('chats/'+item.id,'DELETE');if(chat?.id===item.id)setChat(null);}
+      else if(action==='memory'){await select(item.id);setShowMemory(true);await loadMemory();}
+      else await api('chats/'+item.id,'PATCH',{version:latest.version,...(action==='pin'?{pinned:!latest.pinned}:{archived:!latest.archived})});
+      if(chat?.id===item.id&&action!=='delete')await select(item.id);
+      await refresh();
+    }catch(e){report(e);}
+  }
   async function send(event){
     event.preventDefault();
     if(active.current||!draft.trim()||attachmentBusy)return;
@@ -208,7 +225,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   const historyPanel=<div className="chat-history"><p className="eyebrow">{uz?'Suhbatlar':'Recent chats'}</p>
       <label>{uz?'Tarixdan qidirish':'Search history'}<input value={q} onChange={e=>setQ(e.target.value)}/></label>
       <label><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)}/>{uz?'Arxiv':'Archive'}</label>
-      {history.map(item=><button key={item.id} disabled={!!pending} aria-pressed={chat?.id===item.id} onClick={()=>{setAttachments([]);void select(item.id).catch(report);}}>{item.pinned?'📌 ':''}{item.title}</button>)}
+      {history.map(item=><div key={item.id} className={'history-row '+(chat?.id===item.id?'is-current':'')}><button className="history-select" disabled={!!pending} aria-pressed={chat?.id===item.id} onClick={()=>{setAttachments([]);setRowMenu(null);void select(item.id).catch(report);}}>{item.pinned&&<Pin size={12}/>}<span>{item.title}</span></button><button className="history-more" aria-label={'Chat menu: '+item.title} aria-haspopup="menu" aria-expanded={rowMenu?.item.id===item.id} disabled={!!pending} onClick={e=>{const rect=e.currentTarget.getBoundingClientRect();setRowMenu(rowMenu?.item.id===item.id?null:{item,left:Math.max(8,Math.min(rect.right+8,innerWidth-252)),top:Math.max(8,Math.min(rect.top,innerHeight-350))});}}><MoreHorizontal size={17}/></button></div>)}
       {history.length>=100&&<button onClick={()=>void api('chats?'+new URLSearchParams({q,archived:archived?'1':'0',cursor:history.at(-1).id})).then(items=>setHistory([...history,...items])).catch(report)}>Load more</button>}
     </div>;
   return <section className={'forge-chat '+(empty&&!draft.trim()?'is-empty':'has-messages')}>
@@ -216,19 +233,13 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
     <div className="chat-canvas">
       {empty&&<div className="welcome"><a className="welcome-mark nasa-source-mark" href="https://psi.nasa.gov/physci/repo" target="_blank" rel="noreferrer" aria-label="NASA data source"><img src="/nasa-logo.svg" alt="NASA"/></a><p className="eyebrow">NASA EVIDENCE · YOUR CURIOSITY</p><h1>{uz?'Savolingizdan boshlaymiz.':'Start with a question.'}</h1><p>{uz?'Tadqiqotlarni izlang. Dalillarni solishtiring. Birgalikda tushuning.':'Explore research. Compare evidence. Understand together.'}</p></div>}
       {error&&<p role="alert">{error}</p>}
-      {chat&&<header className="chat-toolbar"><h2>{chat.title}</h2><details className="chat-actions"><summary aria-label="Chat menu">•••</summary><div className="chat-actions-panel"><button disabled={!!pending||!chat.turns?.length} onClick={()=>void update({pinned:!chat.pinned}).catch(report)}>{chat.pinned?(uz?'Pinni olish':'Unpin chat'):(uz?'Pin qilish':'Pin chat')}</button>
-      <button disabled={!!pending||!chat.turns?.length} onClick={async()=>{try{const shared=await api('chats/'+chat.id+'/share','POST',{});const link=location.origin+location.pathname+'?share='+shared.id;setShareLink(link);await select(chat.id);await refresh();try{await copyText(link);setShareCopied(true);}catch{setShareCopied(false);}}catch(e){report(e);}}}>Share chat</button>
-      {shareLink&&<div className="share-panel"><p>{shareCopied?(uz?'Havola nusxalandi':'Link copied'):(uz?'Havolani nusxalang':'Copy this link')}</p><input aria-label="Share link" value={shareLink} readOnly onFocus={e=>e.target.select()}/><p>{uz?'Havolasi bor odam suhbat nusxasini o‘qiy oladi.':'Anyone with this link can read the shared conversation snapshot.'}</p></div>}
-      {chat.share_id&&<button onClick={()=>void api('chats/'+chat.id+'/share','DELETE').then(()=>{setShareLink('');return select(chat.id);}).catch(report)}>{uz?'Ulashishni to‘xtatish':'Stop sharing'}</button>}
-      <div>
-        <form onSubmit={event=>{event.preventDefault();void update({title:new FormData(event.currentTarget).get('title')}).catch(report);}}>
-          <input key={chat.id+chat.version} name="title" aria-label={uz?'Chat nomi':'Chat title'} defaultValue={chat.title} maxLength={120}/>
-          <button disabled={!!pending}>{uz?'Nomni saqlash':'Save name'}</button>
-        </form>
-        <button disabled={!!pending} onClick={()=>void update({archived:!chat.archived}).catch(report)}>{chat.archived?'Restore':'Archive'}</button>
-        <button disabled={!!pending} onClick={()=>{if(window.confirm(uz?'Chat o‘chirilsinmi?':'Delete chat?'))void api('chats/'+chat.id,'DELETE').then(()=>{setChat(null);return refresh();}).catch(report);}}>{uz?'O‘chirish':'Delete'}</button>
-        <label><input type="checkbox" checked={chat.memory} disabled={!!pending} onChange={e=>void update({memory:e.target.checked}).catch(report)}/>{uz?'Shu chatda xotira':'Memory in this chat'}</label>
-      </div><button onClick={()=>{setShowMemory(!showMemory);if(!showMemory)void loadMemory().catch(report);}}>{uz?'Xotirani boshqarish':'Manage memory'}</button></div></details></header>}
+      {chat&&<header className="chat-toolbar"><h2>{chat.title}</h2></header>}
+      {rowMenu&&createPortal(<div className="forge-workspace menu-portal" data-theme={document.querySelector('.forge-workspace')?.dataset.theme||'dark'}><div className="history-menu" role="menu" aria-label="Chat actions" style={{left:rowMenu.left,top:rowMenu.top}} onKeyDown={e=>{const buttons=[...e.currentTarget.querySelectorAll('button')];const index=buttons.indexOf(document.activeElement);if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();buttons[(index+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length]?.focus();}}} ref={node=>{if(node&&!node.contains(document.activeElement))node.querySelector('button')?.focus();}}>
+        {[[Pencil,'rename',uz?'Nomini o‘zgartirish':'Rename'],[Pin,'pin',rowMenu.item.pinned?(uz?'Pinni olish':'Unpin'):(uz?'Pin qilish':'Pin')],[Share2,'share','Share'],[Copy,'copy',uz?'Suhbatni nusxalash':'Copy conversation'],...(rowMenu.item.share_id?[[Link,'revoke',uz?'Ulashishni to‘xtatish':'Stop sharing']]:[]),[Brain,'memory',uz?'Xotira':'Memory'],[Archive,'archive',rowMenu.item.archived?(uz?'Arxivdan chiqarish':'Restore'):(uz?'Arxivlash':'Archive')],[Trash2,'delete',uz?'O‘chirish':'Delete']].map(([Icon,action,label])=><button role="menuitem" key={action} className={action==='delete'?'menu-delete':''} onClick={()=>void rowAction(rowMenu.item,action)}><Icon size={16}/><span>{label}</span></button>)}
+      </div></div>,document.body)}
+      {renaming&&<div className="settings-backdrop" onClick={()=>setRenaming(null)}><form className="settings-sheet forge-pane" role="dialog" aria-modal="true" aria-label="Rename chat" onClick={e=>e.stopPropagation()} onKeyDown={e=>{if(e.key==='Escape')setRenaming(null);}} onSubmit={async e=>{e.preventDefault();try{await api('chats/'+renaming.id,'PATCH',{version:renaming.version,title:renameTitle});if(chat?.id===renaming.id)await select(renaming.id);await refresh();setRenaming(null);}catch(e){report(e);}}}><h2>{uz?'Chat nomini o‘zgartirish':'Rename chat'}</h2><input autoFocus aria-label="Chat title" value={renameTitle} onChange={e=>setRenameTitle(e.target.value)} maxLength={120} required/><button disabled={!renameTitle.trim()}>{uz?'Saqlash':'Save'}</button><button type="button" onClick={()=>setRenaming(null)}>{uz?'Bekor qilish':'Cancel'}</button></form></div>}
+      {shareLink&&<div className="share-panel"><p>{shareCopied?(uz?'Havola nusxalandi':'Link copied'):(uz?'Havolani nusxalang':'Copy link')}</p><input aria-label="Share link" readOnly value={shareLink} onFocus={e=>e.target.select()}/><small>{uz?'Havolasi bor odam ulashilgan suhbatni o‘qiy oladi.':'Anyone with the link can read this shared snapshot.'}</small><button onClick={()=>setShareLink('')}>{uz?'Yopish':'Close'}</button></div>}
+
       {chat?.summary&&<details><summary>{uz?'Suhbat konteksti':'Thread context'}</summary><pre>{JSON.stringify(chat.summary.entries,null,2)}</pre></details>}
 
       {showMemory&&<div>

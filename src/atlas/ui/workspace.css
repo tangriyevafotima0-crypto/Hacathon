@@ -101,3 +101,10 @@
 .forge-workspace .chat-composer:focus-within{border-color:var(--ink);outline:2px solid var(--ink);outline-offset:3px}.study-about details{margin:16px 0}.study-about details summary{min-height:44px;font-size:14px}@media(max-width:700px){.pdf-page-controls{display:grid;grid-template-columns:44px minmax(80px,1fr) 44px;justify-content:center;gap:4px;padding:8px}.pdf-page-controls label{justify-content:center}.pdf-page-controls>span{justify-self:center}.pdf-page-controls>button{justify-self:center}}
 
 .app-trials label>span{display:block;min-width:0}.app-trials label strong{font-size:13px;font-weight:550}.app-trials label small{display:block;font-size:12px;line-height:1.5;margin-top:3px}.app-trials input{flex-shrink:0}@media(max-width:700px){.focused-apps .app-trials{display:block}.app-trials label{margin:8px 0;padding:6px 0}}
+
+/* Leave the hosting badge visible without covering application controls. */
+body:has(#nl-badge-frame) .forge-workspace .forge-main{padding-bottom:80px}
+body:has(#nl-badge-frame) .forge-workspace .chat-composer{bottom:calc(76px + env(safe-area-inset-bottom));margin-bottom:70px}
+body:has(#nl-badge-frame) .forge-workspace button,body:has(#nl-badge-frame) .forge-workspace input,body:has(#nl-badge-frame) .forge-workspace textarea{scroll-margin-bottom:90px}
+body:has(#nl-badge-frame) .forge-workspace.pdf-portal{padding-bottom:80px}
+body:has(#nl-badge-frame) .pdf-dialog{height:calc(100dvh - 104px)}

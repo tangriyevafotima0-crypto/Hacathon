@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-15T09:25:25.875Z",
+  "base": "https://fireatlasnasa.netlify.app",
+  "results": [
+    {
+      "question": "How did airflow and outcomes differ between T20 and T21?",
+      "language": "en",
+      "status": "ANSWERED",
+      "claims": [
+        {
+          "text": "In trial GMT190-T20, the airflow was 11 to 3 cm/s and the outcome was Quenched.",
+          "evidence_ids": [
+            "a2776f3aa3dc0345dea9c7e7bd510427"
+          ],
+          "kind": "SOURCE_FINDING"
+        },
+        {
+          "text": "In trial GMT190-T21, the airflow was 11 to 47 cm/s and the outcome was Blow-off.",
+          "evidence_ids": [
+            "5ed494be53b1b5fbd0e2c4aa90111ab7"
+          ],
+          "kind": "SOURCE_FINDING"
+        }
+      ],
+      "locators": [
+        "Table 7.1 · PDF 104 · GMT190-T21",
+        "Table 7.1 · PDF 104 · GMT190-T20"
+      ]
+    },
+    {
+      "question": "GMT216-T25 sinovida namuna eni qancha? Bu enmi yoki qalinlikmi?",
+      "language": "uz",
+      "status": "ANSWERED",
+      "claims": [
+        {
+          "text": "GMT216-T25 sinovida namuna eni 2.2 sm ni tashkil qiladi.",
+          "evidence_ids": [
+            "66c25d27a6b9c0352435f52e449ac672"
+          ],
+          "kind": "SOURCE_FINDING"
+        },
+        {
+          "text": "Ushbu qiymat namunaning eni (sample_width) hisoblanadi.",
+          "evidence_ids": [
+            "66c25d27a6b9c0352435f52e449ac672"
+          ],
+          "kind": "SOURCE_FINDING"
+        }
+      ],
+      "locators": [
+        "Table 7.1 · PDF 104 · GMT216-T25"
+      ]
+    },
+    {
+      "outOfCorpus": "PASS"
+    }
+  ]
+}

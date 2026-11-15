@@ -1,6 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,Calculator,Layers,ListOrdered,Clock,Download,MoreHorizontal,RotateCcw,Check,ChevronRight,FlaskConical,Target,SlidersHorizontal,Link,Eye,Lightbulb} from 'lucide-react';
 import {ui} from './i18n.js';
+import {BASS_THREE} from '../data/index.js';
 import './tool-apps.css';
 
 const apps={
@@ -8,7 +9,8 @@ const apps={
  estimation:{Icon:Calculator,name:'Estimate Lab',uz:'Baholash',en:'Estimation',description:['Asoslangan baho yoki sintetik hisob.','Evidence eligibility or a synthetic calculation.']},
  scenario:{Icon:Layers,name:'Scenario Lab',uz:'Ssenariy',en:'Scenario',description:['Fakt, taxmin va keyingi tajriba.','Facts, assumptions and the next experiment.']}
 };
-const trialIds=['PSI-25:GMT190-T20','PSI-25:GMT190-T21','PSI-25:GMT216-T25'];
+const trialIds=BASS_THREE.rows.map(row=>row.study_id+':'+row.trial_id);
+const trialContext=id=>{const row=BASS_THREE.rows.find(r=>id.endsWith(':'+r.trial_id));return row?`${row.material} · ${row.flow_raw} ${row.flow_unit} · O₂ ${row.oxygen_vol_pct} ${row.oxygen_unit}`:'';};
 const initialWeights={domain:25,fuel:25,atmosphere:25,unit_family:25};
 const initialNumbers={n:10,k:3,a:1,b:1};
 function requestId(){return Array.from(crypto.getRandomValues(new Uint8Array(16)),n=>n.toString(16).padStart(2,'0')).join('');}
@@ -42,7 +44,7 @@ export default function ToolApps({language,trials,setTrials,api,readableError,do
  async function exportRun(){if(!current)return;try{const latest=await api('runs/'+current.id);setCurrent(latest);download('skyforge-'+latest.definition.tool+'.json',JSON.stringify(latest,null,2));}catch(e){report(e);}}
  async function prepare(){setBusy(true);setError('');try{const d=formDefinition();if(!d.target)throw Error(tr('Avval maqsadni yozing.','Enter your goal first.'));const plan=await api('analysis-preview','POST',{tool:active,target:d.target,language});setProposal(plan);setWeights(plan.weights);if(active==='scenario')setAssumptions(plan.assumptions.join('\n'));}catch(e){report(e);}finally{setBusy(false);}}
  function toggleTrial(id){setTrials(trials.includes(id)?trials.filter(i=>i!==id):[...trials,id]);}
- function sourcePicker(){return <fieldset className="app-trials"><legend><FlaskConical size={16}/>{tr('Tajribalar','Trials')}</legend>{trialIds.map(id=><label key={id}><input type="checkbox" checked={trials.includes(id)} onChange={()=>toggleTrial(id)} disabled={busy}/><span>{id.split(':')[1]}</span></label>)}<p>{active==='ranking'?tr('Tanlov bo‘sh bo‘lsa, barcha 3 ta BASS-II sinovi saralanadi.','An empty selection ranks all 3 BASS-II trials.'):tr('Faqat tanlangan sinovlar kuzatuv sifatida olinadi.','Only selected trials are used as observations.')}</p></fieldset>;}
+ function sourcePicker(){return <fieldset className="app-trials"><legend><FlaskConical size={16}/>{tr('Tajribalar','Trials')}</legend>{trialIds.map(id=><label key={id}><input type="checkbox" checked={trials.includes(id)} onChange={()=>toggleTrial(id)} disabled={busy}/><span><strong>{id.split(':')[1]}</strong><small>{trialContext(id)}</small></span></label>)}<p>{active==='ranking'?tr('Tanlov bo‘sh bo‘lsa, barcha 3 ta BASS-II sinovi saralanadi.','An empty selection ranks all 3 BASS-II trials.'):tr('Faqat tanlangan sinovlar kuzatuv sifatida olinadi.','Only selected trials are used as observations.')}</p></fieldset>;}
  const localizedDate=value=>new Intl.DateTimeFormat(uz?'uz-UZ':'en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Tashkent'}).format(new Date(value));
  const result=current?.result;const selected=result?.results?.find(r=>r.id===selectedRank)||result?.results?.[0];
  const app=apps[active];

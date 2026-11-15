@@ -13,3 +13,9 @@
 - Bu ulanish fayllarni ko‘rish uchun. Qo‘shimcha paketning barcha matni avtomatik AI indeksiga qo‘shildi degan da’vo qilinmagan. ZIP ichidagi fayllar o‘z-o‘zidan katalogga chiqarilmaydi.
 
 Sayt: http://100.105.241.126:4191/ — Ctrl+F5 → Library.
+
+## Yangilanish: yagona Library
+
+Alohida “5 GB to‘plam” chiqarib tashlandi. Barcha 370 ta tekshirilgan fayl asosiy tadqiqot kartalariga birlashtirildi. 61 ta PDF o‘z tadqiqotining “PDF hujjatlar” qismida ochiladi; qolgan fayllar o‘sha tadqiqotning “Boshqa fayllar” ichida. Video/rasmlar ham shu tadqiqot ichida ko‘rinadi. Hozir paketda yangi PSI ID yo‘qligi sababli jami 5 ta tadqiqot saqlanadi; keyin yangi ID bo‘lsa nomi bilan avtomatik qo‘shiladi. Kartadagi fayl soni birlashtirilgan mavjud yozuvlardan hisoblanadi.
+
+75/75 test o‘tdi. Jonli server: 370 fayl, 61 PDF; Library ichida alohida collection yo‘q, PDF study-detail ichida ko‘rinadi. 227 sahifali server PDFda EN/UZ, oldingi/keyingi, zoom, mobil, katta oynada ochish o‘tdi. Bu o‘zgarish fayl ko‘rish ulanishi; barcha yangi fayllar AI indeksiga qo‘shildi degani emas.

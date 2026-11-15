@@ -2,6 +2,8 @@
 
 Sana: 2026-11-15, Asia/Tashkent. Vazifa: SF-EVIDENCE-02.
 
+Serverga o‘rnatilgan kod: `de135b82dd517791f7356142d12d81716409ec3e`. Branch: `codex/skyforge-build-pack`. Health: READY; workspace va korpus ulangan. Server build va 71 test muvaffaqiyatli; yakuniy jonli UI tekshiruvi 2026-11-15 10:45 (Asia/Tashkent) da o‘tdi.
+
 ## Amalda bajarilgan o‘zgarishlar
 
 - Chatdagi `+` tizim fayl tanlash oynasini ochadi. Bir savolga 3 tagacha, har biri 8 MB gacha PDF, DOCX, TXT, CSV, JSON, PNG yoki JPEG biriktiriladi.

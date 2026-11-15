@@ -7,7 +7,8 @@ import './workspace.css';
 import ToolApps from './ToolApps.jsx';
 import PDFViewer from './PDFViewer.jsx';
 import PDFPages from './PDFPages.jsx';
-import ServerPDFLibrary from './ServerPDFLibrary.jsx';
+import {mergeLibraryStudies} from './library-studies.js';
+
 import {ui} from './i18n.js';
 
 async function api(path,method='GET',data,onProgress){
@@ -395,13 +396,14 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
   const [studies,setStudies]=useState([]);
   const [find,setFind]=useState(''),[found,setFound]=useState(null);
   const [category,setCategory]=useState('all'),[studyOpen,setStudyOpen]=useState(null);
-  const visibleStudies=studies.filter(study=>(category==='all'||(category==='model'?study.kind==='GROUND_CFD':study.kind==='FLIGHT_EXPERIMENT'))&&(!find.trim()||[study.id,study.title,study.description].join(' ').toLowerCase().includes(find.toLowerCase())));
+  const allStudies=mergeLibraryStudies(studies,serverPdfs,language);
+  const visibleStudies=allStudies.filter(study=>(category==='all'||(category==='model'?study.kind==='GROUND_CFD':study.kind==='FLIGHT_EXPERIMENT'))&&(!find.trim()||[study.id,study.title,study.description,...study.files.map(f=>f.name)].join(' ').toLowerCase().includes(find.toLowerCase())));
   const report=e=>setError(readableError(e,language));
   async function refresh(){const [s,p,a]=await Promise.all([api('shelves'),api('pins'),api('assets')]);setShelves(s);setPins(p);setAssets(a);}
   useEffect(()=>{if(visible)void refresh().catch(report);},[visible]);
   useEffect(()=>{
-    void fetch('/api/ingestion/studies').then(response=>response.json()).then(data=>setStudies(data.studies??[])).catch(report);
-  },[]);
+    if(!visible)return;let live=true;const update=()=>fetch('/api/ingestion/studies').then(response=>response.json()).then(data=>{if(live)setStudies(data.studies??[]);}).catch(report);void update();const timer=setInterval(update,15000);return()=>{live=false;clearInterval(timer);};
+  },[visible]);
   useEffect(()=>{
     if(!assets.some(asset=>['QUEUED','RUNNING'].includes(asset.state)))return;
     const timer=setInterval(()=>void refresh().catch(report),2000);
@@ -429,22 +431,23 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
     {found?.map(source=><details key={source.id}><summary>{source.studyId} · {source.trialId||source.locator}</summary>
       <pre>{source.text}</pre><a href={source.fileUrl||source.sourceUrl} target="_blank" rel="noreferrer">{source.locator}</a>
     </details>)}
-    <h3>{language==='uz'?'Ulangan tadqiqotlar':'Connected studies'} · {studies.length}</h3><p className="corpus-note">{language==='uz'?'Bu — tanlangan metadata, jadvallar va media to‘plami. Tadqiqotlarning barcha fayllari yuklangan emas.':'Selected metadata, tables and media; these are not complete downloads of every study.'}</p>
-    <div className="study-grid">{visibleStudies.map(study=><button key={study.id} className="study-card" onClick={()=>setStudyOpen(study.id)}>
-      <div className="study-cover">{study.files.some(f=>f.media?.startsWith('image/'))?<img src={study.files.find(f=>f.media?.startsWith('image/')).url} alt={study.title}/>:<BookOpen size={34}/>}<span>{ui(language,study.kind==='GROUND_CFD'?'MODEL':'EXPERIMENT')}</span></div>
+    <h3>{language==='uz'?'Ulangan tadqiqotlar':'Connected studies'} · {allStudies.length}</h3><p className="corpus-note">{language==='uz'?'Bu — tanlangan metadata, jadvallar va media to‘plami. Tadqiqotlarning barcha fayllari yuklangan emas.':'Selected metadata, tables and media; these are not complete downloads of every study.'}</p>
+    <div className="study-grid">{visibleStudies.map(study=><button key={study.id} className="study-card" onClick={()=>{setStudyOpen(study.id);setPreviewPdf(null);}}>
+      <div className="study-cover">{study.files.some(f=>f.media?.startsWith('image/'))?<img src={study.files.find(f=>f.media?.startsWith('image/')).url} alt={study.title}/>:<BookOpen size={34}/>}<span>{ui(language,study.kind==='GROUND_CFD'?'MODEL':study.kind==='FLIGHT_EXPERIMENT'?'EXPERIMENT':'Study')}</span></div>
       <div className="study-card-body"><small>{study.id} · v{study.version}</small><h3>{study.title}</h3><p>{study.description}</p><span>{study.files.length} {language==='uz'?'fayl':'files'} · {language==='uz'?'O‘rganish':'Explore'} ↗</span></div>
     </button>)}</div>
     {visibleStudies.length===0&&<div className="empty-library"><p>{language==='uz'?'Bu nom bilan tajriba topilmadi. Boshqa nom yoki PSI ID kiriting.':'No experiment matches this name. Try another name or PSI ID.'}</p><button onClick={()=>ask(find)}>{language==='uz'?'Gibrid AI’dan so‘rash ↗':'Ask Hybrid AI ↗'}</button></div>}
-    {studyOpen&&studies.filter(s=>s.id===studyOpen).map(study=><section className="study-detail" key={study.id}>
-      <button onClick={()=>setStudyOpen(null)}>← {ui(language,'Library')}</button><p className="eyebrow">{study.id} · {ui(language,study.kind)}</p><h2>{study.title}</h2>
-      <div className="study-detail-layout"><div>{study.files.filter(file=>file.media).map(file=><figure key={file.name}>{file.media.startsWith('image/')?<img src={file.url} alt={file.name}/>:file.media.startsWith('video/')?<video controls src={file.url}/>:file.media==='application/pdf'?<PDFPages url={file.url} name={file.name} language={language}/>:null}<figcaption>{file.name}</figcaption></figure>)}</div><div><h3>{language==='uz'?'Tadqiqot haqida':'About the study'}</h3><p>{study.description}</p><h3>{language==='uz'?'Metodika':'Method'}</h3><p>{study.approach}</p></div></div>
+    {studyOpen&&allStudies.filter(s=>s.id===studyOpen).map(study=><section className="study-detail" key={study.id}>
+      <button onClick={()=>{setStudyOpen(null);setPreviewPdf(null);}}>← {ui(language,'Library')}</button><p className="eyebrow">{study.id} · {ui(language,study.kind)}</p><h2>{study.title}</h2>
+      <div className="study-detail-layout"><div>{study.files.filter(file=>file.media?.startsWith('image/')||file.media?.startsWith('video/')).map(file=><figure key={file.name}>{file.media.startsWith('image/')?<img src={file.url} alt={file.name}/>:file.media.startsWith('video/')?<video controls preload="metadata" src={file.url}/>:file.media==='application/pdf'?<PDFPages url={file.url} name={file.name} language={language}/>:null}<figcaption>{file.name}</figcaption></figure>)}</div><div><h3>{language==='uz'?'Tadqiqot haqida':'About the study'}</h3><p>{study.description}</p><h3>{language==='uz'?'Metodika':'Method'}</h3><p>{study.approach}</p></div></div>
       <a href={study.sourceUrl} target="_blank" rel="noreferrer">NASA · DOI {study.doi} · v{study.version}</a>
-      <ul>{study.files.map(file=><li key={file.name}><a href={file.url} target="_blank" rel="noreferrer" onClick={e=>{if(file.name.toLowerCase().endsWith('.pdf')){e.preventDefault();setPdf({...file,studyId:study.id,indexed:true});}}}>{file.name}</a> · {file.bytes.toLocaleString(language==='uz'?'uz-UZ':'en-US')} {language==='uz'?'bayt':'bytes'}</li>)}</ul>
+      <h3>{language==='uz'?'PDF hujjatlar':'PDF documents'} · {study.files.filter(f=>f.name.toLowerCase().endsWith('.pdf')).length}</h3>
+      <div className="study-pdf-list library-pdf-list">{study.files.filter(f=>f.name.toLowerCase().endsWith('.pdf')).map(file=><button key={file.url} onClick={()=>setPreviewPdf({...file,studyId:study.id})}><BookOpen size={19}/><span><strong>{file.name}</strong><small>{(file.bytes/1000000).toFixed(2)} MB</small></span></button>)}</div>
+      {previewPdf?.studyId===study.id&&<section ref={previewHost} className="library-inline-pdf"><header><h3>{previewPdf.name}</h3><button onClick={()=>setPreviewPdf(null)}>{language==='uz'?'Yopish':'Close'}</button></header><PDFPages key={previewPdf.url} url={previewPdf.url} name={previewPdf.name} language={language}/><button onClick={()=>setPdf(previewPdf)}>{language==='uz'?'Katta oynada ochish':'Expand viewer'}</button></section>}
+      <details className="study-other-files"><summary>{language==='uz'?'Boshqa fayllar':'Other files'} · {study.files.filter(f=>!f.name.toLowerCase().endsWith('.pdf')).length}</summary><ul>{study.files.filter(f=>!f.name.toLowerCase().endsWith('.pdf')).map(file=><li key={file.url}><a href={file.url} target="_blank" rel="noreferrer">{file.name}</a> · {(file.bytes/1000000).toFixed(2)} MB</li>)}</ul></details>
       <button onClick={()=>ask(language==='uz'?study.title+' tadqiqotining maqsadi va natijalarini manbalari bilan tushuntiring':'Explain the objectives and findings of '+study.title+' with sources')}>{language==='uz'?'Gibrid AI’dan so‘rash ↗':'Ask Hybrid AI ↗'}</button>
     </section>)}
-    <ServerPDFLibrary files={serverPdfs} downloadState={downloadState} error={pdfError} language={language} onOpen={setPreviewPdf} onFolderChange={()=>setPreviewPdf(null)}>
-    {previewPdf&&<section ref={previewHost} className="library-inline-pdf"><header><div><h3>{previewPdf.name}</h3></div><button onClick={()=>setPreviewPdf(null)}>{language==='uz'?'Yopish':'Close'}</button></header><PDFPages url={previewPdf.url} name={previewPdf.name} language={language}/><button onClick={()=>setPdf(previewPdf)}>{language==='uz'?'Katta oynada ochish':'Expand viewer'}</button></section>}
-    </ServerPDFLibrary>
+    {pdfError&&<p role="status">{pdfError}</p>}
     {pdf&&<PDFViewer key={pdf.url} document={pdf} language={language} onClose={()=>setPdf(null)}/>}
     <h3>{language==='uz'?'Mening hujjatlarim':'My documents'}</h3><p>{language==='uz'?'8 MB gacha. PDF matni va dastlabki 3 ta ichki rasm tahlil qilinadi; cheklovlar faylda ko‘rsatiladi. AI talqinlari mustaqil tekshirilmagan.':'Up to 8 MB. PDF text and up to 3 embedded images are analyzed; file limitations are shown. AI interpretations are unverified.'}</p>
     <label>{language==='uz'?'Fayl import qilish':'Import document'} · 8 MB

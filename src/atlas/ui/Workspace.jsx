@@ -5,6 +5,7 @@ import {BASS_THREE} from '../data/index.js';
 import {Menu,Plus,LibraryBig,MessageSquare,Settings,Sun,Moon,ArrowUp,Search,Copy,Pencil,Sparkles,SlidersHorizontal,BookOpen,MoreHorizontal,Pin,Share2,Archive,Trash2,Link,Brain,Square} from 'lucide-react';
 import './workspace.css';
 import ToolApps from './ToolApps.jsx';
+import PDFViewer from './PDFViewer.jsx';
 import {ui} from './i18n.js';
 
 async function api(path,method='GET',data,onProgress){
@@ -379,6 +380,8 @@ function TrialPicker({selected,onChange,language}){
 }
 
 function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,visible}){
+  const [pdf,setPdf]=useState(null),[serverPdfs,setServerPdfs]=useState([]),[pdfSearch,setPdfSearch]=useState(''),[pdfError,setPdfError]=useState('');
+  useEffect(()=>{if(!visible)return;let live=true;const refresh=()=>fetch('/api/nasa-files').then(r=>{if(!r.ok||!r.headers.get('content-type')?.includes('application/json'))throw Error();return r.json();}).then(data=>{if(live){setServerPdfs(data.files||[]);setPdfError('');}}).catch(()=>{if(live)setPdfError(language==='uz'?'Server PDF ro‘yxatini olib bo‘lmadi.':'Could not load the server PDF list.');});void refresh();const timer=setInterval(refresh,15000);return()=>{live=false;clearInterval(timer);};},[visible,language]);
   const [shelves,setShelves]=useState([]),[pins,setPins]=useState([]),[comparison,setComparison]=useState(null);
   const [name,setName]=useState(''),[query,setQuery]=useState(''),[error,setError]=useState('');
   const [autoUpdate,setAutoUpdate]=useState(false);
@@ -431,9 +434,11 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
       <button onClick={()=>setStudyOpen(null)}>← {ui(language,'Library')}</button><p className="eyebrow">{study.id} · {ui(language,study.kind)}</p><h2>{study.title}</h2>
       <div className="study-detail-layout"><div>{study.files.filter(file=>file.media).map(file=><figure key={file.name}>{file.media.startsWith('image/')?<img src={file.url} alt={file.name}/>:file.media.startsWith('video/')?<video controls src={file.url}/>:null}<figcaption>{file.name}</figcaption></figure>)}</div><div><h3>{language==='uz'?'Tadqiqot haqida':'About the study'}</h3><p>{study.description}</p><h3>{language==='uz'?'Metodika':'Method'}</h3><p>{study.approach}</p></div></div>
       <a href={study.sourceUrl} target="_blank" rel="noreferrer">NASA · DOI {study.doi} · v{study.version}</a>
-      <ul>{study.files.map(file=><li key={file.name}><a href={file.url} target="_blank" rel="noreferrer">{file.name}</a> · {file.bytes.toLocaleString(language==='uz'?'uz-UZ':'en-US')} {language==='uz'?'bayt':'bytes'}</li>)}</ul>
+      <ul>{study.files.map(file=><li key={file.name}><a href={file.url} target="_blank" rel="noreferrer" onClick={e=>{if(file.name.toLowerCase().endsWith('.pdf')){e.preventDefault();setPdf({...file,studyId:study.id,indexed:true});}}}>{file.name}</a> · {file.bytes.toLocaleString(language==='uz'?'uz-UZ':'en-US')} {language==='uz'?'bayt':'bytes'}</li>)}</ul>
       <button onClick={()=>ask(language==='uz'?study.title+' tadqiqotining maqsadi va natijalarini manbalari bilan tushuntiring':'Explain the objectives and findings of '+study.title+' with sources')}>{language==='uz'?'Gibrid AI’dan so‘rash ↗':'Ask Hybrid AI ↗'}</button>
     </section>)}
+    <section className="library-pdfs"><header><h2>{language==='uz'?'PDF hujjatlar':'PDF documents'}</h2><span>{serverPdfs.length} {language==='uz'?'server PDF fayli':'server PDFs'}</span></header><p>{language==='uz'?'Serverga yuklangan va tekshirilgan NASA hujjatlarini shu yerda ko‘ring. Ko‘rish imkoniyati AI indeksiga qo‘shilganini anglatmaydi.':'Browse verified NASA PDFs downloaded to the server. Availability here does not imply inclusion in the AI search index.'}</p><button className="pdf-reference" onClick={()=>setPdf({name:'NASA/TM-20210011385 · BASS-II',url:'https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf',studyId:'PSI-25',indexed:true})}>NASA · BASS-II · {language==='uz'?'Asl hisobotni ochish':'Open original report'} ↗</button><label>{language==='uz'?'PDF nomi yoki PSI ID bo‘yicha qidirish':'Search PDF name or PSI ID'}<input value={pdfSearch} onChange={e=>setPdfSearch(e.target.value)} maxLength={250}/></label>{pdfError&&<p role="status">{pdfError}</p>}<div className="library-pdf-list">{serverPdfs.filter(f=>(f.name+' '+f.studyId).toLowerCase().includes(pdfSearch.toLowerCase())).map(file=><button key={file.id} onClick={()=>setPdf(file)}><BookOpen size={19}/><span><strong>{file.name}</strong><small>{file.studyId} · v{file.version} · {(file.bytes/1000000).toFixed(2)} MB · {language==='uz'?'AI indeksi kutilmoqda':'AI indexing pending'}</small></span><span>↗</span></button>)}</div>{serverPdfs.length>0&&!serverPdfs.some(f=>(f.name+' '+f.studyId).toLowerCase().includes(pdfSearch.toLowerCase()))&&<p>{language==='uz'?'Bu nom bilan PDF topilmadi.':'No PDFs match this name.'}</p>}</section>
+    {pdf&&<PDFViewer key={pdf.url} document={pdf} language={language} onClose={()=>setPdf(null)}/>}
     <h3>{language==='uz'?'Mening hujjatlarim':'My documents'}</h3><p>{language==='uz'?'8 MB gacha. PDF matni va dastlabki 3 ta ichki rasm tahlil qilinadi; cheklovlar faylda ko‘rsatiladi. AI talqinlari mustaqil tekshirilmagan.':'Up to 8 MB. PDF text and up to 3 embedded images are analyzed; file limitations are shown. AI interpretations are unverified.'}</p>
     <label>{language==='uz'?'Fayl import qilish':'Import document'} · 8 MB
       <input type="file" disabled={assetBusy} aria-label={ui(language,'Upload file')} accept=".pdf,.docx,.txt,.csv,.json,.jpg,.jpeg,.png,.mp4,.webm"
@@ -443,7 +448,7 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
       <summary>{asset.name} · {ui(language,asset.state)} · {asset.chunk_count}</summary>
       {asset.error&&<p>{readableError({message:asset.error},language)}</p>}
       {asset.limit&&<p>{ui(language,asset.limit)}</p>}
-      <a href={'/api/workspace/assets/'+asset.id+'/original'} target="_blank" rel="noreferrer">{ui(language,"Original")}</a>
+      <a href={'/api/workspace/assets/'+asset.id+'/original'} target="_blank" rel="noreferrer" onClick={e=>{if(asset.mime==='application/pdf'){e.preventDefault();setPdf({name:asset.name,url:'/api/workspace/assets/'+asset.id+'/original',indexed:asset.chunk_count>0});}}}>{ui(language,"Original")}</a>
       {asset.mime.startsWith('image/')&&<img width="240" src={'/api/workspace/assets/'+asset.id+'/original'} alt={asset.name}/>}
       {asset.mime.startsWith('video/')&&<><video width="320" controls preload="metadata" src={'/api/workspace/assets/'+asset.id+'/original'}
         onError={event=>{event.currentTarget.nextElementSibling.hidden=false;}}/>

@@ -6,13 +6,15 @@ import { createIngestion } from './server/ingestion.js';
 import { createOpenRouter } from './server/openrouter.js';
 import { createWorkspaceApi } from './server/workspace-api.js';
 import { openWorkspace, digest } from './server/workspace-store.js';
+import {createNasaFiles} from './server/nasa-files.js';
 import { publicTrials } from './server/workspace-tools.js';
 
 export default defineConfig(({ mode }) => {
   const config=loadEnv(mode,process.cwd(),'OPENROUTER_');
   const { SKYFORGE_DATA_ROOT:root, SKYFORGE_INGESTION_RUNTIME:runtime, SKYFORGE_WORKSPACE_DB:workspacePath,
-    SKYFORGE_PYTHON:python,SKYFORGE_PYTHONPATH:pythonPath,SKYFORGE_RELEASE:release } = loadEnv(mode, process.cwd(), 'SKYFORGE_');
+    SKYFORGE_ADDITIONAL_ROOT:additionalRoot,SKYFORGE_PYTHON:python,SKYFORGE_PYTHONPATH:pythonPath,SKYFORGE_RELEASE:release } = loadEnv(mode, process.cwd(), 'SKYFORGE_');
   const configure = async server => {
+    server.middlewares.use(createNasaFiles(additionalRoot));
     server.middlewares.use((req,res,next)=>{
       if(req.url!=='/api/health')return next();
       res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});

@@ -1,0 +1,171 @@
+{
+  "date": "2026-11-15T07:39:04.310Z",
+  "base": "http://100.105.241.126:4191",
+  "results": [
+    {
+      "question": "introduce me this base and si dash",
+      "language": "en",
+      "expected": "PRODUCT",
+      "actual": "PRODUCT",
+      "claims": [
+        {
+          "text": "I’m the Fire Atlas research assistant. You can chat normally or ask about NASA combustion research. Library lets you search the connected sources yourself; for specific research questions I retrieve evidence and cite its page or table. Tools contains separate Ranking, Estimation and Scenario apps. Notes stores your research notes. The connected corpus contains selected files, not the entire NASA database. Factual answers come only from connected sources. If matching evidence is absent, I will say the information was not found in the connected database. Try: “How did airflow and outcomes differ between T20 and T21?”",
+          "evidence_ids": []
+        }
+      ],
+      "evidence": [],
+      "status": "PASS"
+    },
+    {
+      "question": "shu dashboardni tanishtirib ber",
+      "language": "uz",
+      "expected": "PRODUCT",
+      "actual": "PRODUCT",
+      "claims": [
+        {
+          "text": "Men Fire Atlas tadqiqot yordamchisiman. Oddiy suhbatlashishingiz yoki NASA yonish tadqiqotlari haqida savol berishingiz mumkin. Kutubxonada ulangan manbalarni o‘zingiz qidirasiz; aniq savolda men dalillarni topib, manba sahifasi bilan javob beraman. Vositalarda Reyting, Baholash va Ssenariy alohida ishlaydi. Qaydlar esa izohlaringizni saqlaydi. Ulangan korpus tanlangan fayllardan iborat — butun NASA bazasi emas. Faktlar faqat ulangan manbalardan olinadi. Mos dalil bo‘lmasa, ma’lumot bazada topilmaganini aytaman. Boshlash uchun: “T20 va T21 da havo oqimi va natijasi qanday farq qilgan?” deb so‘rashingiz mumkin.",
+          "evidence_ids": []
+        }
+      ],
+      "evidence": [],
+      "status": "PASS"
+    },
+    {
+      "question": "How are you today?",
+      "language": "en",
+      "expected": "GENERAL",
+      "actual": "GENERAL",
+      "claims": [
+        {
+          "text": "I am doing well, thank you for asking! How can I assist you with your research today?",
+          "evidence_ids": []
+        }
+      ],
+      "evidence": [],
+      "usage": {
+        "prompt_tokens": 697,
+        "completion_tokens": 31,
+        "total_tokens": 728,
+        "cost": 0.00022075
+      },
+      "status": "PASS"
+    },
+    {
+      "question": "What is the capital of France?",
+      "language": "en",
+      "expected": "INSUFFICIENT_EVIDENCE",
+      "actual": "INSUFFICIENT_EVIDENCE",
+      "claims": [],
+      "evidence": [],
+      "status": "PASS"
+    },
+    {
+      "question": "Bugun Londonda ob-havo qanday?",
+      "language": "uz",
+      "expected": "INSUFFICIENT_EVIDENCE",
+      "actual": "INSUFFICIENT_EVIDENCE",
+      "claims": [],
+      "evidence": [],
+      "status": "PASS"
+    },
+    {
+      "question": "T9999 sinovida havo oqimi qancha?",
+      "language": "uz",
+      "expected": "INSUFFICIENT_EVIDENCE",
+      "actual": "INSUFFICIENT_EVIDENCE",
+      "claims": [],
+      "evidence": [],
+      "status": "PASS"
+    },
+    {
+      "question": "T20 va T21 da havo oqimi va natijasi qanday farq qilgan?",
+      "language": "uz",
+      "expected": "ANSWERED",
+      "actual": "ANSWERED",
+      "claims": [
+        {
+          "text": "T20 sinovida havo oqimi 11 dan 3 cm/s gacha bo'lgan va natijada yonish o'chgan (Quenched).",
+          "evidence_ids": [
+            "a2776f3aa3dc0345dea9c7e7bd510427"
+          ],
+          "kind": "SOURCE_FINDING"
+        },
+        {
+          "text": "T21 sinovida havo oqimi 11 dan 47 cm/s gacha bo'lgan va natijada yonish uzilib qolgan (Blow-off).",
+          "evidence_ids": [
+            "5ed494be53b1b5fbd0e2c4aa90111ab7"
+          ],
+          "kind": "SOURCE_FINDING"
+        }
+      ],
+      "evidence": [
+        "Table 7.1 · PDF 104 · GMT190-T21",
+        "Table 7.1 · PDF 104 · GMT190-T20"
+      ],
+      "usage": {
+        "prompt_tokens": 1325,
+        "completion_tokens": 210,
+        "total_tokens": 1535,
+        "cost": 0.00064625
+      },
+      "status": "PASS"
+    },
+    {
+      "question": "How did airflow and outcomes differ between T20 and T21?",
+      "language": "en",
+      "expected": "ANSWERED",
+      "actual": "ANSWERED",
+      "claims": [
+        {
+          "text": "In trial GMT190-T20, the airflow was 11 to 3 cm/s and the outcome was Quenched.",
+          "evidence_ids": [
+            "a2776f3aa3dc0345dea9c7e7bd510427"
+          ],
+          "kind": "SOURCE_FINDING"
+        },
+        {
+          "text": "In trial GMT190-T21, the airflow was 11 to 47 cm/s and the outcome was Blow-off.",
+          "evidence_ids": [
+            "5ed494be53b1b5fbd0e2c4aa90111ab7"
+          ],
+          "kind": "SOURCE_FINDING"
+        }
+      ],
+      "evidence": [
+        "Table 7.1 · PDF 104 · GMT190-T21",
+        "Table 7.1 · PDF 104 · GMT190-T20"
+      ],
+      "usage": {
+        "prompt_tokens": 1365,
+        "completion_tokens": 179,
+        "total_tokens": 1544,
+        "cost": 0.00060975
+      },
+      "status": "PASS"
+    },
+    {
+      "tool": "ranking",
+      "aiSettings": "PASS",
+      "explanation": "This research-analysis setup utilizes a ranking tool to evaluate airflow evidence within the ISS SIBAL (Smoke and Aerosol Measurement Experiment) framework. The analysis is bounded by three BASS-II trial transcriptions and supplementary NASA metadata. We will prioritize data points that correlate specific ventilation flow rates with aerosol dispersion patterns, treating the provided documents as the exclusive information space for ranking relevance.",
+      "assumptions": [
+        "The BASS-II transcriptions contain sufficient descriptive data to categorize airflow behavior.",
+        "NASA metadata tables are internally consistent with the trial transcriptions.",
+        "Airflow patterns observed in SIBAL are representative of standard ISS cabin ventilation conditions.",
+        "The ranking tool interprets 'evidence' as explicit mentions of velocity or directionality within the provided text.",
+        "No external physical testing data is required to validate the internal logic of the provided documents."
+      ]
+    },
+    {
+      "tool": "scenario",
+      "aiSettings": "PASS",
+      "explanation": "This research-analysis setup utilizes the scenario tool to synthesize airflow behavior data from BASS-II trial transcriptions and NASA metadata. The objective is to isolate evidence of SIBAL (Smoke Aerosol Measurement Experiment) interaction with cabin ventilation patterns. The analysis is bounded strictly to the provided source-checked documents to ensure traceability and prevent the introduction of external variables.",
+      "assumptions": [
+        "The BASS-II trial transcriptions are representative of the intended experimental conditions.",
+        "NASA metadata tables provide a consistent baseline for cabin environmental parameters.",
+        "Airflow patterns observed in the selected datasets are indicative of general ISS ventilation behavior.",
+        "The SIBAL instrumentation functioned within nominal parameters during the recorded trials.",
+        "No external atmospheric disturbances occurred during the data collection periods."
+      ]
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import {ui} from './i18n.js';
 import React,{useEffect,useState} from 'react';
 
 export async function ingestionJSON(path,options) {
@@ -59,11 +60,11 @@ export default function Ingestion({lang,importJob,retryImport}) {
   if(!studies.length&&!importJob)return null;
   return <section aria-label="Ingestion">
     <nav aria-label={uz?'Dalil bo‘limlari':'Evidence sections'} className="controls">
-      <button aria-pressed={mode==='library'} disabled={busy} onClick={()=>{setMode('library');setResults(null);setAnswer(null);setMessage('');}}>Library</button>
-      <button aria-pressed={mode==='ask'} disabled={busy} onClick={()=>{setMode('ask');setResults(null);setAnswer(null);setMessage('');}}>Ask AI</button>
+      <button aria-pressed={mode==='library'} disabled={busy} onClick={()=>{setMode('library');setResults(null);setAnswer(null);setMessage('');}}>{ui(lang,'Library')}</button>
+      <button aria-pressed={mode==='ask'} disabled={busy} onClick={()=>{setMode('ask');setResults(null);setAnswer(null);setMessage('');}}>{ui(lang,'Ask AI')}</button>
     </nav>
-    <h2>{mode==='ask'?'Ask AI':uz?'NASA dalillari va vektor qidiruvi':'NASA evidence and vector search'}</h2>
-    {importJob&&<p aria-live="polite">Ingestion · {importJob.error||((job?.id===importJob.id)&&job?.state)||'QUEUED'}
+    <h2>{mode==='ask'?ui(lang,'Ask AI'):uz?'NASA dalillari va vektor qidiruvi':'NASA evidence and vector search'}</h2>
+    {importJob&&<p aria-live="polite">{ui(lang,'Ingestion')} · {ui(lang,importJob.error||((job?.id===importJob.id)&&job?.state)||'QUEUED')}
       {job?.id===importJob.id&&job?.error&&' · '+job.error}
       {(importJob.error||job?.id===importJob.id&&job?.state==='FAILED')&&
         <button onClick={retryImport}>{uz?'Qayta urinish':'Retry'}</button>}
@@ -93,7 +94,7 @@ export default function Ingestion({lang,importJob,retryImport}) {
     {!!results?.length&&<a href={'data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(results,null,2))}
       download="skyforge-evidence.json">{uz?'Topilgan dalillarni eksport qilish':'Export retrieved evidence'}</a>}
     {results?.map((result,i)=><details key={result.id} id={'evidence-'+result.id}>
-      <summary>{mode==='ask'&&`[${i+1}] `}{result.studyId} · {result.trialId||result.locator} · {result.kind}</summary>
+      <summary>{mode==='ask'&&`[${i+1}] `}{result.studyId} · {result.trialId||result.locator} · {ui(lang,result.kind)}</summary>
       <p>{result.title} · {result.id}</p>
       <pre>{result.text}</pre>
       <a href={result.sourceUrl} target="_blank" rel="noreferrer">{uz?'Asl manba':'Original source'}</a>
@@ -101,8 +102,8 @@ export default function Ingestion({lang,importJob,retryImport}) {
     </details>)}
     {mode==='library'&&<h3>{uz?'Demo tadqiqotlari':'Demo studies'} · {studies.length}</h3>}
     {mode==='library'&&studies.map(item=><details key={item.id}>
-      <summary>{item.id} · {item.title} · {item.job?.state} ({item.job?.count ?? 0})</summary>
-      <p>{item.kind} · DOI {item.doi} · v{item.version} · {uz?'Tanlangan fayllar':'Selected files'}</p>
+      <summary>{item.id} · {item.title} · {ui(lang,item.job?.state)} ({item.job?.count ?? 0})</summary>
+      <p>{ui(lang,item.kind)} · DOI {item.doi} · v{item.version} · {uz?'Tanlangan fayllar':'Selected files'}</p>
       {item.job?.error&&<p role="alert">{item.job.error}</p>}
       <a href={item.sourceUrl} target="_blank" rel="noreferrer">NASA PSI</a>
       <ul>{item.files.map(file=><li key={file.name}>

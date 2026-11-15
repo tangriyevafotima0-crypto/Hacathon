@@ -75,7 +75,7 @@ export default function Workspace(){
   const [ready,setReady]=useState(false),[failure,setFailure]=useState(''),[page,setPage]=useState('chat'),[language,setLanguage]=useState(()=>preference('forge-language','uz'));
   const [selected,setSelected]=useState([]),[collapsed,setCollapsed]=useState(()=>matchMedia('(max-width:700px)').matches),[theme,setTheme]=useState(()=>preference('forge-theme','dark'));
   const [evidenceFocus,setEvidenceFocus]=useState(null);
-  function inspect(sources){setEvidenceFocus({sources,id:requestId()});setPage('library');requestAnimationFrame(()=>document.getElementById('evidence-reader')?.scrollIntoView({block:'start'}));}
+  function inspect(sources,claims=[]){setEvidenceFocus({sources,claims,id:requestId()});setPage('library');requestAnimationFrame(()=>document.getElementById('evidence-reader')?.scrollIntoView({block:'start'}));}
   const [settings,setSettings]=useState(false),[chatAction,setChatAction]=useState(null),[handoff,setHandoff]=useState(null);
   const uz=language==='uz';
   const sharedId=new URLSearchParams(location.search).get('share');
@@ -88,14 +88,14 @@ export default function Workspace(){
   return <div className={'forge-workspace '+(collapsed?'sidebar-collapsed':'')} data-theme={theme}>
     <header className="forge-topbar"><button className="icon-button" aria-label={uz?'Menyuni ochish':'Toggle menu'} aria-expanded={!collapsed} onClick={()=>setCollapsed(!collapsed)}><Menu size={20}/></button>
       <strong>SKYFORGE <span>Fire Atlas</span></strong>
-      <nav aria-label="Workspace">{[['chat','Hybrid AI'],['library','Library']].map(([key,title])=><button key={key} aria-pressed={page===key} onClick={()=>setPage(key)}>{title}</button>)}</nav>
+      <nav aria-label="Workspace">{[['chat','Hybrid AI'],['library','Library']].map(([key,title])=><button key={key} aria-pressed={page===key} onClick={()=>{setEvidenceFocus(null);setPage(key);}}>{title}</button>)}</nav>
       <div className="top-actions"><button className="icon-button" aria-label="Notes" onClick={()=>setPage('notes')}><BookOpen size={19}/></button>
       <button className="icon-button" aria-label={theme==='dark'?'Day mode':'Night mode'} onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={19}/>:<Moon size={19}/>}</button>
       <a href="https://psi.nasa.gov/physci/repo" target="_blank" rel="noreferrer" className="nasa-wordmark">NASA ↗</a></div>
     </header>
     <aside className="forge-sidebar" aria-label="Main menu"><div className="sidebar-brand">F<span>FIRE ATLAS</span><button className="icon-button" aria-label="Collapse sidebar" onClick={()=>setCollapsed(true)}><PanelLeftClose size={18}/></button></div>
       <button className="sidebar-new" disabled={!ready} onClick={()=>{setPage('chat');setChatAction({id:requestId()});}}><Plus size={18}/> New Chat</button>
-      <button className={'sidebar-nav '+(page==='library'?'active':'')} onClick={()=>setPage('library')}><LibraryBig size={18}/> Library</button>
+      <button className={'sidebar-nav '+(page==='library'?'active':'')} onClick={()=>{setEvidenceFocus(null);setPage('library');}}><LibraryBig size={18}/> Library</button>
       <button className={'sidebar-nav '+(page==='tools'?'active':'')} onClick={()=>setPage('tools')}><SlidersHorizontal size={18}/> Tools</button>
       <div id="forge-history-slot" className="history-slot"/>
       <button className="sidebar-settings" onClick={()=>setSettings(!settings)}><Settings size={18}/>{uz?'Sozlamalar':'Settings'}</button>
@@ -103,8 +103,8 @@ export default function Workspace(){
     <main className="forge-main">
     {!ready?<section className="forge-pane connection-state"><h2>{failure?'Ulanishda xato':'Fire Atlas'}</h2><p>{failure||'Ulanmoqda…'}</p>{failure&&<button onClick={()=>location.reload()}>Qayta ulanish</button>}</section>:<>
       {selected.length>0&&<div className="selection-strip">{uz?'Tanlangan sinovlar':'Selected trials'} · {selected.join(', ')}<button onClick={()=>setSelected([])}>{uz?'Tozalash':'Clear'}</button></div>}
-      <div hidden={page!=='chat'}><Chat language={language} selected={selected} navigate={setPage} action={chatAction} handoff={handoff} collapsed={collapsed} inspect={inspect} onEvidence={setEvidenceFocus}/></div>
-      <div hidden={page!=='library'}><Library language={language} selected={selected} setSelected={setSelected} ask={ask} evidenceFocus={evidenceFocus} visible={page==='library'}/><details className="forge-pane legacy-atlas"><summary>{uz?'O‘lchovlar, import va Notebook':'Measurements, import and Notebook'}</summary><Atlas/></details></div>
+      <div hidden={page!=='chat'}><Chat language={language} selected={selected} navigate={setPage} action={chatAction} handoff={handoff} collapsed={collapsed} inspect={inspect} /></div>
+      <div hidden={page!=='library'}><Library language={language} selected={selected} setSelected={setSelected} ask={ask} evidenceFocus={evidenceFocus} closeEvidence={()=>setEvidenceFocus(null)} visible={page==='library'}/><details className="forge-pane legacy-atlas"><summary>{uz?'O‘lchovlar, import va Notebook':'Measurements, import and Notebook'}</summary><Atlas/></details></div>
       <div hidden={page!=='notes'}><Notes language={language} visible={page==='notes'}/></div>
       <div hidden={page!=='tools'}><Tools language={language} trials={selected} setTrials={setSelected}/></div>
     </>}
@@ -136,7 +136,7 @@ function Notes({language,visible}){
  <button disabled={busy||!text.trim()}>{uz?'Saqlash':'Save note'}</button>{current&&<button type="button" disabled={busy} onClick={async()=>{try{await api('notes/'+current.id,'DELETE');setCurrent(null);setTitle('');setText('');await refresh();}catch(e){setError(e.message);}}}>{uz?'O‘chirish':'Delete note'}</button>}</form></div></section>;
 }
 
-function Chat({language,selected,navigate,action,handoff,collapsed,inspect,onEvidence}){
+function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   const uz=language==='uz';
   const [history,setHistory]=useState([]),[chat,setChat]=useState(null),[q,setQ]=useState(''),[draft,setDraft]=useState('');
   const [pending,setPending]=useState(null),[error,setError]=useState(''),[archived,setArchived]=useState(false);
@@ -145,12 +145,13 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect,onEvi
   const [memory,setMemory]=useState([]),[memo,setMemo]=useState(''),[kind,setKind]=useState('goal');
   const [showMemory,setShowMemory]=useState(false);
   const active=useRef(null);
+  useEffect(()=>{function close(event){const menu=document.querySelector('.chat-actions');if(menu?.open&&(event.key==='Escape'||event.type==='pointerdown'&&!menu.contains(event.target))){menu.open=false;if(event.key==='Escape')menu.querySelector('summary')?.focus();}}document.addEventListener('pointerdown',close);document.addEventListener('keydown',close);return()=>{document.removeEventListener('pointerdown',close);document.removeEventListener('keydown',close);};},[]);
   const bottom=useRef(null),composer=useRef(null),fileInput=useRef(null);
   const [attachments,setAttachments]=useState([]),[uploading,setUploading]=useState(false);
   useEffect(()=>{if(!attachments.some(a=>['QUEUED','RUNNING'].includes(a.state)))return;const timer=setInterval(()=>api('assets').then(items=>setAttachments(old=>old.map(a=>items.find(b=>b.id===a.id)||a))).catch(report),1500);return()=>clearInterval(timer);},[attachments]);
   async function attach(files){setUploading(true);setError('');try{for(const file of [...files].slice(0,3-attachments.length)){if(file.size>8000000)throw Error('Fayl 8 MB dan kichik bo‘lishi kerak');const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(Error('FILE_READ_FAILED'));reader.readAsDataURL(file);});const item=await api('assets','POST',{name:file.name,base64});setAttachments(old=>[...old.filter(a=>a.id!==item.id),item]);}}catch(e){report(e);}finally{setUploading(false);if(fileInput.current)fileInput.current.value='';}}
   const attachmentBusy=uploading||attachments.some(a=>['QUEUED','RUNNING','FAILED'].includes(a.state)||a.chunk_count===0);
-  const [editing,setEditing]=useState(false),[shareLink,setShareLink]=useState(''),[shareCopied,setShareCopied]=useState(false);
+  const [shareLink,setShareLink]=useState(''),[shareCopied,setShareCopied]=useState(false);
   useEffect(()=>{setShareLink('');},[chat?.id]);
   useEffect(()=>{if(action&&!active.current){setAttachments([]);setChat(null);setDraft('');setError('');}},[action]);
   useEffect(()=>{if(handoff){setDraft(handoff.question);requestAnimationFrame(()=>composer.current?.focus());}},[handoff]);
@@ -202,7 +203,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect,onEvi
     finally{active.current=null;setPending(null);}
   }
   async function loadMemory(){setMemory(await api('memory'));}
-  useEffect(()=>{const result=chat?.turns?.filter(t=>t.result).at(-1);onEvidence(result?{sources:result.result.evidence,id:result.id}:null);},[chat?.id,chat?.turns?.length]);
+
   const empty=!chat?.turns?.length&&!pending;
   const historyPanel=<div className="chat-history"><p className="eyebrow">{uz?'Suhbatlar':'Recent chats'}</p>
       <label>{uz?'Tarixdan qidirish':'Search history'}<input value={q} onChange={e=>setQ(e.target.value)}/></label>
@@ -215,11 +216,11 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect,onEvi
     <div className="chat-canvas">
       {empty&&<div className="welcome"><a className="welcome-mark nasa-source-mark" href="https://psi.nasa.gov/physci/repo" target="_blank" rel="noreferrer" aria-label="NASA data source"><img src="/nasa-logo.svg" alt="NASA"/></a><p className="eyebrow">NASA EVIDENCE · YOUR CURIOSITY</p><h1>{uz?'Savolingizdan boshlaymiz.':'Start with a question.'}</h1><p>{uz?'Tadqiqotlarni izlang. Dalillarni solishtiring. Birgalikda tushuning.':'Explore research. Compare evidence. Understand together.'}</p></div>}
       {error&&<p role="alert">{error}</p>}
-      {chat&&<header className="chat-toolbar"><h2>{chat.title}</h2><button onClick={()=>setEditing(!editing)} aria-expanded={editing}>{uz?'Suhbat sozlamalari':'Chat settings'}</button><button disabled={!!pending||!chat.turns?.length} onClick={()=>void update({pinned:!chat.pinned}).catch(report)}>{chat.pinned?(uz?'Pinni olish':'Unpin chat'):(uz?'Pin qilish':'Pin chat')}</button>
+      {chat&&<header className="chat-toolbar"><h2>{chat.title}</h2><details className="chat-actions"><summary aria-label="Chat menu">•••</summary><div className="chat-actions-panel"><button disabled={!!pending||!chat.turns?.length} onClick={()=>void update({pinned:!chat.pinned}).catch(report)}>{chat.pinned?(uz?'Pinni olish':'Unpin chat'):(uz?'Pin qilish':'Pin chat')}</button>
       <button disabled={!!pending||!chat.turns?.length} onClick={async()=>{try{const shared=await api('chats/'+chat.id+'/share','POST',{});const link=location.origin+location.pathname+'?share='+shared.id;setShareLink(link);await select(chat.id);await refresh();try{await copyText(link);setShareCopied(true);}catch{setShareCopied(false);}}catch(e){report(e);}}}>Share chat</button>
       {shareLink&&<div className="share-panel"><p>{shareCopied?(uz?'Havola nusxalandi':'Link copied'):(uz?'Havolani nusxalang':'Copy this link')}</p><input aria-label="Share link" value={shareLink} readOnly onFocus={e=>e.target.select()}/><p>{uz?'Havolasi bor odam suhbat nusxasini o‘qiy oladi.':'Anyone with this link can read the shared conversation snapshot.'}</p></div>}
       {chat.share_id&&<button onClick={()=>void api('chats/'+chat.id+'/share','DELETE').then(()=>{setShareLink('');return select(chat.id);}).catch(report)}>{uz?'Ulashishni to‘xtatish':'Stop sharing'}</button>}
-      <div hidden={!editing}>
+      <div>
         <form onSubmit={event=>{event.preventDefault();void update({title:new FormData(event.currentTarget).get('title')}).catch(report);}}>
           <input key={chat.id+chat.version} name="title" aria-label={uz?'Chat nomi':'Chat title'} defaultValue={chat.title} maxLength={120}/>
           <button disabled={!!pending}>{uz?'Nomni saqlash':'Save name'}</button>
@@ -227,9 +228,9 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect,onEvi
         <button disabled={!!pending} onClick={()=>void update({archived:!chat.archived}).catch(report)}>{chat.archived?'Restore':'Archive'}</button>
         <button disabled={!!pending} onClick={()=>{if(window.confirm(uz?'Chat o‘chirilsinmi?':'Delete chat?'))void api('chats/'+chat.id,'DELETE').then(()=>{setChat(null);return refresh();}).catch(report);}}>{uz?'O‘chirish':'Delete'}</button>
         <label><input type="checkbox" checked={chat.memory} disabled={!!pending} onChange={e=>void update({memory:e.target.checked}).catch(report)}/>{uz?'Shu chatda xotira':'Memory in this chat'}</label>
-      </div></header>}
+      </div><button onClick={()=>{setShowMemory(!showMemory);if(!showMemory)void loadMemory().catch(report);}}>{uz?'Xotirani boshqarish':'Manage memory'}</button></div></details></header>}
       {chat?.summary&&<details><summary>{uz?'Suhbat konteksti':'Thread context'}</summary><pre>{JSON.stringify(chat.summary.entries,null,2)}</pre></details>}
-      <button className="memory-toggle" onClick={()=>{setShowMemory(!showMemory);if(!showMemory)void loadMemory().catch(report);}}>{uz?'Xotirani boshqarish':'Manage memory'}</button>
+
       {showMemory&&<div>
         <button onClick={()=>void api('memory','DELETE').then(loadMemory).catch(report)}>{uz?'Barcha xotirani unutish':'Forget all memory'}</button>
         <form onSubmit={e=>{e.preventDefault();void api('memory','POST',{kind,text:memo,consent:true}).then(()=>{setMemo('');return loadMemory();}).catch(report);}}>
@@ -252,12 +253,11 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect,onEvi
           {turn.result?<><div className="answer-heading"><span className="answer-mark">F</span><strong>Fire Atlas</strong><small>{turn.result.duration_ms?`${(turn.result.duration_ms/1000).toFixed(1)} s`:turn.result.model?'AI':'Local'} · {turn.result.status}</small></div>
             {turn.result.status==='INSUFFICIENT_EVIDENCE'&&<p>{uz?'Ulangan manbalarda ushbu savolga javob berish uchun yetarli dalil yo‘q. Boshqa sinov yoki sharoitni tanlang.':'The connected corpus has insufficient evidence for this question. Select another trial or condition.'}</p>}
             {turn.result.claims.map((claim,i)=><p key={i}>{claim.kind&&<small>{claim.kind==='AI_INTERPRETATION'?(uz?'AI rasm talqini':'AI visual interpretation'):claim.kind==='USER_REPORTED'?(uz?'Yuklangan manba':'Uploaded source'):claim.kind==='SOURCE_FINDING'?(uz?'Manbali natija':'Source finding'):claim.kind} · </small>}{claim.text} {claim.evidence_ids.map(id=><a key={id} href={'#'+turn.id+'-'+id}
-              onClick={()=>{const detail=document.getElementById(turn.id+'-'+id);if(detail)detail.open=true;}}>[{turn.result.evidence.findIndex(source=>source.id===id)+1}] </a>)}</p>)}
+              onClick={event=>{event.preventDefault();inspect(turn.result.evidence.filter(s=>s.id===id),[claim]);}}>[{turn.result.evidence.findIndex(source=>source.id===id)+1}] </a>)}</p>)}
             <AnswerExtras evidence={turn.result.evidence}/>
-            {turn.result.evidence.map(source=><details key={source.id} id={turn.id+'-'+source.id}><summary>{source.studyId} · {source.locator}</summary><pre>{source.text}</pre><button onClick={()=>inspect([source])}>{uz?'Library’da belgilab ko‘rish':'Highlight in Library'}</button><a href={source.sourceUrl} target="_blank" rel="noreferrer">{source.kind==='USER_UPLOAD'?'Uploaded source':'NASA'}</a></details>)}
-            <small>{turn.corpus_snapshot_id.slice(0,12)} · {turn.result.model||'Local'} · {turn.memory_ids?.length||0} {uz?'xotira bandi':'memory items'}</small>
+
             <button onClick={()=>void copyText(turn.result.claims.map(claim=>claim.text+' '+claim.evidence_ids.map(id=>{const source=turn.result.evidence.find(s=>s.id===id);return source?'['+source.locator+']('+source.sourceUrl+')':'';}).join(' ')).join('\n\n')).catch(report)}>Copy</button>
-            <button onClick={()=>inspect(turn.result.evidence)}>Library · {uz?'Dalilni tekshirish':'Verify evidence'}</button>
+            <button onClick={()=>inspect(turn.result.evidence,turn.result.claims)}>Library · {uz?'Dalilni tekshirish':'Verify evidence'}</button>
             <button onClick={()=>navigate('tools')}>Tools</button>
           </>:<p>{turn.state} {readableError({message:turn.error},language)}</p>}
           {['FAILED','CANCELLED','INTERRUPTED'].includes(turn.state)&&<button onClick={()=>setDraft(turn.question)}>{uz?'Qayta urinish':'Retry'}</button>}
@@ -296,24 +296,39 @@ function AnswerExtras({evidence}){
   </>;
 }
 
-function EvidenceReader({focus,language}){
+function readableEvidence(text,language){
+  const uz=language==='uz';
+  // Deterministic presentation of original values, with no new scientific inference.
+  const fields=Object.fromEntries(text.split('\n').map(line=>{const i=line.indexOf(':');return i>0?[line.slice(0,i).trim(),line.slice(i+1).trim()]:[];}).filter(pair=>pair.length));
+  if(fields.trial_id&&fields.material){
+    const result=[uz?`${fields.study||fields.study_id} tadqiqotining ${fields.trial_id} sinovida ${fields.material} materiali ishlatilgan.`:`Trial ${fields.trial_id} in ${fields.study||fields.study_id} used ${fields.material}.`];
+    if(fields.sample_width_cm)result.push(uz?`Namunaning eni ${fields.sample_width_cm} cm. Bu en o‘lchovi; qalinlik sifatida talqin qilinmaydi.`:`The sample width is ${fields.sample_width_cm} cm. This measures width, not thickness.`);
+    if(fields.flow_raw)result.push(uz?`Havo oqimi manbada ${fields.flow_raw} ${fields.flow_unit||''} tartibida berilgan.`:`The source reports airflow in the order ${fields.flow_raw} ${fields.flow_unit||''}.`);
+    for(const [key,value] of Object.entries(fields)){if(/outcome|result|oxygen|o2|gravity/i.test(key))result.push(`${({outcome:uz?'Kuzatilgan natija':'Observed outcome',outcome_raw:uz?'Kuzatilgan natija':'Observed outcome',gravity:uz?'Gravitatsiya':'Gravity',o2_concentration:uz?'Kislorod konsentratsiyasi':'Oxygen concentration'})[key]||key.replaceAll('_',' ')}: ${value}.`);}
+    return result;
+  }
+  return text.split(/\n\s*\n/).filter(Boolean);
+}
+
+function EvidenceReader({focus,language,close}){
   const [current,setCurrent]=useState(0),[part,setPart]=useState(null),[error,setError]=useState('');
   useEffect(()=>{setCurrent(0);},[focus]);
   const source=focus?.sources?.[current];
   useEffect(()=>{setPart(null);setError('');if(!source)return;const id=(source.fileUrl||source.sourceUrl||'').match(/assets\/([0-9a-f]+)\//)?.[1];if(!id)return;let live=true;api('assets/'+id+'/excerpt?'+new URLSearchParams({locator:source.locator})).then(p=>{if(live)setPart(p);}).catch(e=>{if(live)setError(e.message);});return()=>{live=false;};},[source]);
   if(!focus)return null;
   const text=part?.text||source?.text||'';
-  const start=source?text.indexOf(source.text):-1;
   return <section id="evidence-reader" className="evidence-reader" tabIndex={-1}><p className="eyebrow">{language==='uz'?'JAVOB → ASL DALIL':'ANSWER → SOURCE EVIDENCE'}</p><h2>{language==='uz'?'Dalilni tekshiring':'Verify the evidence'}</h2><button onClick={()=>download('evidence.json',JSON.stringify({sources:focus.sources},null,2))}>{language==='uz'?'Dalillarni eksport qilish':'Export evidence'}</button>
     {!source?<p>{language==='uz'?'Bu javobga manba biriktirilmagan.':'No source attached to this answer.'}</p>:<>
     <nav aria-label="Answer sources">{focus.sources.map((s,i)=><button key={s.id} aria-pressed={i===current} onClick={()=>setCurrent(i)}>{s.file||s.studyId} · {s.locator}</button>)}</nav>
-    <h3>{part?.name||source.file||source.studyId}</h3><details><summary>Evidence ID</summary><code>{source.id}</code></details><p>{source.locator}</p>
-    <p>{language==='uz'?'Sariq belgi — javobga dalil bo‘lgan ajratilgan matn. Asl faylni quyidagi havoladan solishtiring.':'Yellow marks the extracted passage used as evidence. Compare it with the original file below.'}</p>
-    {source.interpretation&&<p>{language==='uz'?'AI rasm talqini — asl rasm bilan tekshiring; bu o‘lchangan ilmiy natija emas.':'AI visual interpretation — verify against the original image; this is not a measured finding.'}</p>}
+    <button onClick={close}>{language==='uz'?'Yopish':'Close'}</button>
+    <h3>{part?.name||source.file||source.studyId}</h3><p>{source.locator}</p>
+    <p>{language==='uz'?'Javobni qo‘llab-quvvatlovchi mazmun quyida ajratilgan. Asl hujjatdagi sahifa bilan solishtiring.':'The supporting content is highlighted below. Compare it with the cited page in the original document.'}</p>
+    {source.interpretation&&<p>{language==='uz'?'Bu rasmning AI talqini; asl rasm bilan tekshiring.':'AI image interpretation; verify against the original image.'}</p>}
     {error&&<p role="alert">{error}</p>}
-    <pre>{start>=0?<>{text.slice(0,start)}<mark>{source.text}</mark>{text.slice(start+source.text.length)}</>:<mark>{source.text}</mark>}</pre>
+    <div className="readable-evidence">{readableEvidence(text,language).map((paragraph,i)=><p key={i}><mark>{paragraph}</mark></p>)}</div>
     <a href={source.sourceUrl} target="_blank" rel="noreferrer">{language==='uz'?'Asl fayl va sahifani ochish':'Open original file and page'} ↗</a>
-    {part?.mime==='application/pdf'&&<details><summary>{language==='uz'?'Asl PDF sahifasini shu yerda ochish':'View original PDF here'}</summary><iframe title={part.name+' '+source.locator} src={source.sourceUrl} loading="lazy" style={{width:'100%',height:500,border:0}}/></details>}
+    {(part?.mime==='application/pdf'||/\.pdf(?:#|$|\?)/i.test(source.sourceUrl||''))&&<div className="original-page"><h3>{language==='uz'?'Asl hujjat · tegishli sahifa':'Original document · cited page'}</h3><iframe title={source.file+' '+source.locator} src={source.sourceUrl} loading="lazy" style={{width:'100%',height:550,border:0}}/></div>}
+
     {part?.mime?.startsWith('image/')&&<img src={part.original} alt={part.name}/>}
     </>}
   </section>;
@@ -325,7 +340,7 @@ function TrialPicker({selected,onChange}){
     onChange={e=>onChange(e.target.checked?[...selected,id]:selected.filter(item=>item!==id))}/>{title}</label>)}</fieldset>;
 }
 
-function Library({language,selected,setSelected,ask,evidenceFocus,visible}){
+function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,visible}){
   const [shelves,setShelves]=useState([]),[pins,setPins]=useState([]),[comparison,setComparison]=useState(null);
   const [name,setName]=useState(''),[query,setQuery]=useState(''),[error,setError]=useState('');
   const [autoUpdate,setAutoUpdate]=useState(false);
@@ -358,7 +373,7 @@ function Library({language,selected,setSelected,ask,evidenceFocus,visible}){
     }catch(error){report(error);}finally{setAssetBusy(false);}
   }
   return <section className="forge-pane">
-    <EvidenceReader focus={evidenceFocus} language={language}/><div className="library-heading"><p className="eyebrow">YOUR RESEARCH SPACE</p><h1>Library</h1><p>{language==='uz'?'Manbalarni o‘zingiz o‘rganing. Har bir dalilning aslini ko‘ring.':'Explore the research yourself. See the source behind every claim.'}</p></div>{error&&<p role="alert">{error}</p>}
+    <EvidenceReader focus={evidenceFocus} language={language} close={closeEvidence}/><div className="library-heading"><p className="eyebrow">YOUR RESEARCH SPACE</p><h1>Library</h1><p>{language==='uz'?'Manbalarni o‘zingiz o‘rganing. Har bir dalilning aslini ko‘ring.':'Explore the research yourself. See the source behind every claim.'}</p></div>{error&&<p role="alert">{error}</p>}
     <form className="library-search" onSubmit={event=>{event.preventDefault();void api('search','POST',{query:find}).then(data=>setFound(data.results)).catch(report);}}>
       <label>{language==='uz'?'Tajriba nomi yoki PSI ID bo‘yicha qidirish':'Search experiment name or PSI ID'}<input value={find} onChange={e=>setFind(e.target.value)} maxLength={300} required/></label>
       <button>{language==='uz'?'Qidirish':'Search'}</button><button type="button" onClick={()=>{setFind('');setFound(null);setStudyOpen(null);}}>{language==='uz'?'Tozalash':'Clear'}</button>

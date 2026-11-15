@@ -25,7 +25,8 @@ async function body(req,allowArray=false){
   }catch{throw failure(400,'INVALID_JSON');}
 }
 
-export function createWorkspaceApi({path,router,retrieve,search,embed,python,pythonPath,getSnapshot=()=>trialSnapshot}){
+export function createWorkspaceApi({path,router,retrieve,search,embed,python,pythonPath,getSnapshot=()=>trialSnapshot,trustedOrigins=[]}){
+  const allowedOrigins=new Set(trustedOrigins);
   const store=openWorkspace(path);
   store.recoverInterrupted();
   let closed=false;
@@ -92,10 +93,10 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
     };
     try{
       const origin=req.headers.origin;
-      if(method!=='GET'&&origin&&origin!==`http://${req.headers.host}`&&origin!==`https://${req.headers.host}`)throw failure(403,'ORIGIN');
+      if(method!=='GET'&&origin&&origin!==`http://${req.headers.host}`&&origin!==`https://${req.headers.host}`&&!allowedOrigins.has(origin))throw failure(403,'ORIGIN');
       const owner=store.identity(req);
       if(resource==='session'&&method==='POST'){
-        if(!owner)res.setHeader('Set-Cookie',store.session(Boolean(req.socket.encrypted)).cookie);
+        if(!owner)res.setHeader('Set-Cookie',store.session(Boolean(req.socket.encrypted)||req.headers['x-forwarded-proto']==='https').cookie);
         return respond(200,{ready:true,corpus_snapshot_id:trialSnapshot});
       }
       if(resource==='shared'&&id&&method==='GET'){const shared=store.get('public','share',id);if(!shared)throw failure(404,'NOT_FOUND');return respond(200,shared);}

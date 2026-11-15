@@ -12,7 +12,7 @@ import { publicTrials } from './server/workspace-tools.js';
 export default defineConfig(({ mode }) => {
   const config=loadEnv(mode,process.cwd(),'OPENROUTER_');
   const { SKYFORGE_DATA_ROOT:root, SKYFORGE_INGESTION_RUNTIME:runtime, SKYFORGE_WORKSPACE_DB:workspacePath,
-    SKYFORGE_ADDITIONAL_ROOT:additionalRoot,SKYFORGE_PYTHON:python,SKYFORGE_PYTHONPATH:pythonPath,SKYFORGE_RELEASE:release } = loadEnv(mode, process.cwd(), 'SKYFORGE_');
+    SKYFORGE_ADDITIONAL_ROOT:additionalRoot,SKYFORGE_PUBLIC_ORIGINS:publicOrigins,SKYFORGE_PUBLIC_HOST:publicHost,SKYFORGE_PYTHON:python,SKYFORGE_PYTHONPATH:pythonPath,SKYFORGE_RELEASE:release } = loadEnv(mode, process.cwd(), 'SKYFORGE_');
   const configure = async server => {
     server.middlewares.use(createNasaFiles(additionalRoot));
     server.middlewares.use((req,res,next)=>{
@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
           text:JSON.stringify(r.raw_input),
         }));
       }
-      const workspace=createWorkspaceApi({path:workspacePath,router,retrieve,search:async query=>({results:await retrieve(query,undefined,true)}),embed:ingestion?.embed,getSnapshot:ingestion?.snapshot,python,pythonPath});
+      const workspace=createWorkspaceApi({path:workspacePath,router,retrieve,search:async query=>({results:await retrieve(query,undefined,true)}),embed:ingestion?.embed,getSnapshot:ingestion?.snapshot,python,pythonPath,trustedOrigins:(publicOrigins||'').split(',').map(s=>s.trim()).filter(Boolean)});
       server.middlewares.use((req,res,next)=>{
         if(req.url?.split('?')[0]==='/api/ingestion/import'&&req.method==='POST'){
           req.url='/api/workspace/imports';
@@ -55,6 +55,8 @@ export default defineConfig(({ mode }) => {
     if(ingestion)server.middlewares.use(ingestion);
   };
   return {
+    server:{allowedHosts:publicHost?[publicHost]:[]},
+    preview:{allowedHosts:publicHost?[publicHost]:[]},
     plugins: [react(), tailwindcss(), {
       name: 'fire-atlas-api',
       configureServer: configure,

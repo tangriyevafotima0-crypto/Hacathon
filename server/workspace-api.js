@@ -336,7 +336,7 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
             const evidence=(assetIds.length?uploads:[...connected,...custom,...uploads]).slice(0,8);
             if(controller.signal.aborted)throw failure(409,'CANCELLED');
             const summary=store.get(owner,'summary',id);
-            const cacheId=digest(JSON.stringify({policy:'buildpack-v1',model:router.model,question:input.question,language:input.language,
+            const cacheId=digest(JSON.stringify({policy:'source-only-v2',model:router.model,question:input.question,language:input.language,
               evidence,scope,context,summary:summary?.entries,memory:memory.map(({id,version})=>({id,version}))}));
             const cached=store.get(owner,'cache',cacheId);
             const result=cached?.result??await answerAtlas(router,input.question,input.language,evidence,scope,{context:{recent:context,summary:summary?.entries},

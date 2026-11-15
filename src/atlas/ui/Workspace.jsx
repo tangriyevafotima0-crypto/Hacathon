@@ -298,9 +298,9 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
               onClick={event=>{event.preventDefault();inspect(turn.result.evidence.filter(s=>s.id===id),[claim]);}}>[{turn.result.evidence.findIndex(source=>source.id===id)+1}] </a>)}</p>)}
             {turn.result.evidence.length>0&&<AnswerExtras language={language} evidence={turn.result.evidence}/>}
 
-            <button onClick={()=>void copyText(turn.result.claims.map(claim=>claim.text+' '+claim.evidence_ids.map(id=>{const source=turn.result.evidence.find(s=>s.id===id);return source?'['+source.locator+']('+source.sourceUrl+')':'';}).join(' ')).join('\n\n')).catch(report)}>{ui(language,"Copy")}</button>
+            <button className="answer-icon-action" aria-label={uz?'Javobni nusxalash':'Copy answer'} title={uz?'Javobni nusxalash':'Copy answer'} onClick={()=>void copyText(turn.result.claims.map(claim=>claim.text+' '+claim.evidence_ids.map(id=>{const source=turn.result.evidence.find(s=>s.id===id);return source?'['+source.locator+']('+source.sourceUrl+')':'';}).join(' ')).join('\n\n')).catch(report)}><Copy size={17} aria-hidden="true"/></button>
             {turn.result.evidence.length>0&&<button onClick={()=>inspect(turn.result.evidence,turn.result.claims)}>{ui(language,'Library')} · {uz?'Dalilni tekshirish':'Verify evidence'}</button>}
-            <button onClick={()=>navigate('tools')}>{ui(language,"Tools")}</button>
+            <button className="answer-icon-action" aria-label={ui(language,'Tools')} title={ui(language,'Tools')} onClick={()=>navigate('tools')}><SlidersHorizontal size={17} aria-hidden="true"/></button>
           </>:<p>{ui(language,turn.state)} {readableError({message:turn.error},language)}</p>}
           {['FAILED','CANCELLED','INTERRUPTED'].includes(turn.state)&&<button onClick={()=>setDraft(turn.question)}>{uz?'Qayta urinish':'Retry'}</button>}
         </div></article>)}

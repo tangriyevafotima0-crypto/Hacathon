@@ -91,7 +91,7 @@ function requestId(){
 
 function preference(key,fallback){try{return localStorage.getItem(key)||fallback;}catch{return fallback;}}
 export default function Workspace(){
-  const [ready,setReady]=useState(false),[failure,setFailure]=useState(''),[page,setPage]=useState('chat'),[language,setLanguage]=useState(()=>preference('forge-language','uz'));
+  const [ready,setReady]=useState(false),[failure,setFailure]=useState(''),[page,setPage]=useState('chat'),[language,setLanguage]=useState(()=>preference('forge-language','en'));
   const [selected,setSelected]=useState([]),[collapsed,setCollapsed]=useState(()=>matchMedia('(max-width:700px)').matches),[theme,setTheme]=useState(()=>preference('forge-theme','dark'));
   const [mobile,setMobile]=useState(()=>matchMedia('(max-width:700px)').matches);
   const sidebarRef=useRef(null),menuRef=useRef(null);
@@ -146,7 +146,7 @@ export default function Workspace(){
 }
 
 function SharedChat({id}){
- const [language,setLanguage]=useState(()=>preference('forge-language','uz'));const uz=language==='uz';
+ const [language,setLanguage]=useState(()=>preference('forge-language','en'));const uz=language==='uz';
  const [chat,setChat]=useState(null),[error,setError]=useState('');
  useEffect(()=>{api('shared/'+encodeURIComponent(id)).then(setChat).catch(()=>setError(uz?'Havola topilmadi yoki ulashish to‘xtatilgan.':'Link not found or sharing has stopped.'));},[id,language]);
  return <div className="forge-workspace" data-theme="light"><main className="shared-chat forge-pane"><a href="/">← Fire Atlas</a><button onClick={()=>setLanguage(uz?'en':'uz')}>{uz?'English':'O‘zbekcha'}</button><h1>{chat?.title||(uz?'Ulashilgan suhbat':'Shared chat')}</h1><p>{uz?'Faqat o‘qish · Ulashilgan suhbat nusxasi':'Read-only · Shared conversation snapshot'}</p>{error&&<p role="alert">{error}</p>}{chat?.turns.map((t,i)=><article key={i}><h2>{t.question}</h2>{t.claims.map((c,j)=><p key={j}>{c.kind&&<small>{ui(language,c.kind)} · </small>}{c.text} {c.evidence_ids?.map(id=><a key={id} href={'#shared-'+i+'-'+id}>[{t.evidence.findIndex(e=>e.id===id)+1}] </a>)}</p>)}{t.evidence.map(e=><details key={e.id} id={'shared-'+i+'-'+e.id}><summary>{e.studyId} · {e.locator}</summary><p>{e.interpretation?(uz?'AI talqini · mustaqil tekshirilmagan':'AI interpretation · independently unverified'):e.kind==='USER_UPLOAD'?(uz?'Foydalanuvchi manbasi':'User-supplied source'):(uz?'Keltirilgan manba':'Cited source')}</p><pre>{e.text}</pre>{e.sourceUrl&&<a href={e.sourceUrl} target="_blank" rel="noreferrer">{ui(language,"Original")}</a>}</details>)}</article>)}</main></div>;

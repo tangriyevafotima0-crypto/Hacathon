@@ -39,3 +39,5 @@ Uchala muammo tuzatildi.
 Bu ichki UX va mahsulot tayyorligining subyektiv bahosi, NASA hakamlarining rasmiy bali emas. Manbani tekshirish, asosiy chat oqimi va xatolarni ajratish ancha yaxshilandi. 10/10 uchun real foydalanuvchilar bilan vazifani bajarish o‘lchovlari, barcha yordamchi ekranlarda to‘liq ikki tillilik, ko‘proq ilmiy korpusda mustaqil sinov va barcha PDF formatlarida original matnga koordinatali belgi kerak.
 
 PDF originalining o‘ziga sariq overlay hali qo‘shilmagan. O‘qiladigan dalil ajratiladi va asl sahifa ochiladi. Bu ikki imkoniyat hisobotda bir xil deb ko‘rsatilmaydi. Video tahlili va barcha skanlarga OCR hali cheklangan. Tailscale manzil umumiy internet uchun ochiq emas.
+
+Yakuniy deploy: b75aa59. Jonli 4191 serverda sidebar-menu-check, evidence-menu-check va workspace-ui-check — PASS. Inglizcha UI oqimi va ikki tildagi haqiqiy AI savollari alohida tekshirildi. Kod bo‘yicha 4 ta takrorlanmaydigan funksional muammo (ikki review’da ayrimlari takrorlangan) tuzatildi; bitta modullarga ajratish tavsiyasi qolgan.

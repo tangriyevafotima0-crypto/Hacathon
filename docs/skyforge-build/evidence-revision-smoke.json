@@ -1,0 +1,57 @@
+{
+  "date": "2026-11-15T05:36:59.389Z",
+  "base": "http://100.105.241.126:4191",
+  "checks": [
+    {
+      "name": "owner-scoped conversation and empty New Chat",
+      "status": "PASS"
+    },
+    {
+      "name": "live OpenRouter grounded answer and idempotent turn replay",
+      "status": "PASS"
+    },
+    {
+      "name": "comparison preserves directional flow and NASA source anchors",
+      "status": "PASS"
+    },
+    {
+      "name": "private shelf and explicit memory create/forget",
+      "status": "PASS"
+    },
+    {
+      "name": "saved ranking, physical abstention, qualitative scenario and synthetic posterior",
+      "status": "PASS"
+    },
+    {
+      "name": "private CSV ingestion and source withdrawal",
+      "status": "PASS"
+    },
+    {
+      "name": "Moon question abstains without provider call",
+      "status": "PASS"
+    },
+    {
+      "name": "NASA image source and byte range",
+      "status": "PASS"
+    }
+  ],
+  "provider": [
+    {
+      "turn_id": "2e2636a2-00f6-4057-afb5-5f60af4647ef:gold-turn-1",
+      "model": "google/gemini-3.1-flash-lite",
+      "usage": {
+        "prompt_tokens": 1154,
+        "completion_tokens": 169,
+        "total_tokens": 1323,
+        "cost": 0.000542
+      },
+      "duration_ms": 4213
+    }
+  ],
+  "latencies": [
+    {
+      "name": "chat",
+      "ms": 4507
+    }
+  ]
+}

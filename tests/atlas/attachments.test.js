@@ -31,3 +31,19 @@ test('vision is labeled as interpretation and provider failure preserves explici
  const offline=createAssets({store,dbPath:path});const unavailable=await offline.add('alice',{name:'other.png',base64:Buffer.from('other image').toString('base64')});await offline.process('alice');
  assert.equal(store.get('alice','asset',unavailable.id).parts[0].status,'VISION_UNAVAILABLE');assert.equal(store.get('alice','asset',unavailable.id).chunks.length,0);store.close();
 });
+import {createServer} from 'node:http';
+import {createWorkspaceApi} from '../../server/workspace-api.js';
+test('attached turns reject foreign assets, exclude public evidence and preserve attachment IDs',async t=>{
+ const path=join(mkdtempSync(join(tmpdir(),'attachment-api-')),'workspace.sqlite');
+ const service=createWorkspaceApi({path,router:{async complete({input}){assert.equal(input.evidence.length,1);assert.equal(input.evidence[0].kind,'USER_UPLOAD');return {data:{status:'ANSWERED',claims:[{text:'Uploaded sample width is 2 cm',evidence_ids:[input.evidence[0].id]}]}};}},retrieve:async()=>[{id:'public',text:'unrelated public evidence',kind:'OBJECTIVE'}],search:async()=>({results:[]})});
+ const server=createServer((req,res)=>void service.handle(req,res,()=>res.end()));await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(async()=>{await new Promise(r=>server.close(r));service.close();});
+ const base='http://127.0.0.1:'+server.address().port+'/api/workspace/';
+ async function call(cookie,url,method='GET',body){const r=await fetch(base+url,{method,headers:{cookie:cookie||'','Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});return {status:r.status,data:await r.json(),cookie:r.headers.get('set-cookie')};}
+ const alice=(await call('','session','POST',{})).cookie,bob=(await call('','session','POST',{})).cookie;
+ const asset=(await call(alice,'assets','POST',{name:'attached.txt',base64:Buffer.from('Uploaded sample width is 2 cm').toString('base64')})).data;
+ const chat=(await call(alice,'chats','POST',{})).data;
+ for(let i=0;i<50;i++){const all=(await call(alice,'assets')).data;if(all[0].state==='READY')break;await new Promise(r=>setTimeout(r,100));}
+ const turn=await call(alice,'chats/'+chat.id+'/turns','POST',{question:'What does this document say?',request_id:'scoped',language:'en',asset_ids:[asset.id]});assert.equal(turn.data.state,'READY');assert.deepEqual(turn.data.asset_ids,[asset.id]);assert.equal(turn.data.result.evidence.length,1);
+ const excerpt=await call(alice,'assets/'+asset.id+'/excerpt?locator=Text');assert.equal(excerpt.data.text,'Uploaded sample width is 2 cm');assert.equal((await call(bob,'assets/'+asset.id+'/excerpt?locator=Text')).status,404);
+ const other=(await call(bob,'chats','POST',{})).data;assert.equal((await call(bob,'chats/'+other.id+'/turns','POST',{question:'Read it',request_id:'foreign',asset_ids:[asset.id]})).status,404);
+});

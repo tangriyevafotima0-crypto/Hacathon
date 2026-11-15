@@ -36,6 +36,22 @@ async function api(path,method='GET',data,onProgress){
   return value;
 }
 
+function readableError(error,language){
+  const code=error?.message||'';
+  const messages={
+    BUDGET_LIMIT:['Bugungi AI xarajat chegarasi tugadi. Library va mahalliy tahlil ishlashda davom etadi.','The daily AI budget is exhausted. Library and local analysis remain available.'],
+    API_DEMO_LIMIT:['AI hozir band. Birozdan so‘ng qayta urinib ko‘ring.','AI is busy. Try again shortly.'],
+    ATTACHMENT_NOT_READY:['Fayl tahlili hali tayyor emas. Ingestion holatini tekshiring.','The attachment is not ready. Check its ingestion status.'],
+    UPSTREAM_TIMEOUT:['AI javobi vaqtida kelmadi. Savolingiz saqlandi; qayta urinishingiz mumkin.','AI timed out. Your question is retained; you can retry.'],
+    OPENROUTER_CREDIT:['AI xizmatida kredit yetarli emas. Library’dan manbalarni ochishingiz mumkin.','The AI service has insufficient credit. Sources remain available in Library.'],
+    API_UNSUPPORTED_NUMBER:['Javobdagi son manba bilan tasdiqlanmadi. Manbani Library’da tekshiring yoki savolni aniqlashtiring.','A number in the answer was not supported by the source. Inspect Library or refine the question.'],
+    API_INVALID_RESPONSE:['AI javobi tekshiruvdan o‘tmadi. Qayta urinib ko‘ring.','The AI response failed validation. Please retry.'],
+    WORKSPACE_UNAVAILABLE:['Serverga ulanib bo‘lmadi. Ulanishni tekshirib sahifani yangilang.','Cannot connect to the server. Check the connection and reload.'],
+    SOURCE_WITHDRAWN:['Javob manbasi o‘chirilgan. Yangi manba tanlang.','The source was removed. Select a new source.']
+  };
+  return messages[code]?.[language==='uz'?0:1]||code;
+}
+
 async function copyText(text){
   if(navigator.clipboard)return navigator.clipboard.writeText(text);
   const previous=document.activeElement;
@@ -56,14 +72,14 @@ function requestId(){
 
 function preference(key,fallback){try{return localStorage.getItem(key)||fallback;}catch{return fallback;}}
 export default function Workspace(){
-  const [ready,setReady]=useState(false),[failure,setFailure]=useState(''),[page,setPage]=useState('chat'),[language,setLanguage]=useState('uz');
+  const [ready,setReady]=useState(false),[failure,setFailure]=useState(''),[page,setPage]=useState('chat'),[language,setLanguage]=useState(()=>preference('forge-language','uz'));
   const [selected,setSelected]=useState([]),[collapsed,setCollapsed]=useState(()=>matchMedia('(max-width:700px)').matches),[theme,setTheme]=useState(()=>preference('forge-theme','dark'));
   const [evidenceFocus,setEvidenceFocus]=useState(null);
   function inspect(sources){setEvidenceFocus({sources,id:requestId()});setPage('library');requestAnimationFrame(()=>document.getElementById('evidence-reader')?.scrollIntoView({block:'start'}));}
   const [settings,setSettings]=useState(false),[chatAction,setChatAction]=useState(null),[handoff,setHandoff]=useState(null);
   const uz=language==='uz';
   useEffect(()=>{void api('session','POST',{}).then(()=>setReady(true)).catch(e=>setFailure(e.message));},[]);
-  useEffect(()=>{try{localStorage.setItem('forge-theme',theme);}catch{}},[theme]);
+  useEffect(()=>{try{localStorage.setItem('forge-theme',theme);localStorage.setItem('forge-language',language);}catch{}},[theme,language]);
   useEffect(()=>{const media=matchMedia('(max-width:700px)');const changed=()=>{if(media.matches)setCollapsed(true);};media.addEventListener('change',changed);return()=>media.removeEventListener('change',changed);},[]);
   useEffect(()=>{if(!settings)return;const previous=document.activeElement;const dialog=document.querySelector('.settings-sheet');dialog?.querySelector('button')?.focus();function key(e){if(e.key==='Escape')setSettings(false);if(e.key==='Tab'){const items=[...dialog.querySelectorAll('button,select,a,input')];if(e.shiftKey&&document.activeElement===items[0]){e.preventDefault();items.at(-1)?.focus();}else if(!e.shiftKey&&document.activeElement===items.at(-1)){e.preventDefault();items[0]?.focus();}}}document.addEventListener('keydown',key);return()=>{document.removeEventListener('keydown',key);previous?.focus();};},[settings]);
   function ask(question){setHandoff({question,id:requestId()});setPage('chat');}
@@ -85,8 +101,8 @@ export default function Workspace(){
     <main className="forge-main">
     {!ready?<section className="forge-pane connection-state"><h2>{failure?'Ulanishda xato':'Fire Atlas'}</h2><p>{failure||'Ulanmoqda…'}</p>{failure&&<button onClick={()=>location.reload()}>Qayta ulanish</button>}</section>:<>
       {selected.length>0&&<div className="selection-strip">{uz?'Tanlangan sinovlar':'Selected trials'} · {selected.join(', ')}<button onClick={()=>setSelected([])}>{uz?'Tozalash':'Clear'}</button></div>}
-      <div hidden={page!=='chat'}><Chat language={language} selected={selected} navigate={setPage} action={chatAction} handoff={handoff} collapsed={collapsed} inspect={inspect}/></div>
-      <div hidden={page!=='library'}><Library language={language} selected={selected} setSelected={setSelected} ask={ask} evidenceFocus={evidenceFocus}/><details className="forge-pane legacy-atlas"><summary>{uz?'O‘lchovlar, import va Notebook':'Measurements, import and Notebook'}</summary><Atlas/></details></div>
+      <div hidden={page!=='chat'}><Chat language={language} selected={selected} navigate={setPage} action={chatAction} handoff={handoff} collapsed={collapsed} inspect={inspect} onEvidence={setEvidenceFocus}/></div>
+      <div hidden={page!=='library'}><Library language={language} selected={selected} setSelected={setSelected} ask={ask} evidenceFocus={evidenceFocus} visible={page==='library'}/><details className="forge-pane legacy-atlas"><summary>{uz?'O‘lchovlar, import va Notebook':'Measurements, import and Notebook'}</summary><Atlas/></details></div>
       <div hidden={page!=='tools'}><Tools language={language} trials={selected} setTrials={setSelected}/></div>
     </>}
     </main>
@@ -101,7 +117,7 @@ export default function Workspace(){
   </div>;
 }
 
-function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
+function Chat({language,selected,navigate,action,handoff,collapsed,inspect,onEvidence}){
   const uz=language==='uz';
   const [history,setHistory]=useState([]),[chat,setChat]=useState(null),[q,setQ]=useState(''),[draft,setDraft]=useState('');
   const [pending,setPending]=useState(null),[error,setError]=useState(''),[archived,setArchived]=useState(false);
@@ -120,7 +136,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   useEffect(()=>{if(handoff){setDraft(handoff.question);requestAnimationFrame(()=>composer.current?.focus());}},[handoff]);
   useEffect(()=>{bottom.current?.scrollIntoView({block:'end',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});},[chat?.turns?.length,pending]);
   const lastRequest=useRef(null);
-  const report=e=>setError(e.message);
+  const report=e=>setError(readableError(e,language));
   function refresh(){
     return api('chats?'+new URLSearchParams({q,archived:archived?'1':'0'})).then(setHistory);
   }
@@ -128,6 +144,8 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   async function select(id){
     const selected=await api('chats/'+id);
     setChat(selected);setError('');
+    const ids=selected.turns?.at(-1)?.asset_ids??[];
+    if(ids.length){const items=await api('assets');setAttachments(items.filter(a=>ids.includes(a.id)));}
   }
   useEffect(()=>{
     if(!chat?.turns?.some(t=>t.state==='RUNNING'))return;
@@ -157,18 +175,19 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
       job.chat??=(await create()).id;
       const result=await api('chats/'+job.chat+'/turns','POST',{question:draft,language,request_id:job.id,trials:selected,asset_ids:attachments.map(a=>a.id)},
         event=>setProgress(event==='retrieval.ready'?(uz?'Dalillar tekshirildi':'Evidence checked'):event==='run.started'?(uz?'Qidirilmoqda…':'Searching…'):''));
-      if(result.state==='FAILED')setError(result.error);
+      if(result.state==='FAILED')setError(readableError({message:result.error},language));
       if(result.state!=='RUNNING')lastRequest.current=null;
       setDraft('');await select(job.chat);await refresh();
     }catch(e){report(e);}
     finally{active.current=null;setPending(null);}
   }
   async function loadMemory(){setMemory(await api('memory'));}
+  useEffect(()=>{const result=chat?.turns?.filter(t=>t.result).at(-1);onEvidence(result?{sources:result.result.evidence,id:result.id}:null);},[chat?.id,chat?.turns?.length]);
   const empty=!chat?.turns?.length&&!pending;
   const historyPanel=<div className="chat-history"><p className="eyebrow">{uz?'Suhbatlar':'Recent chats'}</p>
       <label>{uz?'Tarixdan qidirish':'Search history'}<input value={q} onChange={e=>setQ(e.target.value)}/></label>
       <label><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)}/>{uz?'Arxiv':'Archive'}</label>
-      {history.map(item=><button key={item.id} disabled={!!pending} aria-pressed={chat?.id===item.id} onClick={()=>void select(item.id).catch(report)}>{item.title}</button>)}
+      {history.map(item=><button key={item.id} disabled={!!pending} aria-pressed={chat?.id===item.id} onClick={()=>{setAttachments([]);void select(item.id).catch(report);}}>{item.title}</button>)}
       {history.length>=100&&<button onClick={()=>void api('chats?'+new URLSearchParams({q,archived:archived?'1':'0',cursor:history.at(-1).id})).then(items=>setHistory([...history,...items])).catch(report)}>Load more</button>}
     </div>;
   return <section className={'forge-chat '+(empty&&!draft.trim()?'is-empty':'has-messages')}>
@@ -208,15 +227,15 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
         {chat?.turns?.map(turn=><article key={turn.id} className="chat-turn"><div className="user-message"><p>{turn.question}</p><div className="message-actions"><button aria-label="Copy question" onClick={()=>void copyText(turn.question).catch(report)}><Copy size={14}/></button><button aria-label="Edit question" disabled={!!pending} onClick={()=>{setDraft(turn.question);composer.current?.focus();}}><Pencil size={14}/></button></div></div><div className="assistant-message">
           {turn.result?<><div className="answer-heading"><span className="answer-mark">F</span><strong>Fire Atlas</strong><small>{turn.result.duration_ms?`${(turn.result.duration_ms/1000).toFixed(1)} s`:turn.result.model?'AI':'Local'} · {turn.result.status}</small></div>
             {turn.result.status==='INSUFFICIENT_EVIDENCE'&&<p>{uz?'Ulangan manbalarda ushbu savolga javob berish uchun yetarli dalil yo‘q. Boshqa sinov yoki sharoitni tanlang.':'The connected corpus has insufficient evidence for this question. Select another trial or condition.'}</p>}
-            {turn.result.claims.map((claim,i)=><p key={i}>{claim.kind&&<small>{claim.kind} · </small>}{claim.text} {claim.evidence_ids.map(id=><a key={id} href={'#'+turn.id+'-'+id}
-              onClick={()=>{const detail=document.getElementById(turn.id+'-'+id);if(detail)detail.open=true;}}>[{id.slice(0,6)}] </a>)}</p>)}
+            {turn.result.claims.map((claim,i)=><p key={i}>{claim.kind&&<small>{claim.kind==='AI_INTERPRETATION'?(uz?'AI rasm talqini':'AI visual interpretation'):claim.kind==='USER_REPORTED'?(uz?'Yuklangan manba':'Uploaded source'):claim.kind==='SOURCE_FINDING'?(uz?'Manbali natija':'Source finding'):claim.kind} · </small>}{claim.text} {claim.evidence_ids.map(id=><a key={id} href={'#'+turn.id+'-'+id}
+              onClick={()=>{const detail=document.getElementById(turn.id+'-'+id);if(detail)detail.open=true;}}>[{turn.result.evidence.findIndex(source=>source.id===id)+1}] </a>)}</p>)}
             <AnswerExtras evidence={turn.result.evidence}/>
             {turn.result.evidence.map(source=><details key={source.id} id={turn.id+'-'+source.id}><summary>{source.studyId} · {source.locator}</summary><pre>{source.text}</pre><button onClick={()=>inspect([source])}>{uz?'Library’da belgilab ko‘rish':'Highlight in Library'}</button><a href={source.sourceUrl} target="_blank" rel="noreferrer">{source.kind==='USER_UPLOAD'?'Uploaded source':'NASA'}</a></details>)}
             <small>{turn.corpus_snapshot_id.slice(0,12)} · {turn.result.model||'Local'} · {turn.memory_ids?.length||0} {uz?'xotira bandi':'memory items'}</small>
-            <button onClick={()=>void copyText(turn.result.claims.map(claim=>claim.text).join('\n')).catch(report)}>Copy</button>
+            <button onClick={()=>void copyText(turn.result.claims.map(claim=>claim.text+' '+claim.evidence_ids.map(id=>{const source=turn.result.evidence.find(s=>s.id===id);return source?'['+source.locator+']('+source.sourceUrl+')':'';}).join(' ')).join('\n\n')).catch(report)}>Copy</button>
             <button onClick={()=>inspect(turn.result.evidence)}>Library · {uz?'Dalilni tekshirish':'Verify evidence'}</button>
             <button onClick={()=>navigate('tools')}>Tools</button>
-          </>:<p>{turn.state} {turn.error}</p>}
+          </>:<p>{turn.state} {readableError({message:turn.error},language)}</p>}
           {['FAILED','CANCELLED','INTERRUPTED'].includes(turn.state)&&<button onClick={()=>setDraft(turn.question)}>{uz?'Qayta urinish':'Retry'}</button>}
         </div></article>)}
         {pending&&<article className="chat-turn pending-turn"><div className="user-message"><p>{pending.question}</p></div><div className="assistant-message"><p role="status" className="thinking"><span/>{progress|| (uz?'Manbalar ko‘rib chiqilmoqda…':'Reviewing sources…')}</p></div></article>}
@@ -261,15 +280,16 @@ function EvidenceReader({focus,language}){
   if(!focus)return null;
   const text=part?.text||source?.text||'';
   const start=source?text.indexOf(source.text):-1;
-  return <section id="evidence-reader" className="evidence-reader" tabIndex={-1}><p className="eyebrow">{language==='uz'?'JAVOB → ASL DALIL':'ANSWER → SOURCE EVIDENCE'}</p><h2>{language==='uz'?'Dalilni tekshiring':'Verify the evidence'}</h2>
+  return <section id="evidence-reader" className="evidence-reader" tabIndex={-1}><p className="eyebrow">{language==='uz'?'JAVOB → ASL DALIL':'ANSWER → SOURCE EVIDENCE'}</p><h2>{language==='uz'?'Dalilni tekshiring':'Verify the evidence'}</h2><button onClick={()=>download('evidence.json',JSON.stringify({sources:focus.sources},null,2))}>{language==='uz'?'Dalillarni eksport qilish':'Export evidence'}</button>
     {!source?<p>{language==='uz'?'Bu javobga manba biriktirilmagan.':'No source attached to this answer.'}</p>:<>
     <nav aria-label="Answer sources">{focus.sources.map((s,i)=><button key={s.id} aria-pressed={i===current} onClick={()=>setCurrent(i)}>{s.file||s.studyId} · {s.locator}</button>)}</nav>
-    <h3>{part?.name||source.file||source.studyId}</h3><p>{source.locator} · {source.id}</p>
+    <h3>{part?.name||source.file||source.studyId}</h3><details><summary>Evidence ID</summary><code>{source.id}</code></details><p>{source.locator}</p>
     <p>{language==='uz'?'Sariq belgi — javobga dalil bo‘lgan ajratilgan matn. Asl faylni quyidagi havoladan solishtiring.':'Yellow marks the extracted passage used as evidence. Compare it with the original file below.'}</p>
-    {source.interpretation&&<p>AI visual interpretation · verify against the original image</p>}
+    {source.interpretation&&<p>{language==='uz'?'AI rasm talqini — asl rasm bilan tekshiring; bu o‘lchangan ilmiy natija emas.':'AI visual interpretation — verify against the original image; this is not a measured finding.'}</p>}
     {error&&<p role="alert">{error}</p>}
     <pre>{start>=0?<>{text.slice(0,start)}<mark>{source.text}</mark>{text.slice(start+source.text.length)}</>:<mark>{source.text}</mark>}</pre>
     <a href={source.sourceUrl} target="_blank" rel="noreferrer">{language==='uz'?'Asl fayl va sahifani ochish':'Open original file and page'} ↗</a>
+    {part?.mime==='application/pdf'&&<details><summary>{language==='uz'?'Asl PDF sahifasini shu yerda ochish':'View original PDF here'}</summary><iframe title={part.name+' '+source.locator} src={source.sourceUrl} loading="lazy" style={{width:'100%',height:500,border:0}}/></details>}
     {part?.mime?.startsWith('image/')&&<img src={part.original} alt={part.name}/>}
     </>}
   </section>;
@@ -281,7 +301,7 @@ function TrialPicker({selected,onChange}){
     onChange={e=>onChange(e.target.checked?[...selected,id]:selected.filter(item=>item!==id))}/>{title}</label>)}</fieldset>;
 }
 
-function Library({language,selected,setSelected,ask,evidenceFocus}){
+function Library({language,selected,setSelected,ask,evidenceFocus,visible}){
   const [shelves,setShelves]=useState([]),[pins,setPins]=useState([]),[comparison,setComparison]=useState(null);
   const [name,setName]=useState(''),[query,setQuery]=useState(''),[error,setError]=useState('');
   const [autoUpdate,setAutoUpdate]=useState(false);
@@ -291,11 +311,11 @@ function Library({language,selected,setSelected,ask,evidenceFocus}){
   const [find,setFind]=useState(''),[found,setFound]=useState(null);
   const [category,setCategory]=useState('all'),[studyOpen,setStudyOpen]=useState(null);
   const visibleStudies=studies.filter(study=>(category==='all'||(category==='model'?study.kind==='GROUND_CFD':study.kind==='FLIGHT_EXPERIMENT'))&&(!find.trim()||[study.id,study.title,study.description].join(' ').toLowerCase().includes(find.toLowerCase())));
-  const report=e=>setError(e.message);
+  const report=e=>setError(readableError(e,language));
   async function refresh(){const [s,p,a]=await Promise.all([api('shelves'),api('pins'),api('assets')]);setShelves(s);setPins(p);setAssets(a);}
-  useEffect(()=>{void refresh().catch(report);},[]);
+  useEffect(()=>{if(visible)void refresh().catch(report);},[visible]);
   useEffect(()=>{
-    void fetch('/api/ingestion/studies').then(response=>response.json()).then(data=>setStudies(data.studies??[])).catch(()=>{});
+    void fetch('/api/ingestion/studies').then(response=>response.json()).then(data=>setStudies(data.studies??[])).catch(report);
   },[]);
   useEffect(()=>{
     if(!assets.some(asset=>['QUEUED','RUNNING'].includes(asset.state)))return;
@@ -315,16 +335,16 @@ function Library({language,selected,setSelected,ask,evidenceFocus}){
   }
   return <section className="forge-pane">
     <EvidenceReader focus={evidenceFocus} language={language}/><div className="library-heading"><p className="eyebrow">YOUR RESEARCH SPACE</p><h1>Library</h1><p>{language==='uz'?'Manbalarni o‘zingiz o‘rganing. Har bir dalilning aslini ko‘ring.':'Explore the research yourself. See the source behind every claim.'}</p></div>{error&&<p role="alert">{error}</p>}
-    <form onSubmit={event=>{event.preventDefault();void api('search','POST',{query:find}).then(data=>setFound(data.results)).catch(report);}}>
+    <form className="library-search" onSubmit={event=>{event.preventDefault();void api('search','POST',{query:find}).then(data=>setFound(data.results)).catch(report);}}>
       <label>{language==='uz'?'Tajriba nomi yoki PSI ID bo‘yicha qidirish':'Search experiment name or PSI ID'}<input value={find} onChange={e=>setFind(e.target.value)} maxLength={300} required/></label>
-      <button>{language==='uz'?'Qidirish':'Search'}</button>
+      <button>{language==='uz'?'Qidirish':'Search'}</button><button type="button" onClick={()=>{setFind('');setFound(null);setStudyOpen(null);}}>{language==='uz'?'Tozalash':'Clear'}</button>
     </form>
     <div className="library-filters">{[['all','Barchasi'],['experiment','Tajribalar'],['model','Modellar']].map(([id,label])=><button key={id} aria-pressed={category===id} onClick={()=>setCategory(id)}>{label}</button>)}<button onClick={()=>ask(find||'Ulangan tadqiqotlar haqida tushuntiring')}>Hybrid AI’dan so‘rash ↗</button></div>
     {found?.length===0&&<p>{language==='uz'?'Ulangan korpusda mos dalil topilmadi.':'No matching evidence in the connected corpus.'}</p>}
     {found?.map(source=><details key={source.id}><summary>{source.studyId} · {source.trialId||source.locator}</summary>
       <pre>{source.text}</pre><a href={source.fileUrl||source.sourceUrl} target="_blank" rel="noreferrer">{source.locator}</a>
     </details>)}
-    <h3>{language==='uz'?'Ulangan tadqiqotlar':'Connected studies'} · {studies.length}</h3>
+    <h3>{language==='uz'?'Ulangan tadqiqotlar':'Connected studies'} · {studies.length}</h3><p className="corpus-note">{language==='uz'?'Bu — tanlangan metadata, jadvallar va media to‘plami. Tadqiqotlarning barcha fayllari yuklangan emas.':'Selected metadata, tables and media; these are not complete downloads of every study.'}</p>
     <div className="study-grid">{visibleStudies.map(study=><button key={study.id} className="study-card" onClick={()=>setStudyOpen(study.id)}>
       <div className="study-cover">{study.files.some(f=>f.media?.startsWith('image/'))?<img src={study.files.find(f=>f.media?.startsWith('image/')).url} alt={study.title}/>:<BookOpen size={34}/>}<span>{study.kind==='GROUND_CFD'?'MODEL':'EXPERIMENT'}</span></div>
       <div className="study-card-body"><small>{study.id} · v{study.version}</small><h3>{study.title}</h3><p>{study.description}</p><span>{study.files.length} files · {language==='uz'?'O‘rganish':'Explore'} ↗</span></div>
@@ -391,7 +411,7 @@ function Tools({language,trials,setTrials}){
   const [runs,setRuns]=useState([]),[current,setCurrent]=useState(null),[error,setError]=useState('');
   const [busy,setBusy]=useState(false),[weights,setWeights]=useState({domain:25,fuel:25,atmosphere:25,unit_family:25});
   const [proposal,setProposal]=useState(null);
-  const report=e=>setError(e.message);
+  const report=e=>setError(readableError(e,language));
   useEffect(()=>{void api('runs').then(setRuns).catch(report);},[]);
   async function run(e){
     e.preventDefault();setBusy(true);setError('');

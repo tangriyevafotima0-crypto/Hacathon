@@ -1,0 +1,26 @@
+{
+  "time": "2026-11-15T05:34:59.486Z",
+  "synthetic": true,
+  "pdfText": "PASS",
+  "pdfEmbeddedImage": "PASS",
+  "attachButton": "PASS",
+  "scopedAnswer": "PASS",
+  "yellowExcerpt": "PASS",
+  "pageLink": "PASS",
+  "ownerIsolation": "PASS",
+  "newChatClearsAttachments": "PASS",
+  "mobile": "PASS",
+  "errors": [],
+  "extraction": [
+    {
+      "locator": "PDF page 1",
+      "status": "READY"
+    },
+    {
+      "locator": "PDF page 1 image 1",
+      "status": "AI_INTERPRETED",
+      "interpretation": true,
+      "model": "google/gemini-3.1-flash-lite"
+    }
+  ]
+}

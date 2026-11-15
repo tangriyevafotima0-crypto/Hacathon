@@ -1,7 +1,7 @@
 id,status,scope,evidence
 A01,PASS,Audit current server/repo,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
 D01,PASS,Reingest unchanged assets twice,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
-D02,LIMITED,Native text and original image/video transport covered; OCR/visual understanding unavailable.,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
+D02,LIMITED,Native text and bounded image/PDF raster interpretation verified; full OCR and video understanding remain limited.,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
 D03,PASS,Search quoted trial ID and a numeric oxygen filter,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
 D04,PASS,UZ and EN equivalent query,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json
 D05,LIMITED,Owner original access and deletion tested; full administrative source-ACL lifecycle limited.,RELEASE_EVIDENCE.md; tests/atlas; GOLD_SET_RESULTS.json; live-production.json; browser-results.json; native-results.json; dependency-results.json

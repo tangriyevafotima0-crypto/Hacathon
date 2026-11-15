@@ -281,7 +281,7 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
           }
           const context=history.map(t=>({question:t.question,trial_ids:t.result.evidence?.map(e=>e.trialId).filter(Boolean)}));
           const memory=chat.memory?store.list(owner,'memory').filter(item=>item.enabled).slice(0,4):[];
-          const record=store.save(owner,'turn',{chat:id,state:'RUNNING',question:input.question},{id:requestId});
+          const record=store.save(owner,'turn',{chat:id,state:'RUNNING',question:input.question,asset_ids:assetIds},{id:requestId});
           event('run.started',{id:requestId,state:'RUNNING'});
           if(chat.title==='New Chat')store.save(owner,'chat',{...fields(chat),title:input.question.trim().slice(0,90)},{id,version:chat.version});
           const controller=new AbortController();

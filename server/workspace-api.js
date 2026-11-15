@@ -97,6 +97,7 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
         if(!owner)res.setHeader('Set-Cookie',store.session(Boolean(req.socket.encrypted)).cookie);
         return respond(200,{ready:true,corpus_snapshot_id:trialSnapshot});
       }
+      if(resource==='shared'&&id&&method==='GET'){const shared=store.get('public','share',id);if(!shared)throw failure(404,'NOT_FOUND');return respond(200,shared);}
       if(!owner)throw failure(401,'SESSION_REQUIRED');
       const snapshot=currentSnapshot(owner);
       const requireRecord=(kind,key)=>{
@@ -221,14 +222,21 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
         return respond(200,{name:answer.data.title,query:input.query,candidates,explanation:answer.data.explanation,
           model:answer.model,usage:answer.usage});
       }
+      if(resource==='notes'){
+        if(!id&&method==='GET')return respond(200,store.list(owner,'note'));
+        if(!id&&method==='POST'){if(!validText(input.text,20000))throw failure(400,'INVALID_NOTE');return respond(201,store.save(owner,'note',{title:validText(input.title,120)?input.title.trim():'Note',text:input.text}));}
+        const note=requireRecord('note',id);
+        if(method==='PATCH'){if(!validText(input.text,20000))throw failure(400,'INVALID_NOTE');return respond(200,store.save(owner,'note',{title:validText(input.title,120)?input.title.trim():note.title,text:input.text},{id,version:input.version}));}
+        if(method==='DELETE'){store.remove(owner,'note',id);return respond(200,{deleted:true});}
+      }
       if(resource==='chats'){
         if(!id&&method==='GET'){
           const q=(url.searchParams.get('q')||'').toLowerCase();
-          const turns=q?store.list(owner,'turn'):[];
+          const turns=store.list(owner,'turn');
           const archived=url.searchParams.get('archived')==='1';
-          const records=store.list(owner,'chat').filter(chat=>chat.archived===archived&&
+          const records=store.list(owner,'chat').filter(chat=>turns.some(t=>t.chat===chat.id)&&chat.archived===archived&&
             (!q||chat.title.toLowerCase().includes(q)||turns.some(t=>t.chat===chat.id&&
-              (t.question+' '+JSON.stringify(t.result?.claims??[])).toLowerCase().includes(q))));
+              (t.question+' '+JSON.stringify(t.result?.claims??[])).toLowerCase().includes(q)))).sort((a,b)=>Number(!!b.pinned)-Number(!!a.pinned));
           const cursor=url.searchParams.get('cursor');
           const offset=cursor?records.findIndex(record=>record.id===cursor)+1:0;
           if(cursor&&!offset)throw failure(400,'INVALID_CURSOR');
@@ -245,10 +253,20 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
           const update=fields(chat);
           if(validText(input.title,120))update.title=input.title.trim();
           if(typeof input.archived==='boolean')update.archived=input.archived;
+          if(typeof input.pinned==='boolean')update.pinned=input.pinned;
           if(typeof input.memory==='boolean')update.memory=input.memory;
           return respond(200,store.save(owner,'chat',update,{id,version:input.version}));
         }
+        if(operation==='share'&&method==='POST'){
+          const turns=store.list(owner,'turn').filter(t=>t.chat===id&&t.result).reverse();
+          if(!turns.length)throw failure(400,'EMPTY_CHAT');
+          const old=chat.share_id?store.get('public','share',chat.share_id):null;if(old)store.remove('public','share',old.id);
+          const share=store.save('public','share',{title:chat.title,turns:turns.map(t=>({question:t.question,claims:t.result.claims,evidence:t.result.evidence.map(e=>({id:e.id,text:e.text,locator:e.locator,studyId:e.studyId,sourceUrl:e.kind==='USER_UPLOAD'?null:e.sourceUrl}))}))});
+          store.save(owner,'chat',{...fields(chat),share_id:share.id},{id,version:chat.version});return respond(201,{id:share.id});
+        }
+        if(operation==='share'&&method==='DELETE'){if(chat.share_id)store.remove('public','share',chat.share_id);store.save(owner,'chat',{...fields(chat),share_id:null},{id,version:chat.version});return respond(200,{deleted:true});}
         if(!operation&&method==='DELETE'){
+          if(chat.share_id)store.remove('public','share',chat.share_id);
           store.transaction(()=>{
             for(const turn of store.list(owner,'turn').filter(turn=>turn.chat===id)){
               active.get(owner+':'+turn.id)?.abort();store.remove(owner,'turn',turn.id);

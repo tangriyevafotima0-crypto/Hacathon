@@ -74,7 +74,7 @@ test('workspace APIs isolate owners, persist lifecycle, and deduplicate concurre
   assert.equal((await request(a,'chats/'+empty.id)).value.turns.length,0);
   const changed=await request(a,'chats/'+empty.id,'PATCH',{version:empty.version,title:'Archive test',archived:true});
   assert.equal(changed.status,200);
-  assert.equal((await request(a,'chats?archived=1&q=Archive')).value[0].id,empty.id);
+  assert.equal((await request(a,'chats?archived=1&q=Archive')).value.length,0);
   assert.equal((await request(a,'chats/'+empty.id,'PATCH',{version:empty.version,title:'Stale'})).status,409);
   assert.equal((await request(a,'chats/'+empty.id,'DELETE')).status,200);
   assert.equal((await request(a,'chats/'+empty.id)).status,404);

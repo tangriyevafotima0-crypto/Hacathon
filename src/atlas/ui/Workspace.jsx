@@ -78,16 +78,18 @@ export default function Workspace(){
   function inspect(sources){setEvidenceFocus({sources,id:requestId()});setPage('library');requestAnimationFrame(()=>document.getElementById('evidence-reader')?.scrollIntoView({block:'start'}));}
   const [settings,setSettings]=useState(false),[chatAction,setChatAction]=useState(null),[handoff,setHandoff]=useState(null);
   const uz=language==='uz';
+  const sharedId=new URLSearchParams(location.search).get('share');
   useEffect(()=>{void api('session','POST',{}).then(()=>setReady(true)).catch(e=>setFailure(e.message));},[]);
   useEffect(()=>{try{localStorage.setItem('forge-theme',theme);localStorage.setItem('forge-language',language);}catch{}},[theme,language]);
   useEffect(()=>{const media=matchMedia('(max-width:700px)');const changed=()=>{if(media.matches)setCollapsed(true);};media.addEventListener('change',changed);return()=>media.removeEventListener('change',changed);},[]);
   useEffect(()=>{if(!settings)return;const previous=document.activeElement;const dialog=document.querySelector('.settings-sheet');dialog?.querySelector('button')?.focus();function key(e){if(e.key==='Escape')setSettings(false);if(e.key==='Tab'){const items=[...dialog.querySelectorAll('button,select,a,input')];if(e.shiftKey&&document.activeElement===items[0]){e.preventDefault();items.at(-1)?.focus();}else if(!e.shiftKey&&document.activeElement===items.at(-1)){e.preventDefault();items[0]?.focus();}}}document.addEventListener('keydown',key);return()=>{document.removeEventListener('keydown',key);previous?.focus();};},[settings]);
   function ask(question){setHandoff({question,id:requestId()});setPage('chat');}
+  if(sharedId)return <SharedChat id={sharedId}/>;
   return <div className={'forge-workspace '+(collapsed?'sidebar-collapsed':'')} data-theme={theme}>
     <header className="forge-topbar"><button className="icon-button" aria-label={uz?'Menyuni ochish':'Toggle menu'} aria-expanded={!collapsed} onClick={()=>setCollapsed(!collapsed)}><Menu size={20}/></button>
       <strong>SKYFORGE <span>Fire Atlas</span></strong>
       <nav aria-label="Workspace">{[['chat','Hybrid AI'],['library','Library']].map(([key,title])=><button key={key} aria-pressed={page===key} onClick={()=>setPage(key)}>{title}</button>)}</nav>
-      <div className="top-actions"><button className="icon-button" aria-label="Notes and tools" onClick={()=>setPage('tools')}><BookOpen size={19}/></button>
+      <div className="top-actions"><button className="icon-button" aria-label="Notes" onClick={()=>setPage('notes')}><BookOpen size={19}/></button>
       <button className="icon-button" aria-label={theme==='dark'?'Day mode':'Night mode'} onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={19}/>:<Moon size={19}/>}</button>
       <a href="https://psi.nasa.gov/physci/repo" target="_blank" rel="noreferrer" className="nasa-wordmark">NASA ↗</a></div>
     </header>
@@ -103,6 +105,7 @@ export default function Workspace(){
       {selected.length>0&&<div className="selection-strip">{uz?'Tanlangan sinovlar':'Selected trials'} · {selected.join(', ')}<button onClick={()=>setSelected([])}>{uz?'Tozalash':'Clear'}</button></div>}
       <div hidden={page!=='chat'}><Chat language={language} selected={selected} navigate={setPage} action={chatAction} handoff={handoff} collapsed={collapsed} inspect={inspect} onEvidence={setEvidenceFocus}/></div>
       <div hidden={page!=='library'}><Library language={language} selected={selected} setSelected={setSelected} ask={ask} evidenceFocus={evidenceFocus} visible={page==='library'}/><details className="forge-pane legacy-atlas"><summary>{uz?'O‘lchovlar, import va Notebook':'Measurements, import and Notebook'}</summary><Atlas/></details></div>
+      <div hidden={page!=='notes'}><Notes language={language} visible={page==='notes'}/></div>
       <div hidden={page!=='tools'}><Tools language={language} trials={selected} setTrials={setSelected}/></div>
     </>}
     </main>
@@ -115,6 +118,22 @@ export default function Workspace(){
       <p>{uz?'Xotirani chat ichidagi boshqaruvdan ko‘rish va o‘chirish mumkin.':'Memory can be reviewed and removed inside each chat.'}</p>
     </section></div>}
   </div>;
+}
+
+function SharedChat({id}){
+ const [chat,setChat]=useState(null),[error,setError]=useState('');
+ useEffect(()=>{api('shared/'+encodeURIComponent(id)).then(setChat).catch(()=>setError('Havola topilmadi yoki ulashish to‘xtatilgan.'));},[id]);
+ return <div className="forge-workspace" data-theme="light"><main className="shared-chat forge-pane"><a href="/">← Fire Atlas</a><h1>{chat?.title||'Shared chat'}</h1><p>Read-only · Ulashilgan suhbat nusxasi</p>{error&&<p role="alert">{error}</p>}{chat?.turns.map((t,i)=><article key={i}><h2>{t.question}</h2>{t.claims.map((c,j)=><p key={j}>{c.text}</p>)}{t.evidence.map(e=><details key={e.id}><summary>{e.studyId} · {e.locator}</summary><pre>{e.text}</pre>{e.sourceUrl&&<a href={e.sourceUrl} target="_blank" rel="noreferrer">Original</a>}</details>)}</article>)}</main></div>;
+}
+function Notes({language,visible}){
+ const [items,setItems]=useState([]),[current,setCurrent]=useState(null),[title,setTitle]=useState(''),[text,setText]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ const uz=language==='uz';const refresh=()=>api('notes').then(setItems);
+ useEffect(()=>{if(visible)void refresh().catch(e=>setError(e.message));},[visible]);
+ return <section className="forge-pane notes-pane"><h1>Notes</h1><p>{uz?'Tadqiqot qaydlaringiz shu yerda saqlanadi.':'Keep your research notes here.'}</p>{error&&<p role="alert">{error}</p>}
+ <button onClick={()=>{setCurrent(null);setTitle('');setText('');}}>{uz?'Yangi qayd':'New note'}</button><div className="notes-layout"><nav aria-label="Saved notes">{items.map(n=><button key={n.id} onClick={()=>{setCurrent(n);setTitle(n.title);setText(n.text);}}>{n.title}</button>)}{!items.length&&<p>{uz?'Hali qaydlar yo‘q.':'No notes yet.'}</p>}</nav>
+ <form onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');try{const n=await api('notes'+(current?'/'+current.id:''),current?'PATCH':'POST',{title,text,version:current?.version});setCurrent(n);await refresh();}catch(e){setError(e.message);}finally{setBusy(false);}}}>
+ <label>{uz?'Sarlavha':'Title'}<input aria-label="Note title" value={title} onChange={e=>setTitle(e.target.value)} maxLength={120}/></label><label>{uz?'Qayd':'Note'}<textarea aria-label="Note text" value={text} onChange={e=>setText(e.target.value)} maxLength={20000} required rows={14}/></label>
+ <button disabled={busy||!text.trim()}>{uz?'Saqlash':'Save note'}</button>{current&&<button type="button" disabled={busy} onClick={async()=>{try{await api('notes/'+current.id,'DELETE');setCurrent(null);setTitle('');setText('');await refresh();}catch(e){setError(e.message);}}}>{uz?'O‘chirish':'Delete note'}</button>}</form></div></section>;
 }
 
 function Chat({language,selected,navigate,action,handoff,collapsed,inspect,onEvidence}){
@@ -131,8 +150,9 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect,onEvi
   useEffect(()=>{if(!attachments.some(a=>['QUEUED','RUNNING'].includes(a.state)))return;const timer=setInterval(()=>api('assets').then(items=>setAttachments(old=>old.map(a=>items.find(b=>b.id===a.id)||a))).catch(report),1500);return()=>clearInterval(timer);},[attachments]);
   async function attach(files){setUploading(true);setError('');try{for(const file of [...files].slice(0,3-attachments.length)){if(file.size>8000000)throw Error('Fayl 8 MB dan kichik bo‘lishi kerak');const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(Error('FILE_READ_FAILED'));reader.readAsDataURL(file);});const item=await api('assets','POST',{name:file.name,base64});setAttachments(old=>[...old.filter(a=>a.id!==item.id),item]);}}catch(e){report(e);}finally{setUploading(false);if(fileInput.current)fileInput.current.value='';}}
   const attachmentBusy=uploading||attachments.some(a=>['QUEUED','RUNNING','FAILED'].includes(a.state)||a.chunk_count===0);
-  const [editing,setEditing]=useState(false);
-  useEffect(()=>{if(action&&!active.current){setAttachments([]);void create().catch(report);}},[action]);
+  const [editing,setEditing]=useState(false),[shareLink,setShareLink]=useState(''),[shareCopied,setShareCopied]=useState(false);
+  useEffect(()=>{setShareLink('');},[chat?.id]);
+  useEffect(()=>{if(action&&!active.current){setAttachments([]);setChat(null);setDraft('');setError('');}},[action]);
   useEffect(()=>{if(handoff){setDraft(handoff.question);requestAnimationFrame(()=>composer.current?.focus());}},[handoff]);
   useEffect(()=>{bottom.current?.scrollIntoView({block:'end',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});},[chat?.turns?.length,pending]);
   const lastRequest=useRef(null);
@@ -187,7 +207,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect,onEvi
   const historyPanel=<div className="chat-history"><p className="eyebrow">{uz?'Suhbatlar':'Recent chats'}</p>
       <label>{uz?'Tarixdan qidirish':'Search history'}<input value={q} onChange={e=>setQ(e.target.value)}/></label>
       <label><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)}/>{uz?'Arxiv':'Archive'}</label>
-      {history.map(item=><button key={item.id} disabled={!!pending} aria-pressed={chat?.id===item.id} onClick={()=>{setAttachments([]);void select(item.id).catch(report);}}>{item.title}</button>)}
+      {history.map(item=><button key={item.id} disabled={!!pending} aria-pressed={chat?.id===item.id} onClick={()=>{setAttachments([]);void select(item.id).catch(report);}}>{item.pinned?'📌 ':''}{item.title}</button>)}
       {history.length>=100&&<button onClick={()=>void api('chats?'+new URLSearchParams({q,archived:archived?'1':'0',cursor:history.at(-1).id})).then(items=>setHistory([...history,...items])).catch(report)}>Load more</button>}
     </div>;
   return <section className={'forge-chat '+(empty&&!draft.trim()?'is-empty':'has-messages')}>
@@ -195,7 +215,11 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect,onEvi
     <div className="chat-canvas">
       {empty&&<div className="welcome"><a className="welcome-mark nasa-source-mark" href="https://psi.nasa.gov/physci/repo" target="_blank" rel="noreferrer" aria-label="NASA data source"><img src="/nasa-logo.svg" alt="NASA"/></a><p className="eyebrow">NASA EVIDENCE · YOUR CURIOSITY</p><h1>{uz?'Savolingizdan boshlaymiz.':'Start with a question.'}</h1><p>{uz?'Tadqiqotlarni izlang. Dalillarni solishtiring. Birgalikda tushuning.':'Explore research. Compare evidence. Understand together.'}</p></div>}
       {error&&<p role="alert">{error}</p>}
-      {chat&&<header className="chat-toolbar"><h2>{chat.title}</h2><button onClick={()=>setEditing(!editing)} aria-expanded={editing}>{uz?'Suhbat sozlamalari':'Chat settings'}</button><div hidden={!editing}>
+      {chat&&<header className="chat-toolbar"><h2>{chat.title}</h2><button onClick={()=>setEditing(!editing)} aria-expanded={editing}>{uz?'Suhbat sozlamalari':'Chat settings'}</button><button disabled={!!pending||!chat.turns?.length} onClick={()=>void update({pinned:!chat.pinned}).catch(report)}>{chat.pinned?(uz?'Pinni olish':'Unpin chat'):(uz?'Pin qilish':'Pin chat')}</button>
+      <button disabled={!!pending||!chat.turns?.length} onClick={async()=>{try{const shared=await api('chats/'+chat.id+'/share','POST',{});const link=location.origin+location.pathname+'?share='+shared.id;setShareLink(link);await select(chat.id);await refresh();try{await copyText(link);setShareCopied(true);}catch{setShareCopied(false);}}catch(e){report(e);}}}>Share chat</button>
+      {shareLink&&<div className="share-panel"><p>{shareCopied?(uz?'Havola nusxalandi':'Link copied'):(uz?'Havolani nusxalang':'Copy this link')}</p><input aria-label="Share link" value={shareLink} readOnly onFocus={e=>e.target.select()}/><p>{uz?'Havolasi bor odam suhbat nusxasini o‘qiy oladi.':'Anyone with this link can read the shared conversation snapshot.'}</p></div>}
+      {chat.share_id&&<button onClick={()=>void api('chats/'+chat.id+'/share','DELETE').then(()=>{setShareLink('');return select(chat.id);}).catch(report)}>{uz?'Ulashishni to‘xtatish':'Stop sharing'}</button>}
+      <div hidden={!editing}>
         <form onSubmit={event=>{event.preventDefault();void update({title:new FormData(event.currentTarget).get('title')}).catch(report);}}>
           <input key={chat.id+chat.version} name="title" aria-label={uz?'Chat nomi':'Chat title'} defaultValue={chat.title} maxLength={120}/>
           <button disabled={!!pending}>{uz?'Nomni saqlash':'Save name'}</button>

@@ -3,7 +3,7 @@ import { randomBytes, randomUUID, createHash } from 'node:crypto';
 
 export const digest = value => createHash('sha256').update(value).digest('hex');
 export const failure = (status, code) => Object.assign(new Error(code), { status });
-const kinds = new Set(['chat','memory','shelf','analysis','run','pin','turn','import','asset','cache','summary','shelf_revision']);
+const kinds = new Set(['note','share','chat','memory','shelf','analysis','run','pin','turn','import','asset','cache','summary','shelf_revision']);
 
 export function openWorkspace(path) {
   const db = new DatabaseSync(path);

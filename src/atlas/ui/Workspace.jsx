@@ -185,6 +185,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   useEffect(()=>{setShareLink('');},[chat?.id]);
   useEffect(()=>{if(action&&!active.current){setAttachments([]);setChat(null);setDraft('');setError('');}},[action]);
   useEffect(()=>{if(handoff){setDraft(handoff.question);requestAnimationFrame(()=>composer.current?.focus());}},[handoff]);
+  useEffect(()=>{const field=composer.current;if(!field)return;field.style.height='auto';field.style.height=Math.min(field.scrollHeight,120)+'px';},[draft]);
   useEffect(()=>{bottom.current?.scrollIntoView({block:'end',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});},[chat?.turns?.length,pending]);
   const lastRequest=useRef(null);
   const report=e=>setError(readableError(e,language));
@@ -318,7 +319,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
         {uploading&&<p role="status">{uz?'Fayl yuklanmoqda…':'Uploading file…'}</p>}
 
         <label>{uz?'Tadqiqot haqida savol':'Ask about an experiment'}
-          <textarea ref={composer} placeholder={uz?'Savolingizni yozing…':'Write your question…'} value={draft} onChange={e=>setDraft(e.target.value)} maxLength={300} required disabled={!!pending||creating||chat?.archived}
+          <textarea ref={composer} rows={1} placeholder={uz?'Savolingizni yozing…':'Write your question…'} value={draft} onChange={e=>setDraft(e.target.value)} maxLength={300} required disabled={!!pending||creating||chat?.archived}
             onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form.requestSubmit();}}}/>
         </label>
         <div className="composer-bottom"><button type="button" className="icon-button" aria-label={ui(language,"Attach files")} disabled={uploading||!!pending||attachments.length>=3} onClick={()=>fileInput.current?.click()}><Plus size={20}/></button><small>{attachments.length?(uz?'Biriktirilgan fayllar bo‘yicha · rasmlar AI orqali tahlil qilinadi':'Attached sources only · images analyzed with AI'):(uz?'Javoblar ulangan manbalarga asoslanadi':'Answers grounded in connected sources')}</small>{pending?<button type="button" className="send-button stop-generation" aria-label={uz?'Javobni to‘xtatish':'Stop response'} title={uz?'Javobni to‘xtatish':'Stop response'} disabled={stopping} onClick={async()=>{const job=active.current;if(!job)return;job.cancelRequested=true;setStopping(true);setProgress(uz?'To‘xtatilmoqda…':'Stopping…');if(job.chat)try{await api('chats/'+job.chat+'/cancel','POST',{request_id:job.id});}catch(e){job.cancelRequested=false;setStopping(false);report(e);}}}><Square size={14} fill="currentColor" strokeWidth={0}/></button>:<button className="send-button" aria-label={uz?'Yuborish':'Send'} disabled={!draft.trim()||creating||attachmentBusy||chat?.archived}><ArrowUp size={19}/></button>}</div>

@@ -108,3 +108,18 @@ body:has(#nl-badge-frame) .forge-workspace .chat-composer{bottom:calc(76px + env
 body:has(#nl-badge-frame) .forge-workspace button,body:has(#nl-badge-frame) .forge-workspace input,body:has(#nl-badge-frame) .forge-workspace textarea{scroll-margin-bottom:90px}
 body:has(#nl-badge-frame) .forge-workspace.pdf-portal{padding-bottom:80px}
 body:has(#nl-badge-frame) .pdf-dialog{height:calc(100dvh - 104px)}
+
+/* A compact visible control within a stable, touch-friendly target. */
+.forge-workspace .chat-composer{padding:8px 10px;border-radius:22px}
+.forge-workspace .chat-composer textarea{min-height:36px;max-height:120px;line-height:22px;padding:7px 10px;overflow-y:auto}
+.forge-workspace .composer-bottom{min-height:44px;gap:8px}
+.forge-workspace .composer-bottom small{min-width:0;margin:0;font-size:11px;line-height:1.4}
+.forge-workspace .composer-bottom .send-button{position:relative;isolation:isolate;flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;display:grid;place-items:center;margin:0;padding:0;border:0;border-radius:50%;background:transparent;color:var(--bg);transition:opacity 160ms}
+.forge-workspace .composer-bottom .send-button::before{content:'';position:absolute;inset:4px;z-index:-1;border-radius:50%;background:var(--ink);transition:opacity 160ms}
+.forge-workspace .composer-bottom .send-button svg{display:block;flex:none;width:19px;height:19px;margin:0}
+.forge-workspace .composer-bottom .stop-generation svg{width:12px;height:12px;border-radius:2px}
+.forge-workspace .composer-bottom .send-button:hover{background:transparent}
+.forge-workspace .composer-bottom .send-button:not(:disabled):hover::before{opacity:.85}
+.forge-workspace .composer-bottom .send-button:focus-visible{outline:2px solid var(--ink);outline-offset:0}
+.forge-workspace .composer-bottom .send-button:disabled{opacity:.35}
+.forge-workspace .composer-bottom .stop-generation:disabled{opacity:.6}

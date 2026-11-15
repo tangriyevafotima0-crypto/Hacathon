@@ -1,7 +1,7 @@
 import React,{useState} from 'react';
 import {Folder,FileText,ChevronRight,ArrowLeft} from 'lucide-react';
 
-export default function ServerPDFLibrary({files,downloadState,error,language,onOpen,onFolderChange}){
+export default function ServerPDFLibrary({files,downloadState,error,language,onOpen,onFolderChange,children}){
  const uz=language==='uz',[study,setStudy]=useState(null),[query,setQuery]=useState('');
  const groups=[...new Set(files.map(file=>file.studyId))].sort();
  const selected=files.filter(file=>file.studyId===study);
@@ -18,6 +18,7 @@ export default function ServerPDFLibrary({files,downloadState,error,language,onO
    <h3>{study} · {uz?'PDF hujjatlar':'PDF documents'}</h3>
    <label>{uz?'Shu tadqiqot ichidan PDF qidirish':'Search PDFs within this study'}<input value={query} onChange={e=>setQuery(e.target.value)} maxLength={250}/></label>
    <div className="library-pdf-list">{matches.map(file=><button key={file.id} onClick={()=>onOpen(file)}><FileText size={19}/><span><strong>{file.name}</strong><small>v{file.version} · {(file.bytes/1000000).toFixed(2)} MB · {uz?'AI indeksi kutilmoqda':'AI indexing pending'}</small></span><ChevronRight size={18}/></button>)}</div>
+   {children}
    {!matches.length&&<p>{uz?'Bu bo‘limda mos PDF topilmadi.':'No matching PDFs in this folder.'}</p>}
   </>}
   {!files.length&&!error&&<p>{uz?'Hozircha tekshirilgan PDF mavjud emas.':'No verified PDFs are available yet.'}</p>}

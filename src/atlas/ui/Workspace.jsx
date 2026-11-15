@@ -442,8 +442,9 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
       <ul>{study.files.map(file=><li key={file.name}><a href={file.url} target="_blank" rel="noreferrer" onClick={e=>{if(file.name.toLowerCase().endsWith('.pdf')){e.preventDefault();setPdf({...file,studyId:study.id,indexed:true});}}}>{file.name}</a> · {file.bytes.toLocaleString(language==='uz'?'uz-UZ':'en-US')} {language==='uz'?'bayt':'bytes'}</li>)}</ul>
       <button onClick={()=>ask(language==='uz'?study.title+' tadqiqotining maqsadi va natijalarini manbalari bilan tushuntiring':'Explain the objectives and findings of '+study.title+' with sources')}>{language==='uz'?'Gibrid AI’dan so‘rash ↗':'Ask Hybrid AI ↗'}</button>
     </section>)}
-    <ServerPDFLibrary files={serverPdfs} downloadState={downloadState} error={pdfError} language={language} onOpen={setPreviewPdf} onFolderChange={()=>setPreviewPdf(null)}/>
+    <ServerPDFLibrary files={serverPdfs} downloadState={downloadState} error={pdfError} language={language} onOpen={setPreviewPdf} onFolderChange={()=>setPreviewPdf(null)}>
     {previewPdf&&<section ref={previewHost} className="library-inline-pdf"><header><div><h3>{previewPdf.name}</h3></div><button onClick={()=>setPreviewPdf(null)}>{language==='uz'?'Yopish':'Close'}</button></header><PDFPages url={previewPdf.url} name={previewPdf.name} language={language}/><button onClick={()=>setPdf(previewPdf)}>{language==='uz'?'Katta oynada ochish':'Expand viewer'}</button></section>}
+    </ServerPDFLibrary>
     {pdf&&<PDFViewer key={pdf.url} document={pdf} language={language} onClose={()=>setPdf(null)}/>}
     <h3>{language==='uz'?'Mening hujjatlarim':'My documents'}</h3><p>{language==='uz'?'8 MB gacha. PDF matni va dastlabki 3 ta ichki rasm tahlil qilinadi; cheklovlar faylda ko‘rsatiladi. AI talqinlari mustaqil tekshirilmagan.':'Up to 8 MB. PDF text and up to 3 embedded images are analyzed; file limitations are shown. AI interpretations are unverified.'}</p>
     <label>{language==='uz'?'Fayl import qilish':'Import document'} · 8 MB

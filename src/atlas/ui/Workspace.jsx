@@ -58,6 +58,8 @@ function preference(key,fallback){try{return localStorage.getItem(key)||fallback
 export default function Workspace(){
   const [ready,setReady]=useState(false),[failure,setFailure]=useState(''),[page,setPage]=useState('chat'),[language,setLanguage]=useState('uz');
   const [selected,setSelected]=useState([]),[collapsed,setCollapsed]=useState(()=>matchMedia('(max-width:700px)').matches),[theme,setTheme]=useState(()=>preference('forge-theme','dark'));
+  const [evidenceFocus,setEvidenceFocus]=useState(null);
+  function inspect(sources){setEvidenceFocus({sources,id:requestId()});setPage('library');requestAnimationFrame(()=>document.getElementById('evidence-reader')?.scrollIntoView({block:'start'}));}
   const [settings,setSettings]=useState(false),[chatAction,setChatAction]=useState(null),[handoff,setHandoff]=useState(null);
   const uz=language==='uz';
   useEffect(()=>{void api('session','POST',{}).then(()=>setReady(true)).catch(e=>setFailure(e.message));},[]);
@@ -83,8 +85,8 @@ export default function Workspace(){
     <main className="forge-main">
     {!ready?<section className="forge-pane connection-state"><h2>{failure?'Ulanishda xato':'Fire Atlas'}</h2><p>{failure||'Ulanmoqda…'}</p>{failure&&<button onClick={()=>location.reload()}>Qayta ulanish</button>}</section>:<>
       {selected.length>0&&<div className="selection-strip">{uz?'Tanlangan sinovlar':'Selected trials'} · {selected.join(', ')}<button onClick={()=>setSelected([])}>{uz?'Tozalash':'Clear'}</button></div>}
-      <div hidden={page!=='chat'}><Chat language={language} selected={selected} navigate={setPage} action={chatAction} handoff={handoff} collapsed={collapsed}/></div>
-      <div hidden={page!=='library'}><Library language={language} selected={selected} setSelected={setSelected} ask={ask}/><details className="forge-pane legacy-atlas"><summary>{uz?'O‘lchovlar, import va Notebook':'Measurements, import and Notebook'}</summary><Atlas/></details></div>
+      <div hidden={page!=='chat'}><Chat language={language} selected={selected} navigate={setPage} action={chatAction} handoff={handoff} collapsed={collapsed} inspect={inspect}/></div>
+      <div hidden={page!=='library'}><Library language={language} selected={selected} setSelected={setSelected} ask={ask} evidenceFocus={evidenceFocus}/><details className="forge-pane legacy-atlas"><summary>{uz?'O‘lchovlar, import va Notebook':'Measurements, import and Notebook'}</summary><Atlas/></details></div>
       <div hidden={page!=='tools'}><Tools language={language} trials={selected} setTrials={setSelected}/></div>
     </>}
     </main>
@@ -93,12 +95,13 @@ export default function Workspace(){
       <label>{uz?'Til':'Language'}<select value={language} onChange={e=>setLanguage(e.target.value)}><option value="uz">O‘zbekcha</option><option value="en">English</option></select></label>
       <label>{uz?'Ko‘rinish':'Appearance'}<select value={theme} onChange={e=>setTheme(e.target.value)}><option value="dark">Night</option><option value="light">Day</option></select></label>
       <button onClick={()=>{setPage('library');setSettings(false);}}>Library · Import</button>
+      <p>{uz?'Fire Atlas — mustaqil loyiha. NASA ma’lumotlaridan foydalanadi; NASA mahsuloti emas. Javoblarda AI qo‘llanadi, dalillar Library’da tekshiriladi.':'Fire Atlas is an independent project using NASA data, not a NASA product. AI is used for answers; verify evidence in Library.'}</p>
       <p>{uz?'Xotirani chat ichidagi boshqaruvdan ko‘rish va o‘chirish mumkin.':'Memory can be reviewed and removed inside each chat.'}</p>
     </section></div>}
   </div>;
 }
 
-function Chat({language,selected,navigate,action,handoff,collapsed}){
+function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   const uz=language==='uz';
   const [history,setHistory]=useState([]),[chat,setChat]=useState(null),[q,setQ]=useState(''),[draft,setDraft]=useState('');
   const [pending,setPending]=useState(null),[error,setError]=useState(''),[archived,setArchived]=useState(false);
@@ -107,9 +110,13 @@ function Chat({language,selected,navigate,action,handoff,collapsed}){
   const [memory,setMemory]=useState([]),[memo,setMemo]=useState(''),[kind,setKind]=useState('goal');
   const [showMemory,setShowMemory]=useState(false);
   const active=useRef(null);
-  const bottom=useRef(null),composer=useRef(null);
+  const bottom=useRef(null),composer=useRef(null),fileInput=useRef(null);
+  const [attachments,setAttachments]=useState([]),[uploading,setUploading]=useState(false);
+  useEffect(()=>{if(!attachments.some(a=>['QUEUED','RUNNING'].includes(a.state)))return;const timer=setInterval(()=>api('assets').then(items=>setAttachments(old=>old.map(a=>items.find(b=>b.id===a.id)||a))).catch(report),1500);return()=>clearInterval(timer);},[attachments]);
+  async function attach(files){setUploading(true);setError('');try{for(const file of [...files].slice(0,3-attachments.length)){if(file.size>8000000)throw Error('Fayl 8 MB dan kichik bo‘lishi kerak');const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(Error('FILE_READ_FAILED'));reader.readAsDataURL(file);});const item=await api('assets','POST',{name:file.name,base64});setAttachments(old=>[...old.filter(a=>a.id!==item.id),item]);}}catch(e){report(e);}finally{setUploading(false);if(fileInput.current)fileInput.current.value='';}}
+  const attachmentBusy=uploading||attachments.some(a=>['QUEUED','RUNNING','FAILED'].includes(a.state)||a.chunk_count===0);
   const [editing,setEditing]=useState(false);
-  useEffect(()=>{if(action&&!active.current)void create().catch(report);},[action]);
+  useEffect(()=>{if(action&&!active.current){setAttachments([]);void create().catch(report);}},[action]);
   useEffect(()=>{if(handoff){setDraft(handoff.question);requestAnimationFrame(()=>composer.current?.focus());}},[handoff]);
   useEffect(()=>{bottom.current?.scrollIntoView({block:'end',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});},[chat?.turns?.length,pending]);
   const lastRequest=useRef(null);
@@ -140,14 +147,15 @@ function Chat({language,selected,navigate,action,handoff,collapsed}){
   }
   async function send(event){
     event.preventDefault();
-    if(active.current||!draft.trim())return;
+    if(active.current||!draft.trim()||attachmentBusy)return;
     const previous=lastRequest.current;
-    const job=previous?.question===draft&&previous.chat===chat?.id?previous:{id:requestId(),chat:chat?.id,question:draft};
+    const signature=attachments.map(a=>a.id).join(',');
+    const job=previous?.question===draft&&previous.chat===chat?.id&&previous.signature===signature?previous:{id:requestId(),chat:chat?.id,question:draft,signature};
     lastRequest.current=job;
     active.current=job;setError('');setPending(job);
     try{
       job.chat??=(await create()).id;
-      const result=await api('chats/'+job.chat+'/turns','POST',{question:draft,language,request_id:job.id,trials:selected},
+      const result=await api('chats/'+job.chat+'/turns','POST',{question:draft,language,request_id:job.id,trials:selected,asset_ids:attachments.map(a=>a.id)},
         event=>setProgress(event==='retrieval.ready'?(uz?'Dalillar tekshirildi':'Evidence checked'):event==='run.started'?(uz?'Qidirilmoqda…':'Searching…'):''));
       if(result.state==='FAILED')setError(result.error);
       if(result.state!=='RUNNING')lastRequest.current=null;
@@ -166,7 +174,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed}){
   return <section className={'forge-chat '+(empty&&!draft.trim()?'is-empty':'has-messages')}>
     {document.getElementById('forge-history-slot')&&createPortal(historyPanel,document.getElementById('forge-history-slot'))}
     <div className="chat-canvas">
-      {empty&&<div className="welcome"><div className="welcome-mark"><Sparkles size={28}/></div><p className="eyebrow">NASA EVIDENCE · YOUR CURIOSITY</p><h1>{uz?'Savolingizdan boshlaymiz.':'Start with a question.'}</h1><p>{uz?'Tadqiqotlarni izlang. Dalillarni solishtiring. Birgalikda tushuning.':'Explore research. Compare evidence. Understand together.'}</p></div>}
+      {empty&&<div className="welcome"><a className="welcome-mark nasa-source-mark" href="https://psi.nasa.gov/physci/repo" target="_blank" rel="noreferrer" aria-label="NASA data source"><img src="/nasa-logo.svg" alt="NASA"/></a><p className="eyebrow">NASA EVIDENCE · YOUR CURIOSITY</p><h1>{uz?'Savolingizdan boshlaymiz.':'Start with a question.'}</h1><p>{uz?'Tadqiqotlarni izlang. Dalillarni solishtiring. Birgalikda tushuning.':'Explore research. Compare evidence. Understand together.'}</p></div>}
       {error&&<p role="alert">{error}</p>}
       {chat&&<header className="chat-toolbar"><h2>{chat.title}</h2><button onClick={()=>setEditing(!editing)} aria-expanded={editing}>{uz?'Suhbat sozlamalari':'Chat settings'}</button><div hidden={!editing}>
         <form onSubmit={event=>{event.preventDefault();void update({title:new FormData(event.currentTarget).get('title')}).catch(report);}}>
@@ -203,10 +211,10 @@ function Chat({language,selected,navigate,action,handoff,collapsed}){
             {turn.result.claims.map((claim,i)=><p key={i}>{claim.kind&&<small>{claim.kind} · </small>}{claim.text} {claim.evidence_ids.map(id=><a key={id} href={'#'+turn.id+'-'+id}
               onClick={()=>{const detail=document.getElementById(turn.id+'-'+id);if(detail)detail.open=true;}}>[{id.slice(0,6)}] </a>)}</p>)}
             <AnswerExtras evidence={turn.result.evidence}/>
-            {turn.result.evidence.map(source=><details key={source.id} id={turn.id+'-'+source.id}><summary>{source.studyId} · {source.locator}</summary><pre>{source.text}</pre><a href={source.sourceUrl} target="_blank" rel="noreferrer">{source.kind==='USER_UPLOAD'?'Uploaded source':'NASA'}</a></details>)}
+            {turn.result.evidence.map(source=><details key={source.id} id={turn.id+'-'+source.id}><summary>{source.studyId} · {source.locator}</summary><pre>{source.text}</pre><button onClick={()=>inspect([source])}>{uz?'Library’da belgilab ko‘rish':'Highlight in Library'}</button><a href={source.sourceUrl} target="_blank" rel="noreferrer">{source.kind==='USER_UPLOAD'?'Uploaded source':'NASA'}</a></details>)}
             <small>{turn.corpus_snapshot_id.slice(0,12)} · {turn.result.model||'Local'} · {turn.memory_ids?.length||0} {uz?'xotira bandi':'memory items'}</small>
             <button onClick={()=>void copyText(turn.result.claims.map(claim=>claim.text).join('\n')).catch(report)}>Copy</button>
-            <button onClick={()=>navigate('library')}>Library</button>
+            <button onClick={()=>inspect(turn.result.evidence)}>Library · {uz?'Dalilni tekshirish':'Verify evidence'}</button>
             <button onClick={()=>navigate('tools')}>Tools</button>
           </>:<p>{turn.state} {turn.error}</p>}
           {['FAILED','CANCELLED','INTERRUPTED'].includes(turn.state)&&<button onClick={()=>setDraft(turn.question)}>{uz?'Qayta urinish':'Retry'}</button>}
@@ -215,11 +223,15 @@ function Chat({language,selected,navigate,action,handoff,collapsed}){
         <div ref={bottom}/>
       </div>
       <form className="chat-composer" onSubmit={send}>
+        <input ref={fileInput} type="file" hidden multiple accept=".pdf,.docx,.txt,.csv,.json,.png,.jpg,.jpeg" onChange={e=>void attach(e.target.files)}/>
+        {attachments.length>0&&<div className="attachment-list">{attachments.map(a=><div key={a.id}><strong>{a.name}</strong><small>{a.state==='READY'?'Tayyor':a.state==='PARTIAL'?'Qisman tayyor':a.state==='FAILED'?'Xato':'Ingestion…'} {a.error||''}</small><button type="button" disabled={!!pending} aria-label={'Remove '+a.name} onClick={()=>setAttachments(old=>old.filter(b=>b.id!==a.id))}>×</button></div>)}</div>}
+        {uploading&&<p role="status">{uz?'Fayl yuklanmoqda…':'Uploading file…'}</p>}
+
         <label>{uz?'Tadqiqot haqida savol':'Ask about an experiment'}
           <textarea ref={composer} placeholder={uz?'Savolingizni yozing…':'Write your question…'} value={draft} onChange={e=>setDraft(e.target.value)} maxLength={300} required disabled={!!pending||creating||chat?.archived}
             onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form.requestSubmit();}}}/>
         </label>
-        <div className="composer-bottom"><button type="button" className="icon-button" aria-label="Import in Library" onClick={()=>navigate('library')}><Plus size={20}/></button><small>{uz?'Javoblar ulangan manbalarga asoslanadi':'Answers grounded in connected sources'}</small><button className="send-button" aria-label={uz?'Yuborish':'Send'} disabled={!draft.trim()||!!pending||creating||chat?.archived}><ArrowUp size={19}/></button></div>
+        <div className="composer-bottom"><button type="button" className="icon-button" aria-label="Attach files" disabled={uploading||!!pending||attachments.length>=3} onClick={()=>fileInput.current?.click()}><Plus size={20}/></button><small>{attachments.length?(uz?'Biriktirilgan fayllar bo‘yicha · rasmlar AI orqali tahlil qilinadi':'Attached sources only · images analyzed with AI'):(uz?'Javoblar ulangan manbalarga asoslanadi':'Answers grounded in connected sources')}</small><button className="send-button" aria-label={uz?'Yuborish':'Send'} disabled={!draft.trim()||!!pending||creating||attachmentBusy||chat?.archived}><ArrowUp size={19}/></button></div>
         {pending&&<button type="button" onClick={()=>{const job=active.current;if(job?.chat)void api('chats/'+job.chat+'/cancel','POST',{request_id:job.id}).catch(report);}}>{uz?'To‘xtatish':'Stop'}</button>}
       </form>
     </div>
@@ -241,13 +253,35 @@ function AnswerExtras({evidence}){
   </>;
 }
 
+function EvidenceReader({focus,language}){
+  const [current,setCurrent]=useState(0),[part,setPart]=useState(null),[error,setError]=useState('');
+  useEffect(()=>{setCurrent(0);},[focus]);
+  const source=focus?.sources?.[current];
+  useEffect(()=>{setPart(null);setError('');if(!source)return;const id=(source.fileUrl||source.sourceUrl||'').match(/assets\/([0-9a-f]+)\//)?.[1];if(!id)return;let live=true;api('assets/'+id+'/excerpt?'+new URLSearchParams({locator:source.locator})).then(p=>{if(live)setPart(p);}).catch(e=>{if(live)setError(e.message);});return()=>{live=false;};},[source]);
+  if(!focus)return null;
+  const text=part?.text||source?.text||'';
+  const start=source?text.indexOf(source.text):-1;
+  return <section id="evidence-reader" className="evidence-reader" tabIndex={-1}><p className="eyebrow">{language==='uz'?'JAVOB → ASL DALIL':'ANSWER → SOURCE EVIDENCE'}</p><h2>{language==='uz'?'Dalilni tekshiring':'Verify the evidence'}</h2>
+    {!source?<p>{language==='uz'?'Bu javobga manba biriktirilmagan.':'No source attached to this answer.'}</p>:<>
+    <nav aria-label="Answer sources">{focus.sources.map((s,i)=><button key={s.id} aria-pressed={i===current} onClick={()=>setCurrent(i)}>{s.file||s.studyId} · {s.locator}</button>)}</nav>
+    <h3>{part?.name||source.file||source.studyId}</h3><p>{source.locator} · {source.id}</p>
+    <p>{language==='uz'?'Sariq belgi — javobga dalil bo‘lgan ajratilgan matn. Asl faylni quyidagi havoladan solishtiring.':'Yellow marks the extracted passage used as evidence. Compare it with the original file below.'}</p>
+    {source.interpretation&&<p>AI visual interpretation · verify against the original image</p>}
+    {error&&<p role="alert">{error}</p>}
+    <pre>{start>=0?<>{text.slice(0,start)}<mark>{source.text}</mark>{text.slice(start+source.text.length)}</>:<mark>{source.text}</mark>}</pre>
+    <a href={source.sourceUrl} target="_blank" rel="noreferrer">{language==='uz'?'Asl fayl va sahifani ochish':'Open original file and page'} ↗</a>
+    {part?.mime?.startsWith('image/')&&<img src={part.original} alt={part.name}/>}
+    </>}
+  </section>;
+}
+
 const trialOptions=BASS_THREE.rows.map(row=>({id:row.study_id+':'+row.trial_id,title:row.trial_id}));
 function TrialPicker({selected,onChange}){
   return <fieldset><legend>Trials</legend>{trialOptions.map(({id,title})=><label key={id}><input type="checkbox" checked={selected.includes(id)}
     onChange={e=>onChange(e.target.checked?[...selected,id]:selected.filter(item=>item!==id))}/>{title}</label>)}</fieldset>;
 }
 
-function Library({language,selected,setSelected,ask}){
+function Library({language,selected,setSelected,ask,evidenceFocus}){
   const [shelves,setShelves]=useState([]),[pins,setPins]=useState([]),[comparison,setComparison]=useState(null);
   const [name,setName]=useState(''),[query,setQuery]=useState(''),[error,setError]=useState('');
   const [autoUpdate,setAutoUpdate]=useState(false);
@@ -280,7 +314,7 @@ function Library({language,selected,setSelected,ask}){
     }catch(error){report(error);}finally{setAssetBusy(false);}
   }
   return <section className="forge-pane">
-    <div className="library-heading"><p className="eyebrow">YOUR RESEARCH SPACE</p><h1>Library</h1><p>{language==='uz'?'Manbalarni o‘zingiz o‘rganing. Har bir dalilning aslini ko‘ring.':'Explore the research yourself. See the source behind every claim.'}</p></div>{error&&<p role="alert">{error}</p>}
+    <EvidenceReader focus={evidenceFocus} language={language}/><div className="library-heading"><p className="eyebrow">YOUR RESEARCH SPACE</p><h1>Library</h1><p>{language==='uz'?'Manbalarni o‘zingiz o‘rganing. Har bir dalilning aslini ko‘ring.':'Explore the research yourself. See the source behind every claim.'}</p></div>{error&&<p role="alert">{error}</p>}
     <form onSubmit={event=>{event.preventDefault();void api('search','POST',{query:find}).then(data=>setFound(data.results)).catch(report);}}>
       <label>{language==='uz'?'Tajriba nomi yoki PSI ID bo‘yicha qidirish':'Search experiment name or PSI ID'}<input value={find} onChange={e=>setFind(e.target.value)} maxLength={300} required/></label>
       <button>{language==='uz'?'Qidirish':'Search'}</button>
@@ -303,7 +337,7 @@ function Library({language,selected,setSelected,ask}){
       <ul>{study.files.map(file=><li key={file.name}><a href={file.url} target="_blank" rel="noreferrer">{file.name}</a> · {file.bytes.toLocaleString()} bytes</li>)}</ul>
       <button onClick={()=>ask(study.title+' tadqiqotining maqsadi va natijalarini manbalari bilan tushuntiring')}>Hybrid AI’dan so‘rash ↗</button>
     </section>)}
-    <h3>BASS-II · PSI-25</h3>
+    <h3>{language==='uz'?'Mening hujjatlarim':'My documents'}</h3><p>{language==='uz'?'8 MB gacha. PDF matni va dastlabki 3 ta ichki rasm tahlil qilinadi; cheklovlar faylda ko‘rsatiladi. AI talqinlari mustaqil tekshirilmagan.':'Up to 8 MB. PDF text and up to 3 embedded images are analyzed; file limitations are shown. AI interpretations are unverified.'}</p>
     <label>{language==='uz'?'Fayl import qilish':'Import document'} · 8 MB
       <input type="file" disabled={assetBusy} accept=".pdf,.docx,.txt,.csv,.json,.jpg,.jpeg,.png,.mp4,.webm"
         onChange={e=>void upload(e.target.files[0])}/>
@@ -320,7 +354,7 @@ function Library({language,selected,setSelected,ask}){
       {asset.extraction.map((part,index)=><p key={index}>{part.locator} · {part.status}</p>)}
       <button onClick={()=>void api('assets/'+asset.id,'DELETE').then(refresh).catch(report)}>{language==='uz'?'O‘chirish':'Delete'}</button>
     </details>)}
-    <TrialPicker selected={selected} onChange={setSelected}/>
+    <h3>BASS-II · PSI-25</h3><TrialPicker selected={selected} onChange={setSelected}/>
     <div>{selected.map(id=><button key={id} onClick={()=>{
       const pin=pins.find(item=>item.trial===id);
       void (pin?api('pins/'+pin.id,'DELETE'):api('pins','POST',{trial:id})).then(refresh).catch(report);

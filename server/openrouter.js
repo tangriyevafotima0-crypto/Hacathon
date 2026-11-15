@@ -17,7 +17,7 @@ export function createOpenRouter({ key, model = DEFAULT_MODEL, dailyLimit = 100,
   return {
     configured:Boolean(key),
     model,
-    async complete({name,schema,instructions,input,signal}) {
+    async complete({name,schema,instructions,input,signal,images=[]}) {
       if (!key) throw apiError('OPENROUTER_NOT_CONFIGURED',503);
       const today=new Date().toISOString().slice(0,10);
       if(today!==day){day=today;calls=0;}
@@ -26,6 +26,7 @@ export function createOpenRouter({ key, model = DEFAULT_MODEL, dailyLimit = 100,
       const started=performance.now();
       const content=JSON.stringify(input);
       if(Buffer.byteLength(content)+Buffer.byteLength(instructions)>24_000)throw apiError('AI_CONTEXT_LIMIT',400);
+      if(images.length>3||images.some(url=>typeof url!=='string'||!/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(url)||url.length>11000000))throw apiError('INVALID_IMAGE_INPUT',400);
       const reservation=ledger?.reserve('application',12_000,dailyMicroUsd);
       calls++;active++;
       try {
@@ -38,7 +39,7 @@ export function createOpenRouter({ key, model = DEFAULT_MODEL, dailyLimit = 100,
             model, max_completion_tokens:650, temperature:0,
             provider:{require_parameters:true,max_price:{prompt:.25,completion:1.5}},
             response_format:{type:'json_schema',json_schema:{name,strict:true,schema}},
-            messages:[{role:'system',content:instructions},{role:'user',content}],
+            messages:[{role:'system',content:instructions},{role:'user',content:images.length?[{type:'text',text:content},...images.map(url=>({type:'image_url',image_url:{url}}))]:content}],
           }),
         });
         if(!response.ok&&reservation)ledger.settle(reservation,0);

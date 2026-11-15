@@ -28,7 +28,7 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
   const store=openWorkspace(path);
   store.recoverInterrupted();
   let closed=false;
-  const assets=createAssets({store,dbPath:path,embed,python,pythonPath});
+  const assets=createAssets({store,dbPath:path,embed,python,pythonPath,router});
   const worker=setInterval(()=>{for(const owner of store.pendingAssetOwners())void assets.process(owner);},1500);
   worker.unref();
   const currentSnapshot=owner=>digest(JSON.stringify({public:getSnapshot(),assets:store.list(owner,'asset').map(item=>[item.id,item.version,item.state]),
@@ -109,6 +109,12 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
         return respond(200,store.list(owner,'asset').map(({chunks,parts,...asset})=>({...asset,chunk_count:chunks.length,extraction:parts.map(({text,...part})=>part)})));
       }
       if(resource==='assets'&&!id&&method==='POST')return respond(202,await assets.add(owner,input));
+      if(resource==='assets'&&id&&operation==='excerpt'&&method==='GET'){
+        const asset=requireRecord('asset',id);
+        const part=asset.parts.find(p=>p.locator===url.searchParams.get('locator'));
+        if(!part)throw failure(404,'LOCATOR_NOT_FOUND');
+        return respond(200,{...part,name:asset.name,mime:asset.mime,original:'/api/workspace/assets/'+id+'/original'});
+      }
       if(resource==='assets'&&id&&operation==='preview'&&method==='GET'){
         const asset=requireRecord('asset',id);
         const part=asset.parts.find(part=>part.locator===url.searchParams.get('locator'));
@@ -256,6 +262,9 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
         if(operation==='turns'&&method==='POST'){
           if(chat.archived||!validText(input.question,300)||!validText(input.request_id,80))throw failure(400,'INVALID_TURN');
           if(input.trials&&(!Array.isArray(input.trials)||input.trials.length>3||input.trials.some(id=>!values.has(id))))throw failure(400,'INVALID_TRIAL_SELECTION');
+          const assetIds=input.asset_ids??[];
+          if(!Array.isArray(assetIds)||assetIds.length>3||assetIds.some(a=>typeof a!=='string'))throw failure(400,'INVALID_ATTACHMENTS');
+          for(const assetId of assetIds){const a=requireRecord('asset',assetId);if(!['READY','PARTIAL'].includes(a.state)||!a.chunks.length)throw failure(409,'ATTACHMENT_NOT_READY');}
           const requestId=id+':'+input.request_id;
           const key=owner+':'+requestId;
           const existing=store.get(owner,'turn',requestId);
@@ -292,8 +301,8 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
             const canonical=new Set(connected.map(item=>item.studyId+':'+item.trialId));
             const custom=privateEvidence(input.question,scope).filter(item=>!canonical.has(item.studyId+':'+item.trialId));
             const vector=embed?(await embed([input.question],'query'))[0]:undefined;
-            const uploads=await assets.search(owner,input.question,vector);
-            const evidence=[...connected,...custom,...uploads].slice(0,8);
+            const uploads=await assets.search(owner,input.question,vector,assetIds);
+            const evidence=(assetIds.length?uploads:[...connected,...custom,...uploads]).slice(0,8);
             if(controller.signal.aborted)throw failure(409,'CANCELLED');
             if(!evidence.length&&/\b(?:what is|explain|nima|tushuntir)\b/i.test(input.question)&&
               /\b(?:microgravity|mikrogravitatsiya|combustion|yonish|flame|alanga|smoke|tutun)\b/i.test(input.question)&&

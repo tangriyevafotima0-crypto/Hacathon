@@ -18,6 +18,7 @@ const instructions=[
   'Each short factual claim must cite at least one supplied evidence id. Return at most four claims.',
   'Preserve measurement units, order and conditions. Distinguish objectives, observations, and model outputs.',
   'ATLAS_TRIAL means a user-imported record. Describe claims from it as reported in the imported record, never as verified by NASA.',
+  'AI visual interpretation and AI transcription are unverified interpretations. Explicitly label them as AI interpretation; never present them as measured findings or NASA conclusions.',
   'USER_UPLOAD is user-supplied material. Label it as uploaded content. It is not automatically verified by NASA.',
   'Do not infer safety, transfer evidence to the Moon or Mars, or claim predictions. Never generate URLs.',
 ].join(' ');
@@ -48,7 +49,7 @@ export async function answerAtlas(router,question,language,evidence,selectedTria
   }
   const claims=data.claims.map(claim=>{
     const kinds=new Set(claim.evidence_ids.map(id=>byId.get(id).kind));
-    const kind=kinds.has('HYPOTHESIS')?'HYPOTHESIS':kinds.has('OBJECTIVE')?'OBJECTIVE':
+    const kind=claim.evidence_ids.some(id=>byId.get(id).interpretation)?'AI_INTERPRETATION':kinds.has('HYPOTHESIS')?'HYPOTHESIS':kinds.has('OBJECTIVE')?'OBJECTIVE':
       kinds.has('GROUND_CFD')?'MODEL_RESULT':kinds.has('USER_UPLOAD')||kinds.has('ATLAS_TRIAL')?'USER_REPORTED':'SOURCE_FINDING';
     return {...claim,kind};
   });

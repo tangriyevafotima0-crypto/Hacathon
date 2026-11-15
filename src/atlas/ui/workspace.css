@@ -43,3 +43,55 @@
 .pdf-breadcrumb{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:20px 0;font-size:13px}.pdf-study-folders{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.forge-workspace .pdf-study-folders>button{display:flex;align-items:center;gap:14px;text-align:left;padding:18px;background:var(--panel)}.pdf-study-folders>button>span{flex:1}.pdf-study-folders strong,.pdf-study-folders small{display:block}.pdf-study-folders small{margin-top:5px;font-size:12px;color:var(--muted)}.forge-workspace .pdf-folder-back{display:flex;align-items:center;gap:8px;margin-bottom:16px}.library-inline-pdf{scroll-margin-top:110px}
 
 .forge-workspace .assistant-message>.answer-icon-action{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:10px;margin:6px 2px 0 0;background:transparent;border:0;border-radius:10px;color:var(--muted);vertical-align:middle}.forge-workspace .assistant-message>.answer-icon-action:hover{color:var(--ink);background:var(--soft)}.forge-workspace .assistant-message>.answer-icon-action:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* Shared desktop and touch ergonomics. Glyphs stay small; targets remain usable. */
+.forge-workspace .icon-button,.forge-workspace .send-button,.forge-workspace .message-actions button{min-width:44px;min-height:44px}
+.forge-workspace .forge-topbar nav button{min-height:44px}
+.composer-bottom small,.assistant-message>p small,.answer-heading small,.assistant-message>small,.answer-media figcaption{font-size:12px;line-height:1.5}
+.assistant-message p a{font-size:12px;display:inline-block;min-width:24px;padding:3px}
+.chat-scope{font-size:12px!important;line-height:1.6;color:var(--muted);max-width:60ch;margin:16px auto 0!important}
+.starter-questions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:25px}
+.forge-workspace .starter-questions button{display:flex;align-items:center;gap:12px;min-height:44px;font-size:13px;text-align:left;background:var(--panel);border-radius:12px}
+.starter-questions svg{flex-shrink:0}
+.is-empty .welcome{margin-top:clamp(40px,9vh,100px)}
+.sidebar-scrim{position:fixed;inset:0;z-index:35;border:0!important;border-radius:0!important;background:#0008!important;padding:0!important;transform:none!important}
+.study-detail{scroll-margin-top:94px}.study-detail:focus{outline:none}.study-coverage{padding:14px;background:var(--soft);border-radius:12px;font-size:13px!important;line-height:1.65}
+.library-personal,.library-comparison,.library-shelves{margin:24px 0;padding:8px 0}
+.library-overview[hidden]{display:none}.library-personal>summary,.library-comparison>summary,.library-shelves>summary{font-size:15px;min-height:44px}
+.study-pdf-list{max-height:350px}.study-pdf-list small{font-size:12px}
+.forge-workspace .library-pdf-list>button{min-height:56px}
+.forge-workspace .pdf-page-controls button{min-width:44px;min-height:44px}.pdf-page-controls label{font-size:13px}.forge-workspace .pdf-page-controls input{min-height:44px}
+.settings-sheet{max-height:calc(100dvh - 32px);overflow-y:auto}
+@media(max-width:700px){
+ .forge-workspace .forge-main{margin-left:0!important;max-width:100%;width:100%;padding-top:64px}
+ .forge-workspace .forge-topbar{left:0!important;right:0;width:100%;padding:0 10px;gap:6px;height:64px}
+ .forge-workspace .forge-topbar nav{margin:auto;padding:2px;flex-shrink:0}
+ .forge-workspace .forge-topbar nav button{min-width:70px;padding:6px 10px;font-size:12px;min-height:44px}
+ .forge-workspace .top-actions{gap:0}.forge-workspace .icon-button{padding:10px}
+ .forge-workspace .forge-sidebar{width:min(290px,calc(100vw - 56px));padding-top:max(16px,env(safe-area-inset-top));height:100dvh}
+ .sidebar-brand{padding-bottom:18px}.sidebar-brand button{margin-left:auto}
+ .chat-canvas{padding:20px 14px 12px;max-width:100%}
+ .forge-workspace .chat-composer textarea{font-size:16px;min-height:56px}
+ .chat-composer{bottom:max(8px,env(safe-area-inset-bottom));border-radius:20px;padding:10px 12px;margin-top:20px}
+ .composer-bottom{gap:8px}.composer-bottom small{font-size:12px;line-height:1.4}
+ .welcome h1{font-size:28px}.welcome p:last-child{font-size:12px}.welcome-mark{margin-bottom:18px}
+ .is-empty .welcome{margin:32px 0 20px}.starter-questions{display:grid;margin-top:18px;gap:8px}
+ .forge-workspace .starter-questions button{font-size:12px;justify-content:space-between}
+ .answer-heading small{font-size:12px;max-width:50%;text-align:right}.answer-heading strong{font-size:13px}
+ .forge-pane{padding:24px 14px}.forge-pane h1{letter-spacing:-.7px}
+ .library-heading{padding-top:8px}.library-filters{gap:6px;margin-bottom:22px}.forge-workspace .library-filters button{min-height:44px;font-size:13px}
+ .study-grid{gap:12px}.study-cover{height:100px}.study-card-body{padding:16px}.study-card-body>span{font-size:12px}.study-card p{font-size:13px}
+ .study-detail{padding:16px;margin-top:10px;scroll-margin-top:80px;border-radius:14px}.study-detail h2{font-size:20px;line-height:1.4}
+ .study-detail-layout{gap:16px}.study-detail p{font-size:14px}.study-detail li{font-size:14px}.study-detail a{overflow-wrap:anywhere}
+ .study-detail figure{margin-bottom:16px}.study-detail figcaption{font-size:12px}.study-detail-layout>div:empty{display:none}
+ .library-inline-pdf>header{align-items:flex-start}.library-inline-pdf h3{font-size:14px}.library-inline-pdf>header button{flex-shrink:0;min-height:44px}
+ .pdf-page-controls{gap:4px;padding:8px 4px}.pdf-page-controls label{font-size:12px;gap:4px}.forge-workspace .pdf-page-controls input{width:49px;padding:5px}
+ .pdf-page-controls>span{font-size:12px;min-width:30px}.pdf-page-stage{max-height:60dvh;padding:8px}
+ .notes-layout textarea,.notes-layout input,.settings-sheet select,.forge-workspace input:not([type=checkbox]),.forge-workspace select{font-size:16px}
+ .forge-workspace .app-title-actions button{min-height:44px}.forge-workspace .app-title-actions .icon-button{min-width:44px}
+}
+@media(max-height:550px) and (max-width:900px){.is-empty .welcome{margin:20px 0}.welcome-mark{display:none}.starter-questions{margin-top:12px}.chat-canvas{min-height:calc(100dvh - 64px)}}
+
+@media(max-width:700px){.forge-workspace .chat-history .history-more{width:44px;flex-basis:44px;min-height:44px;opacity:1}.forge-workspace .history-select{min-height:44px}.history-menu{max-height:calc(100dvh - 24px);overflow-y:auto}.forge-workspace .history-menu button{min-height:44px}.study-card small{font-size:12px}}
+
+.study-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.forge-workspace .study-tabs button{min-height:44px;font-size:13px}.forge-workspace .study-tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg)}.study-about{margin:20px 0}.study-media{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:20px;margin:20px 0}.study-media figure{margin:0}.study-media video,.study-media img{width:100%;max-height:320px;object-fit:contain}.study-other-files{margin:20px 0}.study-other-files ul{padding-left:20px}.study-other-files a{display:inline-block;min-height:44px;padding:10px 0}.study-pdfs{margin:20px 0}.study-detail>button:last-child{margin-top:20px}@media(max-width:700px){.study-tabs{gap:5px}.forge-workspace .study-tabs button{font-size:12px;padding:8px 9px}.study-coverage{font-size:12px!important}.library-inline-pdf{scroll-margin-top:80px}}

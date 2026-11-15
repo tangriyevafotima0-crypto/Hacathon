@@ -2,7 +2,7 @@ import React,{useEffect,useState,useRef} from 'react';
 import {createPortal} from 'react-dom';
 import Atlas,{download} from './Atlas.jsx';
 import {BASS_THREE} from '../data/index.js';
-import {Menu,Plus,LibraryBig,MessageSquare,Settings,Sun,Moon,ArrowUp,Search,Copy,Pencil,Sparkles,SlidersHorizontal,BookOpen,MoreHorizontal,Pin,Share2,Archive,Trash2,Link,Brain,Square} from 'lucide-react';
+import {Menu,Plus,LibraryBig,MessageSquare,Settings,Sun,Moon,ArrowUp,Search,Copy,Pencil,Sparkles,SlidersHorizontal,BookOpen,MoreHorizontal,Pin,Share2,Archive,Trash2,Link,Brain,Square,X} from 'lucide-react';
 import './workspace.css';
 import ToolApps from './ToolApps.jsx';
 import PDFViewer from './PDFViewer.jsx';
@@ -93,37 +93,42 @@ function preference(key,fallback){try{return localStorage.getItem(key)||fallback
 export default function Workspace(){
   const [ready,setReady]=useState(false),[failure,setFailure]=useState(''),[page,setPage]=useState('chat'),[language,setLanguage]=useState(()=>preference('forge-language','uz'));
   const [selected,setSelected]=useState([]),[collapsed,setCollapsed]=useState(()=>matchMedia('(max-width:700px)').matches),[theme,setTheme]=useState(()=>preference('forge-theme','dark'));
+  const [mobile,setMobile]=useState(()=>matchMedia('(max-width:700px)').matches);
+  const sidebarRef=useRef(null),menuRef=useRef(null);
+  function goPage(next){setPage(next);if(matchMedia('(max-width:700px)').matches)setCollapsed(true);requestAnimationFrame(()=>window.scrollTo({top:0,behavior:'instant'}));}
   const [evidenceFocus,setEvidenceFocus]=useState(null);
-  function inspect(sources,claims=[]){setEvidenceFocus({sources,claims,id:requestId()});setPage('library');requestAnimationFrame(()=>document.getElementById('evidence-reader')?.scrollIntoView({block:'start'}));}
+  function inspect(sources,claims=[]){setEvidenceFocus({sources,claims,id:requestId()});goPage('library');requestAnimationFrame(()=>document.getElementById('evidence-reader')?.scrollIntoView({block:'start'}));}
   const [settings,setSettings]=useState(false),[chatAction,setChatAction]=useState(null),[handoff,setHandoff]=useState(null);
   const uz=language==='uz';
   useEffect(()=>{document.documentElement.lang=language;},[language]);
   const sharedId=new URLSearchParams(location.search).get('share');
   useEffect(()=>{void api('session','POST',{}).then(()=>setReady(true)).catch(e=>setFailure(e.message));},[]);
   useEffect(()=>{try{localStorage.setItem('forge-theme',theme);localStorage.setItem('forge-language',language);}catch{}},[theme,language]);
-  useEffect(()=>{const media=matchMedia('(max-width:700px)');const changed=()=>{if(media.matches)setCollapsed(true);};media.addEventListener('change',changed);return()=>media.removeEventListener('change',changed);},[]);
+  useEffect(()=>{const media=matchMedia('(max-width:700px)');const changed=()=>{setMobile(media.matches);if(media.matches)setCollapsed(true);};media.addEventListener('change',changed);return()=>media.removeEventListener('change',changed);},[]);
   useEffect(()=>{if(!settings)return;const previous=document.activeElement;const dialog=document.querySelector('.settings-sheet');dialog?.querySelector('button')?.focus();function key(e){if(e.key==='Escape')setSettings(false);if(e.key==='Tab'){const items=[...dialog.querySelectorAll('button,select,a,input')];if(e.shiftKey&&document.activeElement===items[0]){e.preventDefault();items.at(-1)?.focus();}else if(!e.shiftKey&&document.activeElement===items.at(-1)){e.preventDefault();items[0]?.focus();}}}document.addEventListener('keydown',key);return()=>{document.removeEventListener('keydown',key);previous?.focus();};},[settings]);
-  function ask(question){setHandoff({question,id:requestId()});setPage('chat');}
+  useEffect(()=>{if(!mobile||collapsed)return;const previous=document.activeElement;const oldOverflow=document.body.style.overflow;document.body.style.overflow='hidden';sidebarRef.current?.querySelector('button')?.focus();function key(e){if(e.key==='Escape'){setCollapsed(true);menuRef.current?.focus();}if(e.key==='Tab'){const items=[...sidebarRef.current.querySelectorAll('button:not(:disabled),input,a,[tabindex="0"]')];const first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}}document.addEventListener('keydown',key);return()=>{document.body.style.overflow=oldOverflow;document.removeEventListener('keydown',key);if(previous?.isConnected)previous.focus();};},[mobile,collapsed]);
+  function ask(question){setHandoff({question,id:requestId()});goPage('chat');}
   if(sharedId)return <SharedChat id={sharedId}/>;
   return <div className={'forge-workspace '+(collapsed?'sidebar-collapsed':'')} data-theme={theme}>
-    <header className="forge-topbar"><button className="icon-button" aria-label={uz?'Menyuni ochish':'Toggle menu'} aria-expanded={!collapsed} onClick={()=>setCollapsed(!collapsed)}><Menu size={20}/></button>
+    <header className="forge-topbar" inert={mobile&&!collapsed}><button ref={menuRef} className="icon-button" aria-label={uz?'Menyuni ochish':'Toggle menu'} aria-expanded={!collapsed} onClick={()=>setCollapsed(!collapsed)}><Menu size={20}/></button>
       <strong>SKYFORGE <span>Fire Atlas</span></strong>
-      <nav aria-label={ui(language,"Workspace")}>{[['chat',ui(language,'Hybrid AI')],['library',ui(language,'Library')]].map(([key,title])=><button key={key} aria-pressed={page===key} onClick={()=>{setEvidenceFocus(null);setPage(key);}}>{title}</button>)}</nav>
-      <div className="top-actions"><button className="icon-button" aria-label={ui(language,'Notes')} onClick={()=>setPage('notes')}><BookOpen size={19}/></button>
+      <nav aria-label={ui(language,"Workspace")}>{[['chat',ui(language,'Hybrid AI')],['library',ui(language,'Library')]].map(([key,title])=><button key={key} aria-pressed={page===key} onClick={()=>{setEvidenceFocus(null);goPage(key);}}>{title}</button>)}</nav>
+      <div className="top-actions"><button className="icon-button" aria-label={ui(language,'Notes')} onClick={()=>goPage('notes')}><BookOpen size={19}/></button>
       <button className="icon-button" aria-label={theme==='dark'?(uz?'Kunduzgi rejim':'Day mode'):(uz?'Tungi rejim':'Night mode')} onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={19}/>:<Moon size={19}/>}</button>
       <a href="https://psi.nasa.gov/physci/repo" target="_blank" rel="noreferrer" className="nasa-wordmark">NASA ↗</a></div>
     </header>
-    <aside className="forge-sidebar" aria-label={ui(language,"Main menu")}><div className="sidebar-brand">F<span>FIRE ATLAS</span></div>
-      <button className="sidebar-new" disabled={!ready} onClick={()=>{setPage('chat');setChatAction({id:requestId()});}}><Plus size={18}/> {ui(language,"New Chat")}</button>
-      <button className={'sidebar-nav '+(page==='library'?'active':'')} onClick={()=>{setEvidenceFocus(null);setPage('library');}}><LibraryBig size={18}/> {ui(language,"Library")}</button>
-      <button className={'sidebar-nav '+(page==='tools'?'active':'')} onClick={()=>setPage('tools')}><SlidersHorizontal size={18}/> {ui(language,"Tools")}</button>
+    <aside ref={sidebarRef} inert={collapsed} aria-hidden={collapsed?true:undefined} className="forge-sidebar" aria-label={ui(language,"Main menu")}><div className="sidebar-brand">F<span>FIRE ATLAS</span>{mobile&&<button className="icon-button" aria-label={uz?'Menyuni yopish':'Close menu'} onClick={()=>setCollapsed(true)}><X size={20}/></button>}</div>
+      <button className="sidebar-new" disabled={!ready} onClick={()=>{goPage('chat');setChatAction({id:requestId()});}}><Plus size={18}/> {ui(language,"New Chat")}</button>
+      <button className={'sidebar-nav '+(page==='library'?'active':'')} onClick={()=>{setEvidenceFocus(null);goPage('library');}}><LibraryBig size={18}/> {ui(language,"Library")}</button>
+      <button className={'sidebar-nav '+(page==='tools'?'active':'')} onClick={()=>goPage('tools')}><SlidersHorizontal size={18}/> {ui(language,"Tools")}</button>
       <div id="forge-history-slot" className="history-slot"/>
-      <button className="sidebar-settings" onClick={()=>setSettings(!settings)}><Settings size={18}/>{uz?'Sozlamalar':'Settings'}</button>
+      <button className="sidebar-settings" onClick={()=>{if(mobile)setCollapsed(true);setSettings(!settings);}}><Settings size={18}/>{uz?'Sozlamalar':'Settings'}</button>
     </aside>
-    <main className="forge-main">
+    {mobile&&!collapsed&&<button className="sidebar-scrim" aria-label={uz?'Menyuni yopish':'Close menu'} onClick={()=>setCollapsed(true)}/> }
+    <main className="forge-main" inert={mobile&&!collapsed}>
     {!ready?<section className="forge-pane connection-state"><h2>{failure?(uz?'Ulanishda xato':'Connection error'):'Fire Atlas'}</h2><p>{failure|| (uz?'Ulanmoqda…':'Connecting…')}</p>{failure&&<button onClick={()=>location.reload()}>{uz?'Qayta ulanish':'Reconnect'}</button>}</section>:<>
       {selected.length>0&&<div className="selection-strip">{uz?'Tanlangan sinovlar':'Selected trials'} · {selected.join(', ')}<button onClick={()=>setSelected([])}>{uz?'Tozalash':'Clear'}</button></div>}
-      <div hidden={page!=='chat'}><Chat language={language} selected={selected} navigate={setPage} action={chatAction} handoff={handoff} collapsed={collapsed} inspect={inspect} /></div>
+      <div hidden={page!=='chat'}><Chat language={language} selected={selected} navigate={goPage} action={chatAction} handoff={handoff} collapsed={collapsed} inspect={inspect} /></div>
       <div hidden={page!=='library'}><Library language={language} selected={selected} setSelected={setSelected} ask={ask} evidenceFocus={evidenceFocus} closeEvidence={()=>setEvidenceFocus(null)} visible={page==='library'}/><details className="forge-pane legacy-atlas"><summary>{uz?'O‘lchovlar, import va Notebook':'Measurements, import and Notebook'}</summary><Atlas language={language} onLanguageChange={setLanguage}/></details></div>
       <div hidden={page!=='notes'}><Notes language={language} visible={page==='notes'}/></div>
       <div hidden={page!=='tools'}><ToolApps language={language} trials={selected} setTrials={setSelected} api={api} readableError={readableError} download={download}/></div>
@@ -133,7 +138,7 @@ export default function Workspace(){
       <header><h2>{uz?'Sozlamalar':'Settings'}</h2><button onClick={()=>setSettings(false)} aria-label={ui(language,"Close settings")}>×</button></header>
       <label>{uz?'Til':'Language'}<select value={language} onChange={e=>setLanguage(e.target.value)}><option value="uz">O‘zbekcha</option><option value="en">English</option></select></label>
       <label>{uz?'Ko‘rinish':'Appearance'}<select value={theme} onChange={e=>setTheme(e.target.value)}><option value="dark">{uz?'Tungi':'Night'}</option><option value="light">{uz?'Kunduzgi':'Day'}</option></select></label>
-      <button onClick={()=>{setPage('library');setSettings(false);}}>{uz?'Kutubxona · Import':'Library · Import'}</button>
+      <button onClick={()=>{goPage('library');setSettings(false);}}>{uz?'Kutubxona · Import':'Library · Import'}</button>
       <p>{uz?'Fire Atlas — mustaqil loyiha. NASA ma’lumotlaridan foydalanadi; NASA mahsuloti emas. Javoblarda AI qo‘llanadi, dalillar Library’da tekshiriladi.':'Fire Atlas is an independent project using NASA data, not a NASA product. AI is used for answers; verify evidence in Library.'}</p>
       <p>{uz?'Xotirani chat ichidagi boshqaruvdan ko‘rish va o‘chirish mumkin.':'Memory can be reviewed and removed inside each chat.'}</p>
     </section></div>}
@@ -253,13 +258,13 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   const historyPanel=<div className="chat-history"><p className="eyebrow">{uz?'Suhbatlar':'Recent chats'}</p>
       <label>{uz?'Tarixdan qidirish':'Search history'}<input value={q} onChange={e=>setQ(e.target.value)}/></label>
       <label><input type="checkbox" checked={archived} onChange={e=>setArchived(e.target.checked)}/>{uz?'Arxiv':'Archive'}</label>
-      {history.map(item=><div key={item.id} className={'history-row '+(chat?.id===item.id?'is-current':'')}><button className="history-select" disabled={!!pending} aria-pressed={chat?.id===item.id} onClick={()=>{setAttachments([]);setRowMenu(null);void select(item.id).catch(report);}}>{item.pinned&&<Pin size={12}/>}<span>{item.title}</span></button><button className="history-more" aria-label={(uz?'Chat menyusi: ':'Chat menu: ')+item.title} aria-haspopup="menu" aria-expanded={rowMenu?.item.id===item.id} disabled={!!pending} onClick={e=>{const rect=e.currentTarget.getBoundingClientRect();setRowMenu(rowMenu?.item.id===item.id?null:{item,left:Math.max(8,Math.min(rect.right+8,innerWidth-252)),top:Math.max(8,Math.min(rect.top,innerHeight-350))});}}><MoreHorizontal size={17}/></button></div>)}
+      {history.map(item=><div key={item.id} className={'history-row '+(chat?.id===item.id?'is-current':'')}><button className="history-select" disabled={!!pending} aria-pressed={chat?.id===item.id} onClick={()=>{navigate('chat');setAttachments([]);setRowMenu(null);void select(item.id).catch(report);}}>{item.pinned&&<Pin size={12}/>}<span>{item.title}</span></button><button className="history-more" aria-label={(uz?'Chat menyusi: ':'Chat menu: ')+item.title} aria-haspopup="menu" aria-expanded={rowMenu?.item.id===item.id} disabled={!!pending} onClick={e=>{const rect=e.currentTarget.getBoundingClientRect();setRowMenu(rowMenu?.item.id===item.id?null:{item,left:Math.max(8,Math.min(rect.right+8,innerWidth-252)),top:Math.max(8,Math.min(rect.top,innerHeight-350))});}}><MoreHorizontal size={17}/></button></div>)}
       {history.length>=100&&<button onClick={()=>void api('chats?'+new URLSearchParams({q,archived:archived?'1':'0',cursor:history.at(-1).id})).then(items=>setHistory([...history,...items])).catch(report)}>{ui(language,"Load more")}</button>}
     </div>;
   return <section className={'forge-chat '+(empty&&!draft.trim()?'is-empty':'has-messages')}>
     {document.getElementById('forge-history-slot')&&createPortal(historyPanel,document.getElementById('forge-history-slot'))}
     <div className="chat-canvas">
-      {empty&&<div className="welcome"><a className="welcome-mark nasa-source-mark" href="https://psi.nasa.gov/physci/repo" target="_blank" rel="noreferrer" aria-label="NASA data source"><img src="/nasa-logo.svg" alt="NASA"/></a><p className="eyebrow">{uz?'NASA DALILLARI · SIZNING IZLANISHINGIZ':'NASA EVIDENCE · YOUR CURIOSITY'}</p><h1>{uz?'Savolingizdan boshlaymiz.':'Start with a question.'}</h1><p>{uz?'Tadqiqotlarni izlang. Dalillarni solishtiring. Birgalikda tushuning.':'Explore research. Compare evidence. Understand together.'}</p></div>}
+      {empty&&<div className="welcome"><a className="welcome-mark nasa-source-mark" href="https://psi.nasa.gov/physci/repo" target="_blank" rel="noreferrer" aria-label="NASA data source"><img src="/nasa-logo.svg" alt="NASA"/></a><p className="eyebrow">{uz?'NASA DALILLARI · SIZNING IZLANISHINGIZ':'NASA EVIDENCE · YOUR CURIOSITY'}</p><h1>{uz?'Savolingizdan boshlaymiz.':'Start with a question.'}</h1><p>{uz?'Tadqiqotlarni izlang. Dalillarni solishtiring. Birgalikda tushuning.':'Explore research. Compare evidence. Understand together.'}</p><div className="starter-questions">{(uz?['T20 va T21 sinovlarini solishtir.','DAFT tadqiqotining maqsadi nima?','GMT216-T25 namunasining eni qancha?']:['Compare trials T20 and T21.','What is the purpose of the DAFT study?','What is the sample width in GMT216-T25?']).map(question=><button key={question} onClick={()=>{setDraft(question);composer.current?.focus();}}>{question}<ArrowUp size={16}/></button>)}</div><p className="chat-scope">{uz?'AI faqat indekslangan manbalar bilan javob beradi. Yuklangan barcha fayllar hali qidiruvga tayyor emas.':'AI answers from indexed sources. Not every downloaded file is ready for AI search yet.'}</p></div>}
       {error&&<p role="alert">{error}</p>}
       {actionNotice&&<div className="action-toast" role="status">{actionNotice}<button aria-label={uz?'Xabarni yopish':'Dismiss notification'} onClick={()=>setActionNotice('')}>×</button></div>}
       {chat&&<header className="chat-toolbar"><h2>{chat.title}</h2></header>}
@@ -383,11 +388,11 @@ function TrialPicker({selected,onChange,language}){
 }
 
 function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,visible}){
-  const previewHost=useRef(null);
+  const previewHost=useRef(null),studyHost=useRef(null),studyTrigger=useRef(null);
   const [previewPdf,setPreviewPdf]=useState(null);
   useEffect(()=>{if(previewPdf)previewHost.current?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});},[previewPdf]);
-  const [pdf,setPdf]=useState(null),[serverPdfs,setServerPdfs]=useState([]),[downloadState,setDownloadState]=useState(''),[pdfError,setPdfError]=useState('');
-  useEffect(()=>{if(!visible)return;let live=true;const refresh=()=>fetch('/api/nasa-files').then(r=>{if(!r.ok||!r.headers.get('content-type')?.includes('application/json'))throw Error();return r.json();}).then(data=>{if(live){setServerPdfs(data.files||[]);setDownloadState(data.downloadState||'');setPdfError('');}}).catch(()=>{if(live)setPdfError(language==='uz'?'Server PDF ro‘yxatini olib bo‘lmadi.':'Could not load the server PDF list.');});void refresh();const timer=setInterval(refresh,15000);return()=>{live=false;clearInterval(timer);};},[visible,language]);
+  const [pdf,setPdf]=useState(null),[serverPdfs,setServerPdfs]=useState([]),[downloadState,setDownloadState]=useState(''),[pdfError,setPdfError]=useState(''),[catalogLoading,setCatalogLoading]=useState(true);
+  useEffect(()=>{if(!visible)return;let live=true;const refresh=()=>fetch('/api/nasa-files').then(r=>{if(!r.ok||!r.headers.get('content-type')?.includes('application/json'))throw Error();return r.json();}).then(data=>{if(live){setServerPdfs(data.files||[]);setDownloadState(data.downloadState||'');setPdfError('');setCatalogLoading(false);}}).catch(()=>{if(live)setPdfError(language==='uz'?'Server PDF ro‘yxatini olib bo‘lmadi.':'Could not load the server PDF list.');});void refresh();const timer=setInterval(refresh,15000);return()=>{live=false;clearInterval(timer);};},[visible,language]);
   const [shelves,setShelves]=useState([]),[pins,setPins]=useState([]),[comparison,setComparison]=useState(null);
   const [name,setName]=useState(''),[query,setQuery]=useState(''),[error,setError]=useState('');
   const [autoUpdate,setAutoUpdate]=useState(false);
@@ -395,8 +400,10 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
   const [assets,setAssets]=useState([]),[assetBusy,setAssetBusy]=useState(false);
   const [studies,setStudies]=useState([]);
   const [find,setFind]=useState(''),[found,setFound]=useState(null);
-  const [category,setCategory]=useState('all'),[studyOpen,setStudyOpen]=useState(null);
+  const [category,setCategory]=useState('all'),[studyOpen,setStudyOpen]=useState(null),[studyTab,setStudyTab]=useState('about');
   const allStudies=mergeLibraryStudies(studies,serverPdfs,language);
+  useEffect(()=>{if(studyOpen){requestAnimationFrame(()=>{studyHost.current?.scrollIntoView({block:'start',behavior:'instant'});studyHost.current?.focus({preventScroll:true});});}},[studyOpen]);
+  function closeStudy(){setStudyOpen(null);setPreviewPdf(null);requestAnimationFrame(()=>{studyTrigger.current?.scrollIntoView({block:'center',behavior:'instant'});studyTrigger.current?.focus({preventScroll:true});});}
   const visibleStudies=allStudies.filter(study=>(category==='all'||(category==='model'?study.kind==='GROUND_CFD':study.kind==='FLIGHT_EXPERIMENT'))&&(!find.trim()||[study.id,study.title,study.description,...study.files.map(f=>f.name)].join(' ').toLowerCase().includes(find.toLowerCase())));
   const report=e=>setError(readableError(e,language));
   async function refresh(){const [s,p,a]=await Promise.all([api('shelves'),api('pins'),api('assets')]);setShelves(s);setPins(p);setAssets(a);}
@@ -422,7 +429,7 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
   }
   return <section className="forge-pane">
     <EvidenceReader focus={evidenceFocus} language={language} close={closeEvidence}/><div className="library-heading"><p className="eyebrow">{language==='uz'?'TADQIQOT ISH MAYDONI':'YOUR RESEARCH SPACE'}</p><h1>{ui(language,"Library")}</h1><p>{language==='uz'?'Manbalarni o‘zingiz o‘rganing. Har bir dalilning aslini ko‘ring.':'Explore the research yourself. See the source behind every claim.'}</p></div>{error&&<p role="alert">{error}</p>}
-    <form className="library-search" onSubmit={event=>{event.preventDefault();void api('search','POST',{query:find}).then(data=>setFound(data.results)).catch(report);}}>
+    <div hidden={!!studyOpen} className="library-overview"><form className="library-search" onSubmit={event=>{event.preventDefault();void api('search','POST',{query:find}).then(data=>setFound(data.results)).catch(report);}}>
       <label>{language==='uz'?'Tajriba nomi yoki PSI ID bo‘yicha qidirish':'Search experiment name or PSI ID'}<input value={find} onChange={e=>setFind(e.target.value)} maxLength={300} required/></label>
       <button>{language==='uz'?'Qidirish':'Search'}</button><button type="button" onClick={()=>{setFind('');setFound(null);setStudyOpen(null);}}>{language==='uz'?'Tozalash':'Clear'}</button>
     </form>
@@ -431,25 +438,28 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
     {found?.map(source=><details key={source.id}><summary>{source.studyId} · {source.trialId||source.locator}</summary>
       <pre>{source.text}</pre><a href={source.fileUrl||source.sourceUrl} target="_blank" rel="noreferrer">{source.locator}</a>
     </details>)}
-    <h3>{language==='uz'?'Ulangan tadqiqotlar':'Connected studies'} · {allStudies.length}</h3><p className="corpus-note">{language==='uz'?'Bu — tanlangan metadata, jadvallar va media to‘plami. Tadqiqotlarning barcha fayllari yuklangan emas.':'Selected metadata, tables and media; these are not complete downloads of every study.'}</p>
-    <div className="study-grid">{visibleStudies.map(study=><button key={study.id} className="study-card" onClick={()=>{setStudyOpen(study.id);setPreviewPdf(null);}}>
+    <h2>{language==='uz'?'Ulangan tadqiqotlar':'Connected studies'} · {allStudies.length}</h2><p className="corpus-note">{language==='uz'?'Bu — tanlangan metadata, jadvallar va media to‘plami. Tadqiqotlarning barcha fayllari yuklangan emas.':'Selected metadata, tables and media; these are not complete downloads of every study.'}</p>
+    <div className="study-grid">{visibleStudies.map(study=><button key={study.id} className="study-card" onClick={e=>{studyTrigger.current=e.currentTarget;setStudyTab('about');setStudyOpen(study.id);setPreviewPdf(null);}}>
       <div className="study-cover">{study.files.some(f=>f.media?.startsWith('image/'))?<img src={study.files.find(f=>f.media?.startsWith('image/')).url} alt={study.title}/>:<BookOpen size={34}/>}<span>{ui(language,study.kind==='GROUND_CFD'?'MODEL':study.kind==='FLIGHT_EXPERIMENT'?'EXPERIMENT':'Study')}</span></div>
-      <div className="study-card-body"><small>{study.id} · v{study.version}</small><h3>{study.title}</h3><p>{study.description}</p><span>{study.files.length} {language==='uz'?'fayl':'files'} · {language==='uz'?'O‘rganish':'Explore'} ↗</span></div>
+      <div className="study-card-body"><small>{study.id} · v{study.version}</small><h3>{study.title}</h3><p>{study.description}</p><span>{catalogLoading?'…':study.files.length} {language==='uz'?'fayl':'files'} · {language==='uz'?'O‘rganish':'Explore'} ↗</span></div>
     </button>)}</div>
     {visibleStudies.length===0&&<div className="empty-library"><p>{language==='uz'?'Bu nom bilan tajriba topilmadi. Boshqa nom yoki PSI ID kiriting.':'No experiment matches this name. Try another name or PSI ID.'}</p><button onClick={()=>ask(find)}>{language==='uz'?'Gibrid AI’dan so‘rash ↗':'Ask Hybrid AI ↗'}</button></div>}
-    {studyOpen&&allStudies.filter(s=>s.id===studyOpen).map(study=><section className="study-detail" key={study.id}>
-      <button onClick={()=>{setStudyOpen(null);setPreviewPdf(null);}}>← {ui(language,'Library')}</button><p className="eyebrow">{study.id} · {ui(language,study.kind)}</p><h2>{study.title}</h2>
-      <div className="study-detail-layout"><div>{study.files.filter(file=>file.media?.startsWith('image/')||file.media?.startsWith('video/')).map(file=><figure key={file.name}>{file.media.startsWith('image/')?<img src={file.url} alt={file.name}/>:file.media.startsWith('video/')?<video controls preload="metadata" src={file.url}/>:file.media==='application/pdf'?<PDFPages url={file.url} name={file.name} language={language}/>:null}<figcaption>{file.name}</figcaption></figure>)}</div><div><h3>{language==='uz'?'Tadqiqot haqida':'About the study'}</h3><p>{study.description}</p><h3>{language==='uz'?'Metodika':'Method'}</h3><p>{study.approach}</p></div></div>
-      <a href={study.sourceUrl} target="_blank" rel="noreferrer">NASA · DOI {study.doi} · v{study.version}</a>
-      <h3>{language==='uz'?'PDF hujjatlar':'PDF documents'} · {study.files.filter(f=>f.name.toLowerCase().endsWith('.pdf')).length}</h3>
-      <div className="study-pdf-list library-pdf-list">{study.files.filter(f=>f.name.toLowerCase().endsWith('.pdf')).map(file=><button key={file.url} onClick={()=>setPreviewPdf({...file,studyId:study.id})}><BookOpen size={19}/><span><strong>{file.name}</strong><small>{(file.bytes/1000000).toFixed(2)} MB</small></span></button>)}</div>
+    </div>
+    {studyOpen&&allStudies.filter(s=>s.id===studyOpen).map(study=><section ref={studyHost} tabIndex={-1} className="study-detail" key={study.id}>
+      <button onClick={closeStudy}>← {ui(language,'Library')}</button><p className="eyebrow">{study.id} · {ui(language,study.kind)}</p><h2>{study.title}</h2><p className="study-coverage">{language==='uz'?'Fayllarni shu yerda ko‘rish mumkin. AI faqat indekslangan metadata va jadvallardan foydalanadi; yangi PDFlar hali AI qidiruviga tayyor emas.':'Browse the files here. AI uses indexed metadata and tables; the additional PDFs are not ready for AI search yet.'}</p>
+      <nav className="study-tabs" aria-label={language==='uz'?'Tadqiqot bo‘limlari':'Study sections'}>{[['about',language==='uz'?'Tavsif':'Overview'],['pdf','PDF · '+study.files.filter(f=>f.name.toLowerCase().endsWith('.pdf')).length],['media',language==='uz'?'Rasm / video':'Images / video'],['files',language==='uz'?'Fayllar':'Files']].map(([id,label])=><button key={id} aria-pressed={studyTab===id} onClick={()=>{setStudyTab(id);setPreviewPdf(null);}}>{label}</button>)}</nav>
+      {studyTab==='about'&&<div className="study-about"><h3>{language==='uz'?'Tadqiqot haqida':'About the study'}</h3><p>{study.description}</p><h3>{language==='uz'?'Metodika':'Method'}</h3><p>{study.approach}</p><a href={study.sourceUrl} target="_blank" rel="noreferrer">NASA · DOI {study.doi} · v{study.version}</a></div>}
+      {studyTab==='media'&&<div className="study-media">{study.files.filter(file=>file.media?.startsWith('image/')||file.media?.startsWith('video/')).map(file=><figure key={file.url}>{file.media.startsWith('image/')?<img loading="lazy" src={file.url} alt={file.name}/>:<video controls playsInline preload="none" src={file.url}/>}<figcaption>{file.name}</figcaption></figure>)}{!study.files.some(f=>f.media?.startsWith('image/')||f.media?.startsWith('video/'))&&<p>{language==='uz'?'Bu tadqiqotda ochiladigan rasm yoki video mavjud emas. ZIP fayllarni Fayllar bo‘limidan olish mumkin.':'No directly playable images or videos in this study. ZIP archives are available in Files.'}</p>}</div>}
+      {studyTab==='pdf'&&<div className="study-pdfs"><h3>{language==='uz'?'PDF hujjatlar':'PDF documents'} · {study.files.filter(f=>f.name.toLowerCase().endsWith('.pdf')).length}</h3>
+      <div className="study-pdf-list library-pdf-list">{study.files.filter(f=>f.name.toLowerCase().endsWith('.pdf')).map(file=><button key={file.url} onClick={()=>setPreviewPdf({...file,studyId:study.id})}><BookOpen size={19}/><span><strong>{file.name}</strong><small>{(file.bytes/1000000).toFixed(2)} MB · {file.indexed===false?(language==='uz'?'AI qidiruviga tayyor emas':'Not indexed for AI search'):(language==='uz'?'Asl manba':'Original source')}</small></span></button>)}</div>
       {previewPdf?.studyId===study.id&&<section ref={previewHost} className="library-inline-pdf"><header><h3>{previewPdf.name}</h3><button onClick={()=>setPreviewPdf(null)}>{language==='uz'?'Yopish':'Close'}</button></header><PDFPages key={previewPdf.url} url={previewPdf.url} name={previewPdf.name} language={language}/><button onClick={()=>setPdf(previewPdf)}>{language==='uz'?'Katta oynada ochish':'Expand viewer'}</button></section>}
-      <details className="study-other-files"><summary>{language==='uz'?'Boshqa fayllar':'Other files'} · {study.files.filter(f=>!f.name.toLowerCase().endsWith('.pdf')).length}</summary><ul>{study.files.filter(f=>!f.name.toLowerCase().endsWith('.pdf')).map(file=><li key={file.url}><a href={file.url} target="_blank" rel="noreferrer">{file.name}</a> · {(file.bytes/1000000).toFixed(2)} MB</li>)}</ul></details>
+      {!study.files.some(f=>f.name.toLowerCase().endsWith('.pdf'))&&<p>{language==='uz'?'Bu tadqiqotda PDF hali mavjud emas.':'No PDFs available for this study yet.'}</p>}</div>}
+      {studyTab==='files'&&<div className="study-other-files"><h3>{language==='uz'?'Boshqa fayllar':'Other files'} · {study.files.filter(f=>!f.name.toLowerCase().endsWith('.pdf')).length}</h3><ul>{study.files.filter(f=>!f.name.toLowerCase().endsWith('.pdf')).map(file=><li key={file.url}><a href={file.url} target="_blank" rel="noreferrer">{file.name}</a> · {(file.bytes/1000000).toFixed(2)} MB</li>)}</ul></div>}
       <button onClick={()=>ask(language==='uz'?study.title+' tadqiqotining maqsadi va natijalarini manbalari bilan tushuntiring':'Explain the objectives and findings of '+study.title+' with sources')}>{language==='uz'?'Gibrid AI’dan so‘rash ↗':'Ask Hybrid AI ↗'}</button>
     </section>)}
     {pdfError&&<p role="status">{pdfError}</p>}
     {pdf&&<PDFViewer key={pdf.url} document={pdf} language={language} onClose={()=>setPdf(null)}/>}
-    <h3>{language==='uz'?'Mening hujjatlarim':'My documents'}</h3><p>{language==='uz'?'8 MB gacha. PDF matni va dastlabki 3 ta ichki rasm tahlil qilinadi; cheklovlar faylda ko‘rsatiladi. AI talqinlari mustaqil tekshirilmagan.':'Up to 8 MB. PDF text and up to 3 embedded images are analyzed; file limitations are shown. AI interpretations are unverified.'}</p>
+    <details className="library-personal"><summary>{language==='uz'?'Mening hujjatlarim · import':'My documents · import'}</summary><h2>{language==='uz'?'Mening hujjatlarim':'My documents'}</h2><p>{language==='uz'?'8 MB gacha. PDF matni va dastlabki 3 ta ichki rasm tahlil qilinadi; cheklovlar faylda ko‘rsatiladi. AI talqinlari mustaqil tekshirilmagan.':'Up to 8 MB. PDF text and up to 3 embedded images are analyzed; file limitations are shown. AI interpretations are unverified.'}</p>
     <label>{language==='uz'?'Fayl import qilish':'Import document'} · 8 MB
       <input type="file" disabled={assetBusy} aria-label={ui(language,'Upload file')} accept=".pdf,.docx,.txt,.csv,.json,.jpg,.jpeg,.png,.mp4,.webm"
         onChange={e=>void upload(e.target.files[0])}/>
@@ -467,7 +477,8 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
       {asset.extraction.map((part,index)=><p key={index}>{part.locator} · {ui(language,part.status)}</p>)}
       <button onClick={()=>void api('assets/'+asset.id,'DELETE').then(refresh).catch(report)}>{language==='uz'?'O‘chirish':'Delete'}</button>
     </details>)}
-    <h3>BASS-II · PSI-25</h3><TrialPicker language={language} selected={selected} onChange={setSelected}/>
+    </details>
+    <details className="library-comparison"><summary>{language==='uz'?'BASS-II sinovlarini taqqoslash':'Compare BASS-II trials'}</summary><h2>BASS-II · PSI-25</h2><TrialPicker language={language} selected={selected} onChange={setSelected}/>
     <div>{selected.map(id=><button key={id} onClick={()=>{
       const pin=pins.find(item=>item.trial===id);
       void (pin?api('pins/'+pin.id,'DELETE'):api('pins','POST',{trial:id})).then(refresh).catch(report);
@@ -477,6 +488,7 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
       <tbody>{comparison.rows.map(row=><tr key={ui(language,row.field)}><th>{ui(language,row.field)}</th><td>{ui(language,row.status)}</td>{row.values.map((v,i)=><td key={i}>{v??ui(language,'Unknown')}</td>)}</tr>)}
         <tr><th>{ui(language,"Outcome")}</th><td></td>{comparison.trials.map(t=><td key={t.trial_id}>{t.outcome.raw_display} <a href={t.sources[0].url}>NASA</a></td>)}</tr></tbody></table>
       <button onClick={()=>download('comparison.json',JSON.stringify(comparison,null,2))}>{ui(language,"Export JSON")}</button></div>}
+    </details><details className="library-shelves"><summary>{language==='uz'?'Saqlangan to‘plamlar':'Saved collections'}</summary>
     <form onSubmit={e=>{e.preventDefault();void api('shelves','POST',{name,mode:query.trim()?'smart':'manual',query,members:selected,auto_update:autoUpdate}).then(()=>{setName('');return refresh();}).catch(report);}}>
       <label>{language==='uz'?'Javon nomi':'Shelf name'}<input value={name} onChange={e=>setName(e.target.value)} required maxLength={100}/></label>
       <label>{language==='uz'?'Smart javon savoli':'Smart shelf query'}<input value={query} onChange={e=>setQuery(e.target.value)} maxLength={300}/></label>
@@ -496,5 +508,6 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
       <ul>{shelf.members.map(id=><li key={id}>{id} <button onClick={()=>void api('shelves/'+shelf.id,'PATCH',{...shelf,exclusions:[...shelf.exclusions,id]}).then(refresh).catch(report)}>{ui(language,"Exclude")}</button></li>)}</ul>
       {shelf.reasons.map((reason,i)=><p key={i}>{reason.trial} · {ui(language,reason.kind)} · {reason.locator}</p>)}
     </details>)}
+    </details>
   </section>;
 }

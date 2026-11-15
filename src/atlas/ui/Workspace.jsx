@@ -2,8 +2,9 @@ import React,{useEffect,useState,useRef} from 'react';
 import {createPortal} from 'react-dom';
 import Atlas,{download} from './Atlas.jsx';
 import {BASS_THREE} from '../data/index.js';
-import {Menu,Plus,LibraryBig,MessageSquare,Settings,Sun,Moon,ArrowUp,PanelLeftClose,Search,Copy,Pencil,Sparkles,SlidersHorizontal,BookOpen,MoreHorizontal,Pin,Share2,Archive,Trash2,Link,Brain} from 'lucide-react';
+import {Menu,Plus,LibraryBig,MessageSquare,Settings,Sun,Moon,ArrowUp,Search,Copy,Pencil,Sparkles,SlidersHorizontal,BookOpen,MoreHorizontal,Pin,Share2,Archive,Trash2,Link,Brain,Square} from 'lucide-react';
 import './workspace.css';
+import ToolApps from './ToolApps.jsx';
 import {ui} from './i18n.js';
 
 async function api(path,method='GET',data,onProgress){
@@ -67,7 +68,7 @@ API_PROVIDER_FAILED:["AI xizmati javob bermadi. Keyinroq qayta urinib ko‘ring.
 }
 
 async function copyText(text){
-  if(navigator.clipboard)return navigator.clipboard.writeText(text);
+  if(navigator.clipboard){try{await navigator.clipboard.writeText(text);return;}catch{/* Fall back when browser clipboard permission is unavailable. */}}
   const previous=document.activeElement;
   const input=document.createElement('textarea');
   input.value=text;
@@ -108,7 +109,7 @@ export default function Workspace(){
       <button className="icon-button" aria-label={theme==='dark'?(uz?'Kunduzgi rejim':'Day mode'):(uz?'Tungi rejim':'Night mode')} onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={19}/>:<Moon size={19}/>}</button>
       <a href="https://psi.nasa.gov/physci/repo" target="_blank" rel="noreferrer" className="nasa-wordmark">NASA ↗</a></div>
     </header>
-    <aside className="forge-sidebar" aria-label={ui(language,"Main menu")}><div className="sidebar-brand">F<span>FIRE ATLAS</span><button className="icon-button" aria-label={ui(language,"Collapse sidebar")} onClick={()=>setCollapsed(true)}><PanelLeftClose size={18}/></button></div>
+    <aside className="forge-sidebar" aria-label={ui(language,"Main menu")}><div className="sidebar-brand">F<span>FIRE ATLAS</span></div>
       <button className="sidebar-new" disabled={!ready} onClick={()=>{setPage('chat');setChatAction({id:requestId()});}}><Plus size={18}/> {ui(language,"New Chat")}</button>
       <button className={'sidebar-nav '+(page==='library'?'active':'')} onClick={()=>{setEvidenceFocus(null);setPage('library');}}><LibraryBig size={18}/> {ui(language,"Library")}</button>
       <button className={'sidebar-nav '+(page==='tools'?'active':'')} onClick={()=>setPage('tools')}><SlidersHorizontal size={18}/> {ui(language,"Tools")}</button>
@@ -121,7 +122,7 @@ export default function Workspace(){
       <div hidden={page!=='chat'}><Chat language={language} selected={selected} navigate={setPage} action={chatAction} handoff={handoff} collapsed={collapsed} inspect={inspect} /></div>
       <div hidden={page!=='library'}><Library language={language} selected={selected} setSelected={setSelected} ask={ask} evidenceFocus={evidenceFocus} closeEvidence={()=>setEvidenceFocus(null)} visible={page==='library'}/><details className="forge-pane legacy-atlas"><summary>{uz?'O‘lchovlar, import va Notebook':'Measurements, import and Notebook'}</summary><Atlas language={language} onLanguageChange={setLanguage}/></details></div>
       <div hidden={page!=='notes'}><Notes language={language} visible={page==='notes'}/></div>
-      <div hidden={page!=='tools'}><Tools language={language} trials={selected} setTrials={setSelected}/></div>
+      <div hidden={page!=='tools'}><ToolApps language={language} trials={selected} setTrials={setSelected} api={api} readableError={readableError} download={download}/></div>
     </>}
     </main>
     {settings&&<div className="settings-backdrop" onClick={()=>setSettings(false)}><section className="settings-sheet forge-pane" role="dialog" aria-modal="true" aria-label={ui(language,"Settings")} onClick={e=>e.stopPropagation()}>
@@ -156,7 +157,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   const uz=language==='uz';
   const [history,setHistory]=useState([]),[chat,setChat]=useState(null),[q,setQ]=useState(''),[draft,setDraft]=useState('');
   const [pending,setPending]=useState(null),[error,setError]=useState(''),[archived,setArchived]=useState(false);
-  const [progress,setProgress]=useState('');
+  const [progress,setProgress]=useState(''),[stopping,setStopping]=useState(false);
   const [creating,setCreating]=useState(false);
   const [memory,setMemory]=useState([]),[memo,setMemo]=useState(''),[kind,setKind]=useState('goal');
   const [showMemory,setShowMemory]=useState(false);
@@ -169,6 +170,7 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   const attachmentBusy=uploading||attachments.some(a=>['QUEUED','RUNNING','FAILED'].includes(a.state)||a.chunk_count===0);
   const [deleteTarget,setDeleteTarget]=useState(null),[deleting,setDeleting]=useState(false);
   const deleteDialog=useRef(null),deleteTrigger=useRef(null);
+  const [actionNotice,setActionNotice]=useState('');
   const [rowMenu,setRowMenu]=useState(null),[renaming,setRenaming]=useState(null),[renameTitle,setRenameTitle]=useState('');
   const [shareLink,setShareLink]=useState(''),[shareCopied,setShareCopied]=useState(false);
   useEffect(()=>{setShareLink('');},[chat?.id]);
@@ -205,21 +207,22 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
   }
   useEffect(()=>{if(!rowMenu)return;function close(e){if(e.key==='Escape'||e.type==='pointerdown'&&!e.target.closest('.history-menu')&&!e.target.closest('.history-more'))setRowMenu(null);}function moved(){setRowMenu(null);}document.addEventListener('pointerdown',close);document.addEventListener('keydown',close);window.addEventListener('resize',moved);return()=>{document.removeEventListener('pointerdown',close);document.removeEventListener('keydown',close);window.removeEventListener('resize',moved);};},[rowMenu]);
   async function rowAction(item,action){
-    setRowMenu(null);setError('');
+    setRowMenu(null);setError('');setActionNotice('');navigate('chat');
     try{
       const latest=await api('chats/'+item.id);
       if(action==='rename'){setRenaming(latest);setRenameTitle(latest.title);return;}
       if(action==='share'){const shared=await api('chats/'+item.id+'/share','POST',{});const link=location.origin+location.pathname+'?share='+shared.id;setShareLink(link);try{await copyText(link);setShareCopied(true);}catch{setShareCopied(false);}}
-      else if(action==='revoke'){await api('chats/'+item.id+'/share','DELETE');setShareLink('');}
-      else if(action==='copy'){await copyText(latest.turns.map(t=>t.question+'\n'+(t.result?.claims||[]).map(c=>c.text).join('\n')).join('\n\n'));}
+      else if(action==='revoke'){await api('chats/'+item.id+'/share','DELETE');setShareLink('');setActionNotice(uz?'Ulashish to‘xtatildi.':'Sharing stopped.');}
+      else if(action==='copy'){await copyText(latest.turns.map(t=>t.question+'\n'+(t.result?.claims||[]).map(c=>c.text).join('\n')).join('\n\n'));setActionNotice(uz?'Suhbat nusxalandi.':'Conversation copied.');}
       else if(action==='delete'){deleteTrigger.current=document.querySelector('.history-more[aria-expanded="true"]')||document.activeElement;setDeleteTarget(latest);return;}
-      else if(action==='memory'){await select(item.id);setShowMemory(true);await loadMemory();}
+      else if(action==='memory'){await select(item.id);setShowMemory(true);await loadMemory();requestAnimationFrame(()=>document.getElementById('chat-memory')?.scrollIntoView({block:'start',behavior:'smooth'}));}
       else await api('chats/'+item.id,'PATCH',{version:latest.version,...(action==='pin'?{pinned:!latest.pinned}:{archived:!latest.archived})});
       if(chat?.id===item.id&&action!=='delete')await select(item.id);
       await refresh();
     }catch(e){report(e);}
   }
   useEffect(()=>{if(!deleteTarget)return;deleteDialog.current?.querySelector('button')?.focus();function key(e){if(e.key==='Escape'&&!deleting)setDeleteTarget(null);if(e.key==='Tab'){const buttons=[...deleteDialog.current.querySelectorAll('button:not(:disabled)')];if(!buttons.length){e.preventDefault();return;}const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}document.addEventListener('keydown',key);return()=>{document.removeEventListener('keydown',key);deleteTrigger.current?.focus();};},[deleteTarget,deleting]);
+  useEffect(()=>{if(!shareLink&&!renaming)return;const previous=document.activeElement;const dialog=document.querySelector('.chat-action-dialog');dialog?.querySelector('input,button')?.focus();function key(e){if(e.key==='Escape'){setShareLink('');setRenaming(null);}if(e.key==='Tab'){const items=[...dialog.querySelectorAll('input,button:not(:disabled)')];if(e.shiftKey&&document.activeElement===items[0]){e.preventDefault();items.at(-1)?.focus();}else if(!e.shiftKey&&document.activeElement===items.at(-1)){e.preventDefault();items[0]?.focus();}}}document.addEventListener('keydown',key);return()=>{document.removeEventListener('keydown',key);if(previous?.isConnected)previous.focus();};},[!!shareLink,!!renaming]);
   async function confirmDelete(){if(deleting||!deleteTarget)return;setDeleting(true);try{await api('chats/'+deleteTarget.id,'DELETE');if(chat?.id===deleteTarget.id){setChat(null);setAttachments([]);setDraft('');lastRequest.current=null;}await refresh();setDeleteTarget(null);}catch(e){report(e);}finally{setDeleting(false);}}
   async function send(event){
     event.preventDefault();
@@ -228,16 +231,17 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
     const signature=attachments.map(a=>a.id).join(',');
     const job=previous?.question===draft&&previous.chat===chat?.id&&previous.signature===signature?previous:{id:requestId(),chat:chat?.id,question:draft,signature};
     lastRequest.current=job;
-    active.current=job;setError('');setPending(job);
+    active.current=job;setError('');setPending(job);setDraft('');setStopping(false);
     try{
       job.chat??=(await create()).id;
-      const result=await api('chats/'+job.chat+'/turns','POST',{question:draft,language,request_id:job.id,trials:selected,asset_ids:attachments.map(a=>a.id)},
-        event=>setProgress(event==='retrieval.ready'?(uz?'Dalillar tekshirildi':'Evidence checked'):event==='run.started'?(uz?'Qidirilmoqda…':'Searching…'):''));
+      if(job.cancelRequested){lastRequest.current=null;return;}
+      const result=await api('chats/'+job.chat+'/turns','POST',{question:job.question,language,request_id:job.id,trials:selected,asset_ids:attachments.map(a=>a.id)},
+        event=>{if(job.cancelRequested)return;setProgress(event==='retrieval.ready'?(uz?'Dalillar tekshirildi':'Evidence checked'):event==='run.started'?(uz?'Qidirilmoqda…':'Searching…'):'');});
       if(result.state==='FAILED')setError(readableError({message:result.error},language));
       if(result.state!=='RUNNING')lastRequest.current=null;
       setDraft('');await select(job.chat);await refresh();
-    }catch(e){report(e);}
-    finally{active.current=null;setPending(null);}
+    }catch(e){report(e);setDraft(job.question);}
+    finally{active.current=null;setPending(null);setStopping(false);}
   }
   async function loadMemory(){setMemory(await api('memory'));}
 
@@ -253,17 +257,19 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
     <div className="chat-canvas">
       {empty&&<div className="welcome"><a className="welcome-mark nasa-source-mark" href="https://psi.nasa.gov/physci/repo" target="_blank" rel="noreferrer" aria-label="NASA data source"><img src="/nasa-logo.svg" alt="NASA"/></a><p className="eyebrow">{uz?'NASA DALILLARI · SIZNING IZLANISHINGIZ':'NASA EVIDENCE · YOUR CURIOSITY'}</p><h1>{uz?'Savolingizdan boshlaymiz.':'Start with a question.'}</h1><p>{uz?'Tadqiqotlarni izlang. Dalillarni solishtiring. Birgalikda tushuning.':'Explore research. Compare evidence. Understand together.'}</p></div>}
       {error&&<p role="alert">{error}</p>}
+      {actionNotice&&<div className="action-toast" role="status">{actionNotice}<button aria-label={uz?'Xabarni yopish':'Dismiss notification'} onClick={()=>setActionNotice('')}>×</button></div>}
       {chat&&<header className="chat-toolbar"><h2>{chat.title}</h2></header>}
       {rowMenu&&createPortal(<div className="forge-workspace menu-portal" data-theme={document.querySelector('.forge-workspace')?.dataset.theme||'dark'}><div className="history-menu" role="menu" aria-label={ui(language,"Chat actions")} style={{left:rowMenu.left,top:rowMenu.top}} onKeyDown={e=>{const buttons=[...e.currentTarget.querySelectorAll('button')];const index=buttons.indexOf(document.activeElement);if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();buttons[(index+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length]?.focus();}}} ref={node=>{if(node&&!node.contains(document.activeElement))node.querySelector('button')?.focus();}}>
         {[[Pencil,'rename',uz?'Nomini o‘zgartirish':'Rename'],[Pin,'pin',rowMenu.item.pinned?(uz?'Pinni olish':'Unpin'):(uz?'Pin qilish':'Pin')],[Share2,'share',ui(language,'Share')],[Copy,'copy',uz?'Suhbatni nusxalash':'Copy conversation'],...(rowMenu.item.share_id?[[Link,'revoke',uz?'Ulashishni to‘xtatish':'Stop sharing']]:[]),[Brain,'memory',uz?'Xotira':'Memory'],[Archive,'archive',rowMenu.item.archived?(uz?'Arxivdan chiqarish':'Restore'):(uz?'Arxivlash':'Archive')],[Trash2,'delete',uz?'O‘chirish':'Delete']].map(([Icon,action,label])=><button role="menuitem" key={action} className={action==='delete'?'menu-delete':''} onClick={()=>void rowAction(rowMenu.item,action)}><Icon size={16}/><span>{label}</span></button>)}
       </div></div>,document.body)}
       {deleteTarget&&<div className="settings-backdrop" onClick={()=>{if(!deleting)setDeleteTarget(null);}}><section ref={deleteDialog} className="settings-sheet forge-pane delete-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-chat-title" aria-describedby="delete-chat-description" aria-busy={deleting} onClick={e=>e.stopPropagation()}><h2 id="delete-chat-title">{uz?'Chatni o‘chirish':'Delete chat'}</h2><p id="delete-chat-description">{uz?'Ushbu suhbat o‘chiriladi. Uni qayta tiklab bo‘lmaydi.':'This conversation will be deleted. This cannot be undone.'}</p><div className="dialog-actions"><button disabled={deleting} onClick={()=>setDeleteTarget(null)}>{ui(language,"Cancel")}</button><button className="confirm-delete" disabled={deleting} onClick={()=>void confirmDelete()}>{deleting?(uz?'O‘chirilmoqda…':'Deleting…'):ui(language,'Confirm')}</button></div></section></div>}
-      {renaming&&<div className="settings-backdrop" onClick={()=>setRenaming(null)}><form className="settings-sheet forge-pane" role="dialog" aria-modal="true" aria-label={ui(language,"Rename chat")} onClick={e=>e.stopPropagation()} onKeyDown={e=>{if(e.key==='Escape')setRenaming(null);}} onSubmit={async e=>{e.preventDefault();try{await api('chats/'+renaming.id,'PATCH',{version:renaming.version,title:renameTitle});if(chat?.id===renaming.id)await select(renaming.id);await refresh();setRenaming(null);}catch(e){report(e);}}}><h2>{uz?'Chat nomini o‘zgartirish':'Rename chat'}</h2><input autoFocus aria-label={ui(language,"Chat title")} value={renameTitle} onChange={e=>setRenameTitle(e.target.value)} maxLength={120} required/><button disabled={!renameTitle.trim()}>{uz?'Saqlash':'Save'}</button><button type="button" onClick={()=>setRenaming(null)}>{uz?'Bekor qilish':'Cancel'}</button></form></div>}
-      {shareLink&&<div className="share-panel"><p>{shareCopied?(uz?'Havola nusxalandi':'Link copied'):(uz?'Havolani nusxalang':'Copy link')}</p><input aria-label={ui(language,"Share link")} readOnly value={shareLink} onFocus={e=>e.target.select()}/><small>{uz?'Havolasi bor odam ulashilgan suhbatni o‘qiy oladi.':'Anyone with the link can read this shared snapshot.'}</small><button onClick={()=>setShareLink('')}>{uz?'Yopish':'Close'}</button></div>}
+      {renaming&&<div className="settings-backdrop" onClick={()=>setRenaming(null)}><form className="settings-sheet forge-pane chat-action-dialog" role="dialog" aria-modal="true" aria-label={ui(language,"Rename chat")} onClick={e=>e.stopPropagation()} onKeyDown={e=>{if(e.key==='Escape')setRenaming(null);}} onSubmit={async e=>{e.preventDefault();try{await api('chats/'+renaming.id,'PATCH',{version:renaming.version,title:renameTitle});if(chat?.id===renaming.id)await select(renaming.id);await refresh();setRenaming(null);}catch(e){report(e);}}}><h2>{uz?'Chat nomini o‘zgartirish':'Rename chat'}</h2><input autoFocus aria-label={ui(language,"Chat title")} value={renameTitle} onChange={e=>setRenameTitle(e.target.value)} maxLength={120} required/><button disabled={!renameTitle.trim()}>{uz?'Saqlash':'Save'}</button><button type="button" onClick={()=>setRenaming(null)}>{uz?'Bekor qilish':'Cancel'}</button></form></div>}
+      {shareLink&&<div className="settings-backdrop" onClick={()=>setShareLink('')}><section className="settings-sheet forge-pane chat-action-dialog share-panel" role="dialog" aria-modal="true" aria-label={uz?'Suhbatni ulashish':'Share conversation'} onClick={e=>e.stopPropagation()}><h2>{uz?'Suhbatni ulashish':'Share conversation'}</h2><p>{uz?'Havolasi bor odam suhbatning ulashilgan nusxasini o‘qiy oladi.':'Anyone with the link can read the shared snapshot.'}</p><input aria-label={ui(language,'Share link')} readOnly value={shareLink} onFocus={e=>e.target.select()}/><p role="status">{shareCopied?(uz?'Havola nusxalandi.':'Link copied.'):(uz?'Havolani nusxalang yoki maydondan tanlab oling.':'Copy the link or select it from the field.')}</p><div className="dialog-actions"><button onClick={()=>setShareLink('')}>{uz?'Yopish':'Close'}</button><button onClick={async()=>{try{await copyText(shareLink);setShareCopied(true);}catch{setShareCopied(false);}}}>{uz?'Havolani nusxalash':'Copy link'}</button></div></section></div>}
+
 
       {chat?.summary&&<details><summary>{uz?'Suhbat konteksti':'Thread context'}</summary><pre>{JSON.stringify(chat.summary.entries,null,2)}</pre></details>}
 
-      {showMemory&&<div><label><input type="checkbox" checked={!!chat?.memory} disabled={!chat||!!pending} onChange={e=>void update({memory:e.target.checked}).catch(report)}/>{uz?'Shu chatda xotirani ishlatish':'Use memory in this chat'}</label>
+      {showMemory&&<div id="chat-memory"><header className="memory-heading"><h2>{uz?'Chat xotirasi':'Chat memory'}</h2><button onClick={()=>setShowMemory(false)}>{uz?'Yopish':'Close'}</button></header><label><input type="checkbox" checked={!!chat?.memory} disabled={!chat||!!pending} onChange={e=>void update({memory:e.target.checked}).catch(report)}/>{uz?'Shu chatda xotirani ishlatish':'Use memory in this chat'}</label>
         <button onClick={()=>void api('memory','DELETE').then(loadMemory).catch(report)}>{uz?'Barcha xotirani unutish':'Forget all memory'}</button>
         <form onSubmit={e=>{e.preventDefault();void api('memory','POST',{kind,text:memo,consent:true}).then(()=>{setMemo('');return loadMemory();}).catch(report);}}>
           <select value={kind} onChange={e=>setKind(e.target.value)} aria-label={ui(language,"Memory type")}>{['goal','language','format','conditions'].map(k=><option key={k} value={k}>{ui(language,k)}</option>)}</select>
@@ -282,19 +288,19 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
       <div className="forge-turns" aria-live="polite">
         
         {chat?.turns?.map(turn=><article key={turn.id} className="chat-turn"><div className="user-message"><p>{turn.question}</p><div className="message-actions"><button aria-label={ui(language,"Copy question")} onClick={()=>void copyText(turn.question).catch(report)}><Copy size={14}/></button><button aria-label={ui(language,"Edit question")} disabled={!!pending} onClick={()=>{setDraft(turn.question);composer.current?.focus();}}><Pencil size={14}/></button></div></div><div className="assistant-message">
-          {turn.result?<><div className="answer-heading"><span className="answer-mark">F</span><strong>Fire Atlas</strong><small>{turn.result.duration_ms?`${(turn.result.duration_ms/1000).toFixed(1)} s`:turn.result.model?'AI':ui(language,'Local')} · {ui(language,turn.result.status)}</small></div>
-            {turn.result.status==='INSUFFICIENT_EVIDENCE'&&<p>{uz?'Ulangan manbalarda ushbu savolga javob berish uchun yetarli dalil yo‘q. Boshqa sinov yoki sharoitni tanlang.':'The connected corpus has insufficient evidence for this question. Select another trial or condition.'}</p>}
+          {turn.result?<><div className="answer-heading"><span className="answer-mark">F</span><strong>Fire Atlas</strong><small>{turn.result.duration_ms?`${(turn.result.duration_ms/1000).toFixed(1)} s`:turn.result.status==='GENERAL'?(uz?'Umumiy suhbat':'General conversation'):turn.result.status==='PRODUCT'?(uz?'Tizim haqida':'Workspace help'):turn.result.model?'AI':ui(language,'Local')} · {ui(language,turn.result.status)}</small></div>
+            {turn.result.status==='INSUFFICIENT_EVIDENCE'&&<p>{uz?'Bu ma’lumot ulangan bazamizda topilmadi. Mos manbani yuklang yoki boshqa savol bering.':'This information was not found in our connected database. Add a relevant source or ask another question.'}</p>}
             {turn.result.claims.map((claim,i)=><p key={i}>{claim.kind&&<small>{claim.kind==='AI_INTERPRETATION'?(uz?'AI rasm talqini':'AI visual interpretation'):claim.kind==='USER_REPORTED'?(uz?'Yuklangan manba':'Uploaded source'):claim.kind==='SOURCE_FINDING'?(uz?'Manbali natija':'Source finding'):ui(language,claim.kind)} · </small>}{claim.text} {claim.evidence_ids.map(id=><a key={id} href={'#'+turn.id+'-'+id}
               onClick={event=>{event.preventDefault();inspect(turn.result.evidence.filter(s=>s.id===id),[claim]);}}>[{turn.result.evidence.findIndex(source=>source.id===id)+1}] </a>)}</p>)}
-            <AnswerExtras language={language} evidence={turn.result.evidence}/>
+            {turn.result.evidence.length>0&&<AnswerExtras language={language} evidence={turn.result.evidence}/>}
 
             <button onClick={()=>void copyText(turn.result.claims.map(claim=>claim.text+' '+claim.evidence_ids.map(id=>{const source=turn.result.evidence.find(s=>s.id===id);return source?'['+source.locator+']('+source.sourceUrl+')':'';}).join(' ')).join('\n\n')).catch(report)}>{ui(language,"Copy")}</button>
-            <button onClick={()=>inspect(turn.result.evidence,turn.result.claims)}>{ui(language,'Library')} · {uz?'Dalilni tekshirish':'Verify evidence'}</button>
+            {turn.result.evidence.length>0&&<button onClick={()=>inspect(turn.result.evidence,turn.result.claims)}>{ui(language,'Library')} · {uz?'Dalilni tekshirish':'Verify evidence'}</button>}
             <button onClick={()=>navigate('tools')}>{ui(language,"Tools")}</button>
           </>:<p>{ui(language,turn.state)} {readableError({message:turn.error},language)}</p>}
           {['FAILED','CANCELLED','INTERRUPTED'].includes(turn.state)&&<button onClick={()=>setDraft(turn.question)}>{uz?'Qayta urinish':'Retry'}</button>}
         </div></article>)}
-        {pending&&<article className="chat-turn pending-turn"><div className="user-message"><p>{pending.question}</p></div><div className="assistant-message"><p role="status" className="thinking"><span/>{progress|| (uz?'Manbalar ko‘rib chiqilmoqda…':'Reviewing sources…')}</p></div></article>}
+        {pending&&!chat?.turns?.some(t=>t.id===pending.chat+':'+pending.id)&&<article className="chat-turn pending-turn"><div className="user-message"><p>{pending.question}</p></div><div className="assistant-message"><p role="status" className="thinking"><span/>{progress|| (uz?'Manbalar ko‘rib chiqilmoqda…':'Reviewing sources…')}</p></div></article>}
         <div ref={bottom}/>
       </div>
       <form className="chat-composer" onSubmit={send}>
@@ -306,8 +312,8 @@ function Chat({language,selected,navigate,action,handoff,collapsed,inspect}){
           <textarea ref={composer} placeholder={uz?'Savolingizni yozing…':'Write your question…'} value={draft} onChange={e=>setDraft(e.target.value)} maxLength={300} required disabled={!!pending||creating||chat?.archived}
             onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form.requestSubmit();}}}/>
         </label>
-        <div className="composer-bottom"><button type="button" className="icon-button" aria-label={ui(language,"Attach files")} disabled={uploading||!!pending||attachments.length>=3} onClick={()=>fileInput.current?.click()}><Plus size={20}/></button><small>{attachments.length?(uz?'Biriktirilgan fayllar bo‘yicha · rasmlar AI orqali tahlil qilinadi':'Attached sources only · images analyzed with AI'):(uz?'Javoblar ulangan manbalarga asoslanadi':'Answers grounded in connected sources')}</small><button className="send-button" aria-label={uz?'Yuborish':'Send'} disabled={!draft.trim()||!!pending||creating||attachmentBusy||chat?.archived}><ArrowUp size={19}/></button></div>
-        {pending&&<button type="button" onClick={()=>{const job=active.current;if(job?.chat)void api('chats/'+job.chat+'/cancel','POST',{request_id:job.id}).catch(report);}}>{uz?'To‘xtatish':'Stop'}</button>}
+        <div className="composer-bottom"><button type="button" className="icon-button" aria-label={ui(language,"Attach files")} disabled={uploading||!!pending||attachments.length>=3} onClick={()=>fileInput.current?.click()}><Plus size={20}/></button><small>{attachments.length?(uz?'Biriktirilgan fayllar bo‘yicha · rasmlar AI orqali tahlil qilinadi':'Attached sources only · images analyzed with AI'):(uz?'Javoblar ulangan manbalarga asoslanadi':'Answers grounded in connected sources')}</small>{pending?<button type="button" className="send-button stop-generation" aria-label={uz?'Javobni to‘xtatish':'Stop response'} title={uz?'Javobni to‘xtatish':'Stop response'} disabled={stopping} onClick={async()=>{const job=active.current;if(!job)return;job.cancelRequested=true;setStopping(true);setProgress(uz?'To‘xtatilmoqda…':'Stopping…');if(job.chat)try{await api('chats/'+job.chat+'/cancel','POST',{request_id:job.id});}catch(e){job.cancelRequested=false;setStopping(false);report(e);}}}><Square size={14} fill="currentColor" strokeWidth={0}/></button>:<button className="send-button" aria-label={uz?'Yuborish':'Send'} disabled={!draft.trim()||creating||attachmentBusy||chat?.archived}><ArrowUp size={19}/></button>}</div>
+
       </form>
     </div>
   </section>;
@@ -475,72 +481,4 @@ function Library({language,selected,setSelected,ask,evidenceFocus,closeEvidence,
       {shelf.reasons.map((reason,i)=><p key={i}>{reason.trial} · {ui(language,reason.kind)} · {reason.locator}</p>)}
     </details>)}
   </section>;
-}
-
-const toolCopy={
-  ranking:{uz:['Qaysi dalil foydaliroq?','Maqsadingizga mos sinovlarni dalil darajasi va mezonlar bo‘yicha saralang.','Masalan: ISSda SIBAL matosi uchun ventilyatsiya dalillari','Dalillarni saralash'],en:['Which evidence is most useful?','Rank trials by applicability and their fit to your research goal.','For example: ventilation evidence for SIBAL fabric on the ISS','Rank evidence']},
-  estimation:{uz:['Hisoblashga dalil yetarlimi?','Maqsadli baho uchun ma’lumot yetarliligini tekshiring yoki sintetik statistik misolni sinang.','Masalan: shu sharoitda so‘nish ehtimolini baholash','Dalil yetarliligini tekshirish'],en:['Is there enough evidence to estimate?','Check whether a target estimate is supported, or explore a synthetic statistical example.','For example: estimate extinction probability under these conditions','Check evidence eligibility']},
-  scenario:{uz:['Shart o‘zgarsa nima bo‘ladi?','Kuzatilgan faktlarni ochiq taxminlar bilan solishtiring va keyingi tajribani belgilang.','Masalan: havo oqimi kamayganda nimani tekshirish kerak?','Ssenariyni tayyorlash'],en:['What if conditions change?','Compare observed facts with explicit assumptions and identify the next experiment.','For example: what should we test if airflow decreases?','Prepare scenario']}
-};
-function Tools({language,trials,setTrials}){
-  const uz=language==='uz',copy=toolCopy;
-  const [tool,setTool]=useState('ranking'),[target,setTarget]=useState(''),[assumptions,setAssumptions]=useState('');
-  const [runs,setRuns]=useState([]),[current,setCurrent]=useState(null),[error,setError]=useState('');
-  const [busy,setBusy]=useState(false),[synthetic,setSynthetic]=useState(false),[weights,setWeights]=useState({domain:25,fuel:25,atmosphere:25,unit_family:25});
-  const [proposal,setProposal]=useState(null);
-  const report=e=>setError(readableError(e,language));
-  useEffect(()=>{void api('runs').then(setRuns).catch(report);},[]);
-  const words=copy[tool][uz?'uz':'en'];
-  async function run(e){
-    e.preventDefault();setBusy(true);setError('');
-    try{
-      const form=new FormData(e.currentTarget);
-      const definition=await api('analyses','POST',{tool,target,assumptions:assumptions.split('\n').filter(Boolean),trials,weights,
-        synthetic:tool==='estimation'&&synthetic?{n:Number(form.get('n')),k:Number(form.get('k')),a:Number(form.get('a')),b:Number(form.get('b'))}:undefined,
-        entity_type:form.get('entity_type'),rank_mode:form.get('rank_mode')});
-      const result=await api('analyses/'+definition.id+'/run','POST',{request_id:requestId()});
-      setCurrent(result);setRuns(await api('runs'));
-    }catch(e){report(e);}finally{setBusy(false);}
-  }
-  return <section className="forge-pane tools-page">
-    <div className="tools-intro"><p className="eyebrow">{uz?'DALILDAN KEYINGI QADAMGA':'FROM EVIDENCE TO THE NEXT STEP'}</p><h1>{ui(language,'Tools')}</h1><p>{uz?'Maqsadingizni tanlang. AI sozlamani taklif qiladi, hisoblash kodi natijani chiqaradi.':'Choose your goal. AI can propose settings; calculation code produces the result.'}</p></div>
-    <div className="tool-choices" aria-label={uz?'Vosita tanlash':'Choose a tool'}>{Object.keys(copy).map((key,i)=><button key={key} disabled={busy} aria-pressed={tool===key} onClick={()=>{setTool(key);setSynthetic(false);setProposal(null);setCurrent(null);setError('');}}><span className="tool-number">0{i+1}</span><strong>{copy[key][uz?'uz':'en'][0]}</strong><p>{copy[key][uz?'uz':'en'][1]}</p></button>)}</div>
-    <div className="tool-workspace"><form className="tool-form" onSubmit={run}>
-      <header><small>{uz?'1 · MAQSAD':'1 · GOAL'}</small><h2>{words[0]}</h2></header>
-      <label>{uz?'Nimani o‘rganmoqchisiz?':'What do you want to investigate?'}<textarea value={target} onChange={e=>setTarget(e.target.value)} placeholder={words[2]} maxLength={500} required rows={3}/></label>
-      <p className="tool-scope">{uz?'Joriy hisoblash qamrovi: manbalari tekshirilgan 3 ta BASS-II sinovi. Kutubxonadagi har bir PDF hali fizik reyting yozuvi emas.':'Current calculation scope: 3 source-checked BASS-II trials. Library PDFs are not automatically eligible physical ranking records.'}</p>
-      <div className="tool-source-step"><small>{uz?'2 · DALILLAR':'2 · EVIDENCE'}</small><TrialPicker language={language} selected={trials} onChange={setTrials}/><p>{tool==='scenario'?(uz?'Ssenariy kuzatuvlari uchun kamida bitta sinovni tanlang.':'Choose at least one trial for scenario observations.'):(uz?'Tanlov taqqoslash va ssenariyda ishlatiladi. Reyting hozir barcha 3 ta mos yozuvni tekshiradi.':'Selections are used for comparison and scenarios. Ranking currently checks all 3 eligible records.')}</p></div>
-      {tool==='scenario'&&<label>{uz?'O‘zgaradigan shartlar — har qatorda bitta taxmin':'Changing conditions — one assumption per line'}<textarea value={assumptions} onChange={e=>setAssumptions(e.target.value)} placeholder={uz?'Havo oqimini kamaytiramiz; qolgan shartlar bir xil.':'Reduce airflow; hold other conditions fixed.'} rows={3} required/></label>}
-      <button type="button" className="tool-ai" disabled={busy||!target.trim()} onClick={async()=>{setBusy(true);setError('');try{const plan=await api('analysis-preview','POST',{tool,target,language});setProposal(plan);setWeights(plan.weights);setAssumptions(plan.assumptions.join('\n'));}catch(e){report(e);}finally{setBusy(false);}}}>{uz?'AI bilan sozlamani tayyorlash':'Prepare settings with AI'}</button>
-      {proposal&&<div className="tool-proposal"><strong>{uz?'AI taklifi · tahrirlashingiz mumkin':'AI proposal · editable'}</strong><p>{proposal.explanation}</p></div>}
-      {tool==='ranking'&&<details className="tool-advanced"><summary>{uz?'Qo‘shimcha sozlamalar · obyekt, mezon va vaznlar':'Advanced settings · entity, criteria and weights'}</summary>
-        <label>{ui(language,'Entity')}<select name="entity_type">{['TRIAL','STUDY','MATERIAL'].map(key=><option key={key} value={key}>{ui(language,key)}</option>)}</select></label>
-        <label>{ui(language,'Rank mode')}<select name="rank_mode">{['RESEARCH_USEFULNESS','MEASURED_PERFORMANCE'].map(key=><option key={key} value={key}>{ui(language,key)}</option>)}</select></label>
-        <p>{uz?'Moslik bali xavfsizlik yoki yong‘in ehtimoli emas. Avval dalil darajasi, keyin shu daraja ichidagi ball solishtiriladi.':'Alignment is not safety or fire probability. Evidence tier is compared first, then score within that tier.'}</p>
-        <div className="tool-weight-grid">{Object.entries(weights).map(([key,value])=><label key={key}>{ui(language,key)}<input type="number" min="0" max="100" value={value} onChange={e=>setWeights({...weights,[key]:Number(e.target.value)})}/></label>)}</div>
-      </details>}
-      {tool==='estimation'&&<div className="estimate-options"><label><input type="checkbox" name="synthetic" checked={synthetic} onChange={e=>setSynthetic(e.target.checked)}/>{uz?'Sintetik misol bilan usulni tushunish':'Explore the method with synthetic data'}</label>
-        <p>{synthetic?(uz?'Bu o‘quv hisobi. Natija NASA tajribasi yoki kosmik yong‘in ehtimoli emas.':'This is a learning exercise, not a NASA finding or a space-fire probability.'):(uz?'Mos mustaqil kuzatuvlar yoki tasdiqlangan model bo‘lmasa, tizim foiz o‘rniga yetishmayotgan dalillarni ko‘rsatadi.':'Without eligible independent observations or a validated model, the tool reports evidence gaps instead of a probability.')}</p>
-        {synthetic&&<fieldset><legend>{uz?'Mustaqil ikkilik sinovlar':'Independent binary trials'}</legend><div className="tool-weight-grid"><label>{uz?'Jami sinovlar (n)':'Total trials (n)'}<input name="n" type="number" min="1" max="1000000" defaultValue={10} required/></label><label>{uz?'Hodisa kuzatilgan sinovlar (k)':'Trials with the event (k)'}<input name="k" type="number" min="0" max="1000000" defaultValue={3} required/></label></div><details><summary>{uz?'Prior sozlamalari · Beta(a, b)':'Prior settings · Beta(a, b)'}</summary><p>{uz?'Standart Beta(1,1). Prior tanlovi natijaga ta’sir qiladi.':'Default Beta(1,1). The prior affects the result.'}</p><label>a<input name="a" type="number" min="0.001" step="any" defaultValue={1} required/></label><label>b<input name="b" type="number" min="0.001" step="any" defaultValue={1} required/></label></details></fieldset>}
-      </div>}
-      {error&&<p role="alert">{error}</p>}<button className="tool-run" disabled={busy||!target.trim()||(tool==='scenario'&&!trials.length)}>{busy?(uz?'Bajarilmoqda…':'Working…'):(tool==='estimation'&&synthetic?(uz?'Sintetik hisobni bajarish':'Run synthetic calculation'):words[3])}</button>
-      <small className="tool-save-note">{uz?'Natija va ishlatilgan sozlamalar avtomatik saqlanadi.':'Results and their settings are saved automatically.'}</small>
-    </form>
-    <aside className="tool-guide"><small>{uz?'QANDAY ISHLAYDI':'HOW IT WORKS'}</small><h3>{uz?'Maqsad → Dalil → Natija':'Goal → Evidence → Result'}</h3><ol><li>{uz?'Maqsadni aniq yozing va kerakli sinovlarni tanlang.':'Describe your goal and choose the relevant trials.'}</li><li>{uz?'AI taklifini ko‘ring yoki standart sozlamalardan foydalaning.':'Review an AI proposal or use the default settings.'}</li><li>{uz?'Natijani manbasi va cheklovlari bilan tekshiring.':'Check the result, sources and limitations.'}</li></ol><p>{uz?'AI ishlamasa ham hisoblash kodi va saqlangan natijalar ochiladi.':'Calculations and saved results remain available when AI is unavailable.'}</p></aside></div>
-    <section className="saved-tools"><h2>{uz?'Saqlangan tahlillar':'Saved analyses'}</h2><label>{uz?'Oldingi natijani ochish':'Open a previous result'}<select value={current?.id??''} onChange={e=>{if(!e.target.value){setCurrent(null);return;}void api('runs/'+e.target.value).then(setCurrent).catch(report);}}><option value="">{uz?'Natijani tanlang':'Select a result'}</option>{runs.map(item=><option key={item.id} value={item.id}>{ui(language,item.definition.tool)} · {item.definition.target}</option>)}</select></label>{runs.length===0&&<p>{uz?'Birinchi hisobdan keyin natijangiz shu yerda turadi.':'Your first calculation will appear here.'}</p>}</section>
-    {current&&<ToolResult current={current} language={language} busy={busy} rerun={async()=>{setBusy(true);try{const result=await api('analyses/'+current.analysis+'/run','POST',{request_id:requestId()});setCurrent(result);setRuns(await api('runs'));}catch(e){report(e);}finally{setBusy(false);}}} exportRun={async()=>{try{const latest=await api('runs/'+current.id);setCurrent(latest);download('analysis-run.json',JSON.stringify(latest,null,2));}catch(e){report(e);}}}/>}
-  </section>;
-}
-function ToolResult({current,language,busy,rerun,exportRun}){
- const uz=language==='uz',result=current.result;
- return <article className="tool-result" aria-live="polite"><p className="eyebrow">{uz?'NATIJA':'RESULT'} · {ui(language,result.status)}</p><h2>{current.definition.target}</h2>
-  {current.stale&&<p>{uz?'Korpus yangilangan. Bu saqlangan natija eski dalillar versiyasiga tegishli; xohlasangiz qayta hisoblang.':'The corpus has changed. This saved result uses an earlier evidence version; rerun to update.'}</p>}
-  {result.results?<><p>{uz?'Dalil darajasi bo‘yicha saralangan ro‘yxat. Moslik bali xavfsizlik bahosi emas.':'Ranked by evidence tier. Alignment score is not a safety rating.'}</p>{result.results.length===0&&<p>{uz?'O‘lchangan samaradorlikni saralash uchun mos nazorat qilingan dalil yetarli emas.':'There is insufficient controlled evidence to rank measured performance.'}</p>}<div className="tool-rank-list">{result.results.map((item,i)=><section key={item.id}><div className="rank-line"><span>{i+1}</span><h3>{item.id}</h3><strong>{item.score}/100</strong></div><p>{ui(language,'Tier')}: {ui(language,item.tier)}</p><details><summary>{uz?'Nega bu o‘rinda?':'Why this rank?'}</summary><p>{ui(language,item.tier_reason)}</p>{item.sources.map(source=><a key={source.source_ref_id} href={source.url} target="_blank" rel="noreferrer">{ui(language,'Table')} {source.table} · {source.row_id} ↗ </a>)}<details><summary>{uz?'Mezonlarning hisob yozuvi':'Criteria calculation record'}</summary><pre>{JSON.stringify(item.checklist,null,2)}</pre></details></details></section>)}</div></>:
-  result.scenarios?<><p>{ui(language,result.notice)}</p><h3>{uz?'Kuzatilgan faktlar':'Observed facts'}</h3>{result.observations.length===0&&<p>{uz?'Kuzatuv tanlanmagan.':'No observations selected.'}</p>}{result.observations.map(o=><p key={o.trial}><strong>{o.trial}</strong> · {o.outcome} {o.sources.map(source=><a key={source.source_ref_id} href={source.url} target="_blank" rel="noreferrer">{source.row_id} ↗ </a>)}</p>)}<div className="scenario-results">{result.scenarios.map((scenario,i)=><section key={i}><small>{uz?'TAXMIN':'ASSUMPTION'} {i+1}</small><h3>{scenario.assumption}</h3><p>{ui(language,scenario.outcome)}</p><p>{ui(language,scenario.rationale)}</p><h4>{uz?'Keyingi tekshiruv':'Next experiment'}</h4><p>{ui(language,scenario.next_measurement)}</p><small>{uz?'Bu shartli tadqiqot ssenariysi. Tasdiqlangan model bo‘lmagani uchun foiz hisoblanmaydi.':'This is a conditional research scenario. No probability is computed without a validated model.'}</small></section>)}</div></>:
-  result.synthetic?<><p className="synthetic-label">{uz?'Sintetik o‘quv misoli · NASA natijasi emas':'Synthetic learning example · not a NASA finding'}</p><div className="estimate-metrics"><div><small>{uz?'Posterior o‘rtacha':'Posterior mean'}</small><strong>{(100*result.estimate).toFixed(2)}%</strong></div><div><small>{ui(language,'95% credible interval')}</small><strong>{(100*result.interval[0]).toFixed(2)}%–{(100*result.interval[1]).toFixed(2)}%</strong></div></div><p>{uz?`${result.n} ta mustaqil sintetik sinovning ${result.k} tasida hodisa kuzatilgan deb olindi.`:`Assumed ${result.k} events in ${result.n} independent synthetic trials.`}</p><p>Beta({result.prior.alpha}, {result.prior.beta}) → Beta({result.posterior.alpha}, {result.posterior.beta})</p></>:
-  <><h3>{uz?'Hozir foiz chiqarish uchun dalil yetarli emas':'There is not enough evidence for a probability'}</h3><p>{uz?'Kerakli ma’lumotlar: maqsadli guruh, mustaqil tajribalar va mos sharoit yoki tasdiqlangan model.':'Needed: a defined target population, independent trials, and matched conditions or a validated model.'}</p><h4>{uz?'Keyingi qadam':'Next step'}</h4><p>{ui(language,result.next_measurement)}</p></>}
-  {result.limitations?.map((value,i)=><p key={i}>{ui(language,value)}</p>)}
-  <div className="tool-result-actions"><button disabled={busy} onClick={()=>void rerun()}>{ui(language,'Run again')}</button><button onClick={()=>void exportRun()}>{ui(language,'Export JSON')}</button></div>
-  <details className="tool-advanced"><summary>{uz?'Usul, sozlamalar va hisob yozuvi':'Method, settings and calculation record'}</summary><p>{ui(language,result.method)}</p><pre>{JSON.stringify({definition:current.definition,result,corpus_snapshot_id:current.corpus_snapshot_id},null,2)}</pre></details>
- </article>;
 }

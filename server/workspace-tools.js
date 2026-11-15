@@ -35,7 +35,7 @@ export function compareTrials(ids) {
 
 export function runTool(definition) {
   if(definition.tool==='ranking'){
-    const {results,weights,sensitivity}=rankTrials(publicTrials,definition.target,{
+    const {results,weights,sensitivity}=rankTrials(definition.trials?.length?publicTrials.filter(r=>definition.trials.includes(identity(r))):publicTrials,definition.target,{
       weights:definition.weights,
       metadataAdapter:()=>({environment:'FLIGHT_0G',domain:'PREVENTION_SOLID',fuel_type:'SOLID_FABRIC'}),
     });

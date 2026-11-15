@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { openWorkspace, failure,digest } from './workspace-store.js';
 import { compareTrials,publicTrials,runTool,trialSnapshot } from './workspace-tools.js';
 import { answerAtlas } from './atlas-answer.js';
+import {isProductQuestion,isExplicitResearch,introduction,routeConversation} from './conversation-router.js';
 import { readImport,extractRow,reviewRecord } from '../src/atlas/core/import.js';
 import { createAssets } from './workspace-assets.js';
 import publicStudies from './pitch-studies.json' with { type:'json' };
@@ -310,6 +311,18 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
               const result={status:'GENERAL',claims:[{text,evidence_ids:[]}],evidence:[]};
               return respond(200,store.save(owner,'turn',{...fields(record),state:'READY',result,corpus_snapshot_id:snapshot,memory_ids:[]},{id:requestId,version:record.version}));
             }
+            const finishGeneral=(text,mode='GENERAL',meta={})=>respond(200,store.save(owner,'turn',{...fields(record),state:'READY',result:{...meta,status:mode,claims:[{text,evidence_ids:[]}],evidence:[]},corpus_snapshot_id:snapshot,memory_ids:[]},{id:requestId,version:record.version}));
+            if(!assetIds.length&&isProductQuestion(input.question))return finishGeneral(introduction(input.language),'PRODUCT');
+            const priorEvidence=history.at(-1)?.result?.evidence?.length;
+            const contextualResearch=priorEvidence&&/^(?:and|what about|how about|why|unda|bunda|natija|nega|bu |buni |u |what was its)/i.test(input.question);
+            if(!assetIds.length&&!isExplicitResearch(input.question)&&!contextualResearch){
+              const routed=await routeConversation(router,{question:input.question,language:input.language,signal:controller.signal,
+                history:history.map(t=>({question:t.question,mode:t.result.status,answer:t.result.status==='GENERAL'||t.result.status==='PRODUCT'?t.result.claims.map(c=>c.text).join(' ').slice(0,600):'Source-backed research response'}))});
+              if(controller.signal.aborted)throw failure(409,'CANCELLED');
+              if(routed.data.route==='OUT_OF_CORPUS')return respond(200,store.save(owner,'turn',{...fields(record),state:'READY',result:{status:'INSUFFICIENT_EVIDENCE',claims:[],evidence:[]},corpus_snapshot_id:snapshot,memory_ids:[]},{id:requestId,version:record.version}));
+              if(routed.data.route==='PRODUCT')return finishGeneral(introduction(input.language),'PRODUCT');
+              if(routed.data.route==='GENERAL'){const {data,...meta}=routed;return finishGeneral(data.text,'GENERAL',meta);}
+            }
             const explicit=/\b(?:GMT\d+-)?T\d+\b/i.test(input.question);
             const followup=/^(?:and|what about|how about|unda|u|bunda|natijasi|natija|what was its)\b/i.test(input.question);
             const selected=input.trials?.map(id=>id.split(':').at(-1));
@@ -322,17 +335,6 @@ export function createWorkspaceApi({path,router,retrieve,search,embed,python,pyt
             const uploads=await assets.search(owner,input.question,vector,assetIds);
             const evidence=(assetIds.length?uploads:[...connected,...custom,...uploads]).slice(0,8);
             if(controller.signal.aborted)throw failure(409,'CANCELLED');
-            if(!evidence.length&&/\b(?:what is|explain|nima|tushuntir)\b/i.test(input.question)&&
-              /\b(?:microgravity|mikrogravitatsiya|combustion|yonish|flame|alanga|smoke|tutun)\b/i.test(input.question)&&
-              !/\b(?:moon|mars|oyda|risk|safe|xavfsiz|T\d+)\b/i.test(input.question)){
-              const schema={type:'object',required:['text'],additionalProperties:false,properties:{text:{type:'string'}}};
-              const response=await router.complete({name:'general_concept',schema,signal:controller.signal,
-                instructions:'Explain this basic concept briefly in the requested language as general scientific background. Do not claim connected-corpus findings, quote NASA, produce citations, recommend operational safety conditions or provide numerical predictions.',
-                input:{question:input.question,language:input.language}});
-              if(!validText(response.data?.text,1800))throw failure(502,'API_INVALID_RESPONSE');
-              const result={status:'GENERAL',claims:[{text:response.data.text,evidence_ids:[]}],evidence:[],model:response.model,usage:response.usage};
-              return respond(200,store.save(owner,'turn',{...fields(record),state:'READY',result,corpus_snapshot_id:snapshot,memory_ids:[]},{id:requestId,version:record.version}));
-            }
             const summary=store.get(owner,'summary',id);
             const cacheId=digest(JSON.stringify({policy:'buildpack-v1',model:router.model,question:input.question,language:input.language,
               evidence,scope,context,summary:summary?.entries,memory:memory.map(({id,version})=>({id,version}))}));

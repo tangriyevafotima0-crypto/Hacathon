@@ -1,4 +1,5 @@
 const uz = {
+  "PRODUCT":"Tizim haqida",
   "New Chat": "Yangi chat",
   "Hybrid AI": "Gibrid AI",
   "Library": "Kutubxona",
@@ -150,6 +151,7 @@ const uz = {
   "context": "Umumiy kontekst"
 };
 const en = {
+  "PRODUCT":"Workspace help",
   "TRIAL": "Trial",
   "STUDY": "Study",
   "MATERIAL": "Material",

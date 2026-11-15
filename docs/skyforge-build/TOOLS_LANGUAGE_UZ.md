@@ -23,3 +23,5 @@ Chegaralar:
 - Original ilmiy hujjatlar va foydalanuvchi yozgan eski matnlar avtomatik tarjima qilinmaydi. Texnik JSON yozuvi asl schema bilan qoladi.
 - Fizik reyting 3 ta BASS-II yozuvi bilan ishlaydi; yangi PDF’lar avtomatik normalizatsiyalangan fizik yozuv deb ko‘rsatilmaydi.
 - Ushbu yangilanish yangi 4.93 GB server papkasini umumiy indeksga ulamaydi.
+
+Serverga o‘rnatilgan versiya: 9fe95ef. Jonli http://100.105.241.126:4191 manzilida tools-language-check va localized-chat-check ikkala tilda PASS; browser pageErrors=[] va nativeDialogs=0.
